@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Sparkles,
-  Brain,
   Shield,
   Zap,
   Globe,
@@ -12,14 +11,10 @@ import {
   Users,
   Calculator,
   Rocket,
-  Heart,
-  BarChart3,
   Target,
   Lightbulb,
   PiggyBank,
   CreditCard,
-  Award,
-  ArrowRight,
   CheckCircle,
   Wallet,
   Star,
@@ -36,26 +31,28 @@ export const AboutUs = () => {
     goal: 1000,
     donors: 4,
   });
-  const [earnings, setEarnings] = useState({ net: 980, processing: 20, platform: 0 });
   const [loading, setLoading] = useState(true);
+
+  const earnings = useMemo(() => {
+    const totalFunds = calculatorInput.goal;
+    const processing = totalFunds * 0.02;
+    const platform = 0;
+    return {
+      net: totalFunds - processing - platform,
+      processing,
+      platform,
+    };
+  }, [calculatorInput.goal]);
 
   useEffect(() => {
     fetchStats();
   }, []);
-
-  useEffect(() => {
-    calculateEarnings();
-  }, [calculatorInput]);
 
   const fetchStats = async () => {
     try {
       const { data: campaigns } = await supabase
         .from('campaigns')
         .select('current_amount, status, id');
-
-      const { data: donations } = await supabase
-        .from('donations')
-        .select('id', { count: 'exact' });
 
       if (campaigns) {
         const created = campaigns.length;
@@ -81,31 +78,18 @@ export const AboutUs = () => {
     }
   };
 
-  const calculateEarnings = () => {
-    const totalFunds = calculatorInput.goal;
-    const processingFee = totalFunds * 0.02;
-    const platformFee = 0;
-    const netAmount = totalFunds - processingFee - platformFee;
-
-    setEarnings({
-      net: netAmount,
-      processing: processingFee,
-      platform: platformFee,
-    });
-  };
-
   const features = [
     {
-      icon: Brain,
-      title: 'AI-Powered Campaign Optimization',
+      icon: Lightbulb,
+      title: 'Guided Campaign Setup',
       description:
-        'Leverage machine learning algorithms to optimize campaign strategy and maximize funding potential.',
+        'Use clear prompts and structured fields to tell your story, set a goal, and prepare a stronger campaign.',
     },
     {
       icon: Shield,
       title: 'Trust & Security First',
       description:
-        'Industry-leading encryption and fraud detection to protect creators and supporters.',
+        'Supabase authentication, row-level security, and creator-owned dashboards help protect account and campaign data.',
     },
     {
       icon: Zap,
@@ -134,7 +118,7 @@ export const AboutUs = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       <div className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-orange-50 py-20 sm:py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.h1 
@@ -152,8 +136,8 @@ export const AboutUs = () => {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="text-xl text-gray-700 max-w-3xl mx-auto mb-8"
           >
-            Revolutionizing crowdfunding with artificial intelligence, connecting
-            dreamers with supporters worldwide to turn ideas into reality.
+            A focused crowdfunding platform connecting campaign creators with
+            supporters to turn urgent needs and meaningful ideas into reality.
           </motion.p>
 
           <motion.div 
@@ -207,8 +191,8 @@ export const AboutUs = () => {
             viewport={{ once: true }}
             className="text-lg text-gray-600 max-w-2xl mx-auto"
           >
-            Our AI-driven platform grows with every campaign and donation,
-            creating real impact across the globe.
+            Raise brings campaign creation, public discovery, donor updates, and
+            creator analytics into one practical fundraising workspace.
           </motion.p>
         </div>
 
@@ -222,7 +206,7 @@ export const AboutUs = () => {
             {
               icon: Lightbulb,
               value: loading ? '—' : `₹${(stats.totalRaised / 100000).toFixed(1)}L`,
-              label: 'Raised Through AI',
+              label: 'Raised on Raise',
             },
             {
               icon: TrendingUp,
@@ -280,9 +264,9 @@ export const AboutUs = () => {
                 viewport={{ once: true }}
                 className="text-lg text-gray-700 mb-6 leading-relaxed"
               >
-                We believe every great idea deserves a chance to flourish. Our
-                AI-powered crowdfunding platform democratizes fundraising, making
-                it accessible, efficient, and successful for everyone.
+                We believe every credible cause deserves a clear way to reach
+                supporters. Raise makes campaign creation, sharing, and tracking
+                straightforward for individuals and communities.
               </motion.p>
 
               <motion.p 
@@ -292,9 +276,8 @@ export const AboutUs = () => {
                 viewport={{ once: true }}
                 className="text-lg text-gray-700 mb-8 leading-relaxed"
               >
-                By leveraging cutting-edge artificial intelligence, we help
-                campaign creators optimize their strategies, reach the right
-                audience, and maximize their fundraising potential.
+                Our tools help creators present their story, add media, monitor
+                donor activity, and keep momentum as their campaign grows.
               </motion.p>
 
               <motion.div
@@ -329,21 +312,21 @@ export const AboutUs = () => {
                   whileHover={{ scale: 1.1 }}
                   className="relative flex items-center justify-center w-24 h-24 bg-white rounded-2xl mx-auto mb-6"
                 >
-                  <Brain className="h-12 w-12 text-orange-600" />
+                  <Target className="h-12 w-12 text-orange-600" />
                 </motion.div>
 
                 <h3 className="text-2xl font-black text-gray-900 text-center mb-4">
-                  AI-Driven Success
+                  Campaigns Built for Clarity
                 </h3>
 
                 <p className="text-center text-gray-700 mb-6">
-                  Our proprietary AI algorithms analyze millions of data points to
-                  provide personalized recommendations for campaign optimization.
+                  Structured campaign pages, media support, progress tracking,
+                  and creator analytics help supporters understand the cause.
                 </p>
 
                 <div className="flex items-center justify-center text-orange-600 font-bold">
                   <Sparkles className="h-5 w-5 mr-2 animate-pulse" />
-                  <span>Powered by Machine Learning</span>
+                  <span>Built for Fundraising Workflows</span>
                 </div>
               </div>
             </motion.div>

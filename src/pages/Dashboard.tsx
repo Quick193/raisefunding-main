@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { Campaign } from '../types';
 import { CampaignCard } from '../components/CampaignCard';
 import { Plus, TrendingUp, Pencil, Trash2 } from 'lucide-react';
@@ -15,13 +15,9 @@ export const Dashboard = () => {
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (user) {
-      fetchCampaigns();
-    }
-  }, [user]);
+  const fetchCampaigns = useCallback(async () => {
+    if (!user) return;
 
-  const fetchCampaigns = async () => {
     try {
       const { data, error } = await supabase
         .from('campaigns')
@@ -32,7 +28,7 @@ export const Dashboard = () => {
             email
           )
         `)
-        .eq('creator_id', user?.id)
+        .eq('creator_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -42,7 +38,11 @@ export const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    fetchCampaigns();
+  }, [fetchCampaigns]);
 
   const handleDelete = async (id: string, title: string) => {
     if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return;
@@ -51,7 +51,7 @@ export const Dashboard = () => {
       const { error } = await supabase.from('campaigns').delete().eq('id', id);
       if (error) throw error;
       setCampaigns((prev) => prev.filter((c) => c.id !== id));
-    } catch (err) {
+    } catch {
       alert('Failed to delete campaign. Please try again.');
     } finally {
       setDeletingId(null);

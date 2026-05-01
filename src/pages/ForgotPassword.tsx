@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Brain } from 'lucide-react';
+import { Wallet } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const ForgotPassword = () => {
@@ -29,14 +29,14 @@ export const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center relative">
+    <div className="min-h-screen bg-white flex items-center justify-center relative px-4 py-8">
       <div className="fixed inset-0 bg-white z-0" />
 
       <motion.div
         initial={{ opacity: 0, y: 40, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.7, ease: 'easeOut' }}
-        className="relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-12 w-full max-w-xl mx-4 flex flex-col items-center border border-white/40 z-20"
+        className="relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-6 sm:p-12 w-full max-w-xl flex flex-col items-center border border-white/40 z-20"
       >
         <motion.span
           initial={{ scale: 0, rotate: -90 }}
@@ -44,7 +44,7 @@ export const ForgotPassword = () => {
           transition={{ delay: 0.2, duration: 0.5, type: 'spring', stiffness: 150 }}
           className="bg-gradient-to-r from-orange-500 to-orange-600 p-3 rounded-full mb-2"
         >
-          <Brain className="h-8 w-8 text-white" />
+          <Wallet className="h-8 w-8 text-white" />
         </motion.span>
 
         <motion.h2

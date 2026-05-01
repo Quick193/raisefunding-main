@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Campaign } from '../types';
@@ -127,7 +127,7 @@ export const Campaigns = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-center text-gray-600 mb-10 text-lg"
+            className="text-center text-gray-600 mb-10 text-base sm:text-lg"
           >
             Discover and support amazing projects from creators around the world
           </motion.p>
@@ -219,25 +219,27 @@ export const Campaigns = () => {
           >
             <motion.div
               whileHover={{ scale: 1.02, boxShadow: "0 12px 40px 0 rgba(251, 146, 60, 0.25)" }}
-              className="flex w-full max-w-2xl bg-white/80 backdrop-blur-lg border border-orange-200/50 shadow-lg items-center px-4 py-2 rounded-full transition-all"
+              className="flex w-full max-w-2xl flex-col gap-2 bg-white/80 backdrop-blur-lg border border-orange-200/50 shadow-lg px-4 py-3 rounded-2xl transition-all sm:flex-row sm:items-center sm:gap-0 sm:rounded-full sm:py-2"
             >
-              <span className="flex items-center pr-2 text-orange-500">
-                <Search size={22} />
-              </span>
-              <motion.input
-                whileFocus={{ scale: 1.01 }}
-                type="text"
-                className="flex-1 py-3 pr-2 bg-transparent text-lg focus:outline-none focus:ring-0 focus:border-transparent placeholder:text-gray-500 text-gray-700 transition-all duration-300"
-                placeholder="Search campaigns by keyword..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <div style={{ borderLeft: "1px solid #fed7aa" }}>
+              <div className="flex min-w-0 flex-1 items-center">
+                <span className="flex items-center pr-2 text-orange-500">
+                  <Search size={22} />
+                </span>
+                <motion.input
+                  whileFocus={{ scale: 1.01 }}
+                  type="text"
+                  className="min-w-0 flex-1 py-3 pr-2 bg-transparent text-base sm:text-lg focus:outline-none focus:ring-0 focus:border-transparent placeholder:text-gray-500 text-gray-700 transition-all duration-300"
+                  placeholder="Search campaigns..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="w-full border-t border-orange-200 pt-2 sm:w-auto sm:border-l sm:border-t-0 sm:pt-0" style={{ borderColor: "#fed7aa" }}>
                 <CustomSelect
                   value={selectedCategory}
                   onChange={setSelectedCategory}
                   options={CATEGORY_OPTIONS}
-                  buttonClassName="border-none rounded-none rounded-r-full py-3 min-w-[150px] focus:ring-0 shadow-none"
+                  buttonClassName="w-full border-none rounded-xl sm:rounded-none sm:rounded-r-full py-3 sm:min-w-[150px] focus:ring-0 shadow-none"
                 />
               </div>
             </motion.div>
@@ -248,7 +250,7 @@ export const Campaigns = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="flex justify-center gap-3 mb-10"
+            className="flex flex-wrap justify-center gap-3 mb-10"
           >
             {(['all', 'active', 'completed'] as const).map((status) => (
               <motion.button
@@ -256,7 +258,7 @@ export const Campaigns = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setFilter(status)}
-                className={`px-6 py-2 rounded-full font-semibold transition-all ${
+                className={`px-4 sm:px-6 py-2 rounded-full font-semibold transition-all ${
                   filter === status
                     ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow-lg'
                     : 'bg-white/60 text-gray-700 border border-orange-200 hover:bg-orange-50'
@@ -400,7 +402,7 @@ export const Campaigns = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.8 }}
-              className="flex justify-center items-center mt-12 gap-4"
+              className="flex flex-wrap justify-center items-center mt-12 gap-3 sm:gap-4"
             >
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -412,7 +414,7 @@ export const Campaigns = () => {
               >
                 <ChevronLeft size={24} />
               </motion.button>
-              <span className="mx-2 text-lg font-semibold text-gray-700 bg-white/80 backdrop-blur-lg px-6 py-2 rounded-full shadow-lg border border-orange-200/50">
+              <span className="text-base sm:text-lg font-semibold text-gray-700 bg-white/80 backdrop-blur-lg px-4 sm:px-6 py-2 rounded-full shadow-lg border border-orange-200/50">
                 Page {page} of {totalPages}
               </span>
               <motion.button

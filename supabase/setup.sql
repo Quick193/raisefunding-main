@@ -8,9 +8,10 @@
 */
 
 -- ── clean slate (safe to run on empty project) ────────────────────────────────
-DROP TABLE IF EXISTS donations  CASCADE;
-DROP TABLE IF EXISTS campaigns  CASCADE;
-DROP TABLE IF EXISTS profiles   CASCADE;
+DROP TABLE IF EXISTS campaign_reports CASCADE;
+DROP TABLE IF EXISTS donations        CASCADE;
+DROP TABLE IF EXISTS campaigns        CASCADE;
+DROP TABLE IF EXISTS profiles         CASCADE;
 
 -- ── profiles ─────────────────────────────────────────────────────────────────
 
@@ -129,6 +130,32 @@ CREATE POLICY "Campaign creators can view donations for their campaigns"
     )
   );
 
+-- ── campaign reports ─────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS campaign_reports (
+  id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  campaign_id    uuid NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+  reporter_email text,
+  reason         text NOT NULL,
+  status         text NOT NULL DEFAULT 'open',
+  created_at     timestamptz DEFAULT now(),
+  reviewed_at    timestamptz,
+
+  CONSTRAINT campaign_reports_status_check
+    CHECK (status IN ('open', 'reviewed', 'dismissed')),
+  CONSTRAINT campaign_reports_reason_length
+    CHECK (char_length(reason) BETWEEN 10 AND 5000),
+  CONSTRAINT campaign_reports_email_format
+    CHECK (reporter_email IS NULL OR reporter_email ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$')
+);
+
+ALTER TABLE campaign_reports ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can create campaign reports"
+  ON campaign_reports FOR INSERT
+  TO anon, authenticated
+  WITH CHECK (true);
+
 -- ── indexes ───────────────────────────────────────────────────────────────────
 
 CREATE INDEX IF NOT EXISTS idx_campaigns_creator_id     ON campaigns(creator_id);
@@ -137,6 +164,9 @@ CREATE INDEX IF NOT EXISTS idx_campaigns_category       ON campaigns(category);
 CREATE INDEX IF NOT EXISTS idx_campaigns_status_created ON campaigns(status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_donations_campaign_id    ON donations(campaign_id);
 CREATE INDEX IF NOT EXISTS idx_donations_created_at     ON donations(created_at);
+CREATE INDEX IF NOT EXISTS idx_campaign_reports_campaign_id ON campaign_reports(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_campaign_reports_status      ON campaign_reports(status);
+CREATE INDEX IF NOT EXISTS idx_campaign_reports_created_at  ON campaign_reports(created_at);
 
 -- ── functions & triggers ──────────────────────────────────────────────────────
 

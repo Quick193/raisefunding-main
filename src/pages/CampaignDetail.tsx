@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -11,9 +11,9 @@ import {
   Target,
   Heart,
   MapPin,
-  Shield,
   Bookmark,
-  ChevronDown
+  ChevronDown,
+  Flag
 } from 'lucide-react';
 import { Campaign } from '../types';
 import { formatCurrency } from '../utils/format';
@@ -24,24 +24,25 @@ export const CampaignDetail = () => {
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [relatedCampaigns, setRelatedCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
-  const [donationSuccess, setDonationSuccess] = useState(false);
-  const [donationError, setDonationError] = useState('');
-  const [donationAmount, setDonationAmount] = useState('');
-  const [donorName, setDonorName] = useState('');
-  const [donorEmail, setDonorEmail] = useState('');
-  const [anonymous, setAnonymous] = useState(false);
-  const [showDonateForm, setShowDonateForm] = useState(false);
   const [supporters, setSupporters] = useState<{ donor_name: string; amount: number; created_at: string }[]>([]);
   const [showSupporters, setShowSupporters] = useState(false);
+  const [showReportForm, setShowReportForm] = useState(false);
+  const [reporterEmail, setReporterEmail] = useState('');
+  const [reportReason, setReportReason] = useState('');
+  const [reportStatus, setReportStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [reportError, setReportError] = useState('');
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (id) {
-      fetchCampaign(id);
-    }
-  }, [id]);
+  const fetchSupporters = useCallback(async (campaignId: string) => {
+    const { data } = await supabase
+      .from('donations')
+      .select('donor_name, amount, created_at')
+      .eq('campaign_id', campaignId)
+      .order('created_at', { ascending: false });
+    setSupporters(data || []);
+  }, []);
 
-  const fetchCampaign = async (campaignId: string) => {
+  const fetchCampaign = useCallback(async (campaignId: string) => {
     try {
       const { data, error } = await supabase
         .from('campaigns')
@@ -87,66 +88,44 @@ export const CampaignDetail = () => {
       console.error('Error fetching campaign:', error);
       setLoading(false);
     }
-  };
+  }, [fetchSupporters]);
 
-  const fetchSupporters = async (campaignId: string) => {
-    const { data } = await supabase
-      .from('donations')
-      .select('donor_name, amount, created_at')
-      .eq('campaign_id', campaignId)
-      .order('created_at', { ascending: false });
-    setSupporters(data || []);
-  };
+  useEffect(() => {
+    if (id) {
+      fetchCampaign(id);
+    }
+  }, [fetchCampaign, id]);
 
-  const handleDonateSubmit = async (e: React.FormEvent) => {
+  const handleReportSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!campaign) return;
 
-    setDonationError('');
-    const amount = parseFloat(donationAmount);
-    if (isNaN(amount) || amount < 1) {
-      setDonationError('Minimum donation amount is ₹1.');
+    if (reportReason.trim().length < 10) {
+      setReportError('Please describe the concern in at least 10 characters.');
       return;
     }
 
+    setReportStatus('submitting');
+    setReportError('');
+
     try {
-      const { error: insertError } = await supabase.from('donations').insert({
+      const { error } = await supabase.from('campaign_reports').insert({
         campaign_id: campaign.id,
-        amount,
-        donor_name: anonymous ? 'Anonymous' : donorName,
-        donor_email: anonymous ? 'anonymous@raise.app' : donorEmail,
+        reporter_email: reporterEmail.trim() || null,
+        reason: reportReason.trim(),
       });
 
-      if (insertError) throw insertError;
-
-      // Re-fetch campaign to get trigger-updated current_amount and supporter_count
-      const { data: updated } = await supabase
-        .from('campaigns')
-        .select('current_amount, supporter_count')
-        .eq('id', campaign.id)
-        .single();
-
-      if (updated) {
-        setCampaign({
-          ...campaign,
-          current_amount: updated.current_amount,
-          supporter_count: updated.supporter_count,
-        });
-      }
-      setDonationSuccess(true);
-      setDonationAmount('');
-      setDonorName('');
-      setDonorEmail('');
-      setAnonymous(false);
-      setShowDonateForm(false);
-      setTimeout(() => setDonationSuccess(false), 5000);
-      // Refresh supporters list if the creator is viewing
-      if (user?.id === campaign.creator_id) fetchSupporters(campaign.id);
+      if (error) throw error;
+      setReportStatus('success');
+      setReporterEmail('');
+      setReportReason('');
+      setShowReportForm(false);
     } catch (err: unknown) {
       const msg = err instanceof Error
         ? err.message
-        : (err as { message?: string })?.message || 'Failed to process donation. Please try again.';
-      setDonationError(msg);
+        : (err as { message?: string })?.message || 'Failed to submit report. Please try again.';
+      setReportError(msg);
+      setReportStatus('error');
     }
   };
 
@@ -572,21 +551,6 @@ export const CampaignDetail = () => {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="bg-white/80 backdrop-blur-lg rounded-2xl border border-orange-200/50 shadow-xl p-6 space-y-6"
             >
-              {/* Success Message */}
-              {donationSuccess && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-green-50 border border-green-200 text-green-700 p-4 rounded-xl flex items-start gap-3"
-                >
-                  <Heart className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-bold">Thank you!</p>
-                    <p className="text-sm">Your donation has been received successfully.</p>
-                  </div>
-                </motion.div>
-              )}
-
               {/* Amount Raised */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -611,111 +575,79 @@ export const CampaignDetail = () => {
                 </div>
               </motion.div>
 
-              {/* Donate Button */}
-              {!showDonateForm ? (
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.7 }}
-                  whileHover={{ scale: 1.02, boxShadow: "0 10px 30px rgba(251, 146, 60, 0.4)" }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setShowDonateForm(true)}
-                  className="w-full bg-gradient-to-r from-orange-500 to-orange-400 text-white px-6 py-4 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all duration-300 font-bold text-lg flex items-center justify-center gap-2 shadow-lg"
-                >
-                  <Heart className="w-5 h-5" />
-                  Donate Now
-                </motion.button>
-              ) : (
-                <motion.form
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  onSubmit={handleDonateSubmit}
-                  className="space-y-4"
-                >
+              <div className="rounded-xl border border-orange-200 bg-orange-50 p-4">
+                <div className="flex items-start gap-3">
+                  <Heart className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Donation Amount (INR)
-                    </label>
-                    <input
-                      type="number"
-                      required
-                      min="1"
-                      value={donationAmount}
-                      onChange={(e) => setDonationAmount(e.target.value)}
-                      className="w-full px-4 py-3 border border-orange-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all"
-                      placeholder="Enter amount"
-                    />
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {[100, 500, 1000, 2500, 5000].map((amount) => (
-                        <button
-                          key={amount}
-                          type="button"
-                          onClick={() => setDonationAmount(amount.toString())}
-                          className="px-3 py-1.5 text-sm border border-orange-300 rounded-lg hover:bg-orange-50 transition-all font-medium text-gray-700"
-                        >
-                          {formatCurrency(amount)}
-                        </button>
-                      ))}
-                    </div>
+                    <p className="font-bold text-gray-900">Online donations are being connected</p>
+                    <p className="text-sm text-gray-700 mt-1">
+                      Razorpay verification will be enabled before real donations are accepted.
+                      This prevents unverified pledge records from changing campaign totals.
+                    </p>
                   </div>
-                  {/* Anonymous toggle */}
-                  <label className="flex items-center gap-3 cursor-pointer select-none">
-                    <div
-                      onClick={() => setAnonymous((v) => !v)}
-                      className={`w-10 h-5 rounded-full transition-colors duration-200 flex-shrink-0 ${anonymous ? 'bg-orange-500' : 'bg-gray-300'}`}
-                    >
-                      <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform duration-200 ${anonymous ? 'translate-x-5' : 'translate-x-0'}`} />
-                    </div>
-                    <span className="text-sm font-medium text-gray-700">Donate anonymously</span>
-                  </label>
+                </div>
+              </div>
 
-                  {!anonymous && (
-                    <>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Your Name</label>
-                        <input
-                          type="text" required={!anonymous}
-                          value={donorName} onChange={(e) => setDonorName(e.target.value)}
-                          className="w-full px-4 py-3 border border-orange-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all"
-                          placeholder="Enter your name"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Your Email</label>
-                        <input
-                          type="email" required={!anonymous}
-                          value={donorEmail} onChange={(e) => setDonorEmail(e.target.value)}
-                          className="w-full px-4 py-3 border border-orange-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all"
-                          placeholder="Enter your email"
-                        />
-                      </div>
-                    </>
-                  )}
-                  {donationError && (
-                    <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                      {donationError}
+              {reportStatus === 'success' && (
+                <div className="rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-700">
+                  Thanks. Your report has been submitted for review.
+                </div>
+              )}
+
+              {!showReportForm ? (
+                <button
+                  type="button"
+                  onClick={() => setShowReportForm(true)}
+                  className="w-full flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 transition-colors"
+                >
+                  <Flag className="h-4 w-4" />
+                  Report this campaign
+                </button>
+              ) : (
+                <form onSubmit={handleReportSubmit} className="space-y-3 rounded-xl border border-gray-200 bg-white p-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Email (optional)</label>
+                    <input
+                      type="email"
+                      value={reporterEmail}
+                      onChange={(e) => setReporterEmail(e.target.value)}
+                      className="w-full rounded-lg border border-orange-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      placeholder="you@example.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Concern</label>
+                    <textarea
+                      required
+                      rows={4}
+                      value={reportReason}
+                      onChange={(e) => setReportReason(e.target.value)}
+                      className="w-full rounded-lg border border-orange-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      placeholder="Tell us what looks wrong or unsafe."
+                    />
+                  </div>
+                  {reportError && (
+                    <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+                      {reportError}
                     </p>
                   )}
-                  <div className="flex gap-3">
-                    <motion.button
+                  <div className="flex gap-2">
+                    <button
                       type="submit"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="flex-1 bg-gradient-to-r from-orange-500 to-orange-400 text-white px-6 py-3 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all font-bold"
+                      disabled={reportStatus === 'submitting'}
+                      className="flex-1 rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-60"
                     >
-                      Submit
-                    </motion.button>
-                    <motion.button
+                      {reportStatus === 'submitting' ? 'Submitting...' : 'Submit report'}
+                    </button>
+                    <button
                       type="button"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setShowDonateForm(false)}
-                      className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all font-medium"
+                      onClick={() => setShowReportForm(false)}
+                      className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-200"
                     >
                       Cancel
-                    </motion.button>
+                    </button>
                   </div>
-                </motion.form>
+                </form>
               )}
 
               {/* Campaign Info */}

@@ -37,11 +37,7 @@ export const Home = () => {
 
       const { data: allCampaigns } = await supabase
         .from('campaigns')
-        .select('current_amount, status');
-
-      const { data: allDonations } = await supabase
-        .from('donations')
-        .select('id', { count: 'exact' });
+        .select('current_amount, status, supporter_count');
 
       if (allCampaigns) {
         const totalRaised = allCampaigns.reduce(
@@ -51,7 +47,10 @@ export const Home = () => {
         const activeCampaigns = allCampaigns.filter(
           (c) => c.status === 'active'
         ).length;
-        const totalSupporters = allDonations?.length || 0;
+        const totalSupporters = allCampaigns.reduce(
+          (sum, c) => sum + Number(c.supporter_count || 0),
+          0
+        );
 
         setStats({
           totalRaised,
@@ -68,29 +67,29 @@ export const Home = () => {
 
   const faqItems = [
     {
-      question: 'How fast is verification?',
+      question: 'How fast can I launch?',
       answer:
-        'Campaign verification typically takes 1-3 business days. Our AI-powered system reviews your campaign in real-time while our team conducts final checks to ensure authenticity and compliance with community guidelines.',
+        'You can create and publish a campaign in minutes once you have your story, goal, timeline, and media ready.',
     },
     {
       question: 'What fees do you charge?',
       answer:
-        'We charge a 5% platform fee on successfully funded campaigns, plus standard payment processing fees. There are no upfront costs or fees if your campaign does not reach its funding goal.',
+        'Raise is set up for no platform fee on donations. Standard payment processing fees may apply once live payments are enabled.',
     },
     {
       question: 'Can I fundraise in multiple categories?',
       answer:
-        'Yes, you can create multiple campaigns across different categories. Each campaign is managed independently with its own analytics and funding goal. However, each campaign must go through our standard verification process.',
+        'Yes, you can create multiple campaigns across different categories. Each campaign is managed independently with its own analytics and funding goal.',
     },
     {
-      question: 'How does the AI guidance work?',
+      question: 'What tools do campaign creators get?',
       answer:
-        'Our AI guidance system provides real-time recommendations for optimizing your campaign, including title suggestions, description improvements, and pricing strategies based on successful similar campaigns. It learns from millions of campaigns globally.',
+        'Creators get campaign editing, media uploads, a dashboard, donation analytics, supporter visibility, and optional featured placement.',
     },
     {
       question: 'What payment methods do you accept?',
       answer:
-        'We accept all major credit cards (Visa, Mastercard, American Express), digital wallets (Apple Pay, Google Pay), bank transfers, and local payment methods in 150+ countries. Funds are securely processed through industry-leading payment gateways.',
+        'Online payments are the next production step. Razorpay will be used for secure payment collection and verification.',
     },
   ];
 
@@ -106,7 +105,7 @@ export const Home = () => {
                 Empowering Dreams
               </span>
               <br />
-              <span>with AI-Powered</span>
+              <span>with Community</span>
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">
                 Crowdfunding
@@ -167,8 +166,8 @@ export const Home = () => {
               </span>
             </h2>
             <p className="animate-fade-in-up text-base sm:text-lg text-gray-600 max-w-2xl mx-auto" style={{ animationDelay: '0.1s' }}>
-              AI-verified campaigns making real impact worldwide with authentic
-              success stories.
+              Featured campaigns making real impact with clear stories and
+              transparent progress.
             </p>
           </div>
 
@@ -208,7 +207,7 @@ export const Home = () => {
 
           <p className="animate-float text-base sm:text-xl text-orange-50 mb-8 max-w-2xl mx-auto" style={{ animationDelay: '0.2s' }}>
             Join thousands of successful campaigners who've raised millions with
-            our AI-powered platform. Start your journey in just 2 minutes.
+            Raise. Start your journey in just 2 minutes.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center" style={{ animationDelay: '0.4s' }}>

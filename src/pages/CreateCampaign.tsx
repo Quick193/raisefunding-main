@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { ImagePlus, Video, Upload, X, Plus, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CustomSelect } from '../components/CustomSelect';
@@ -13,6 +13,8 @@ const CATEGORY_OPTIONS = [
   'Medical', 'Education', 'Social Impact', 'Emergency',
   'Environment', 'Animal Welfare', 'Other',
 ];
+
+const paymentsConfigured = Boolean(import.meta.env.VITE_RAZORPAY_KEY_ID);
 
 export const CreateCampaign = () => {
   const { user } = useAuth();
@@ -147,7 +149,7 @@ export const CreateCampaign = () => {
         .select()
         .single();
       if (campaignError) throw campaignError;
-      if (wantFeature) {
+      if (wantFeature && paymentsConfigured) {
         setCreatedCampaign({ id: data.id, title: data.title });
       } else {
         navigate(`/campaign/${data.id}`);
@@ -341,8 +343,10 @@ export const CreateCampaign = () => {
 
             {/* ── Feature Campaign ──────────────────────────────────── */}
             <div
-              onClick={() => setWantFeature((v) => !v)}
-              className={`cursor-pointer rounded-2xl border-2 p-5 transition-all ${
+              onClick={() => paymentsConfigured && setWantFeature((v) => !v)}
+              className={`rounded-2xl border-2 p-5 transition-all ${
+                paymentsConfigured ? 'cursor-pointer' : 'cursor-not-allowed opacity-75'
+              } ${
                 wantFeature
                   ? 'border-orange-500 bg-orange-50'
                   : 'border-gray-200 hover:border-orange-300'
@@ -364,7 +368,13 @@ export const CreateCampaign = () => {
                     </div>
                   </div>
                   <p className="text-sm text-gray-600 mt-1">
-                    Get pinned at the top of Browse Campaigns with a Featured badge. Starting from <span className="font-semibold text-orange-600">₹499</span> — you'll choose your duration after creating.
+                    {paymentsConfigured ? (
+                      <>
+                        Get pinned at the top of Browse Campaigns with a Featured badge. Starting from <span className="font-semibold text-orange-600">₹499</span> — you'll choose your duration after creating.
+                      </>
+                    ) : (
+                      'Featured placement will be available once Razorpay keys are configured.'
+                    )}
                   </p>
                 </div>
               </div>

@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { Campaign } from '../types';
 import { ImagePlus, Video } from 'lucide-react';
 import { CustomSelect } from '../components/CustomSelect';
@@ -38,13 +38,9 @@ export const EditCampaign = () => {
     status: 'active' as 'active' | 'completed',
   });
 
-  useEffect(() => {
-    if (id) {
-      fetchCampaign();
-    }
-  }, [id]);
+  const fetchCampaign = useCallback(async () => {
+    if (!id) return;
 
-  const fetchCampaign = async () => {
     try {
       const { data, error } = await supabase
         .from('campaigns')
@@ -76,7 +72,11 @@ export const EditCampaign = () => {
     } finally {
       setFetchLoading(false);
     }
-  };
+  }, [id, navigate, user?.id]);
+
+  useEffect(() => {
+    fetchCampaign();
+  }, [fetchCampaign]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({

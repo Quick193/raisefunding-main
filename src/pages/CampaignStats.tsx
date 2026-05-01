@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { Campaign, Donation } from '../types';
 import { formatCurrency, formatDate } from '../utils/format';
 import { TrendingUp, Users, IndianRupee, Calendar, ArrowLeft } from 'lucide-react';
@@ -17,6 +17,7 @@ import {
   Legend,
   Filler,
 } from 'chart.js';
+import type { ChartOptions, TooltipItem } from 'chart.js';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
@@ -31,11 +32,9 @@ export const CampaignStats = () => {
   const [donations, setDonations] = useState<Donation[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (id) fetchData();
-  }, [id]);
+  const fetchData = useCallback(async () => {
+    if (!id) return;
 
-  const fetchData = async () => {
     try {
       const { data: campaignData, error: campaignError } = await supabase
         .from('campaigns').select('*').eq('id', id).single();
@@ -53,7 +52,11 @@ export const CampaignStats = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, navigate, user?.id]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   if (loading) {
     return (
@@ -100,15 +103,24 @@ export const CampaignStats = () => {
     }],
   };
 
-  const chartOptions = {
+  const chartOptions: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
-      tooltip: { callbacks: { label: (ctx: any) => `₹${ctx.parsed.y.toLocaleString('en-IN')}` } },
+      tooltip: {
+        callbacks: {
+          label: (ctx: TooltipItem<'line'>) => `₹${Number(ctx.parsed.y).toLocaleString('en-IN')}`,
+        },
+      },
     },
     scales: {
-      y: { beginAtZero: true, ticks: { callback: (v: any) => '₹' + Number(v).toLocaleString('en-IN') } },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: (value: string | number) => '₹' + Number(value).toLocaleString('en-IN'),
+        },
+      },
       x: { grid: { display: false } },
     },
   };
