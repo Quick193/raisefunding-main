@@ -11,7 +11,7 @@ interface FAQAccordionProps {
 }
 
 export const FAQAccordion = ({ items }: FAQAccordionProps) => {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
     <div className="space-y-4">
@@ -25,7 +25,7 @@ export const FAQAccordion = ({ items }: FAQAccordionProps) => {
             className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors text-left"
           >
             <span
-              className={`text-lg font-semibold transition-colors ${
+              className={`text-base sm:text-lg font-semibold transition-colors ${
                 openIndex === index ? 'text-orange-600' : 'text-gray-900'
               }`}
             >

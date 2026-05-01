@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Wallet, LogOut, LayoutDashboard, Plus, ChevronDown, Globe } from 'lucide-react';
+import { Wallet, LogOut, LayoutDashboard, Plus, ChevronDown, Globe, Menu, X } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 
 const LANGUAGES = [
@@ -15,6 +15,7 @@ export const Navbar = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [langOpen, setLangOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState(LANGUAGES[0]);
   const langRef = useRef<HTMLDivElement>(null);
 
@@ -31,8 +32,11 @@ export const Navbar = () => {
 
   const handleSignOut = async () => {
     await signOut();
+    setMobileOpen(false);
     navigate('/');
   };
+
+  const closeMobileMenu = () => setMobileOpen(false);
 
   const userInitial =
     (user?.user_metadata?.full_name as string | undefined)?.charAt(0)?.toUpperCase() ||
@@ -42,13 +46,13 @@ export const Navbar = () => {
   return (
     <nav className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-16 min-w-0">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 group">
+          <Link to="/" onClick={closeMobileMenu} className="flex items-center space-x-2 group min-w-0">
             <div className="p-2 bg-orange-100 rounded-lg group-hover:bg-orange-200 transition-colors">
               <Wallet className="h-6 w-6 text-orange-600" />
             </div>
-            <span className="text-2xl font-bold text-gray-900">Raise</span>
+            <span className="text-xl sm:text-2xl font-bold text-gray-900">Raise</span>
           </Link>
 
           {/* Centre nav */}
@@ -101,7 +105,7 @@ export const Navbar = () => {
           </div>
 
           {/* Right side */}
-          <div className="flex items-center space-x-3">
+          <div className="hidden md:flex items-center space-x-3">
             {user ? (
               <>
                 <Link
@@ -158,7 +162,108 @@ export const Navbar = () => {
               </>
             )}
           </div>
+
+          <button
+            type="button"
+            onClick={() => setMobileOpen((v) => !v)}
+            className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-700 hover:border-orange-200 hover:text-orange-600 hover:bg-orange-50 transition-colors"
+            aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={mobileOpen}
+          >
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
+
+        {mobileOpen && (
+          <div className="md:hidden border-t border-gray-100 py-4">
+            <div className="flex flex-col gap-1">
+              <Link
+                to="/campaigns"
+                onClick={closeMobileMenu}
+                className="rounded-lg px-3 py-3 text-sm font-semibold text-gray-700 hover:bg-orange-50 hover:text-orange-600"
+              >
+                Browse
+              </Link>
+              <Link
+                to="/about"
+                onClick={closeMobileMenu}
+                className="rounded-lg px-3 py-3 text-sm font-semibold text-gray-700 hover:bg-orange-50 hover:text-orange-600"
+              >
+                About Us
+              </Link>
+
+              <div className="px-3 py-3">
+                <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-700">
+                  <Globe className="h-4 w-4 text-orange-600" />
+                  Language
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {LANGUAGES.map((lang) => (
+                    <button
+                      key={lang.code}
+                      type="button"
+                      onClick={() => setSelectedLang(lang)}
+                      className={`rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
+                        selectedLang.code === lang.code
+                          ? 'border-orange-300 bg-orange-50 text-orange-600 font-semibold'
+                          : 'border-gray-200 text-gray-700 hover:border-orange-200 hover:bg-orange-50'
+                      }`}
+                    >
+                      {lang.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-2 border-t border-gray-100 pt-3">
+                {user ? (
+                  <div className="flex flex-col gap-2">
+                    <Link
+                      to="/create"
+                      onClick={closeMobileMenu}
+                      className="inline-flex items-center justify-center gap-2 rounded-lg bg-orange-600 px-4 py-3 text-sm font-semibold text-white hover:bg-orange-700"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Create Campaign
+                    </Link>
+                    <Link
+                      to="/dashboard"
+                      onClick={closeMobileMenu}
+                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600"
+                    >
+                      <LayoutDashboard className="h-4 w-4" />
+                      Dashboard
+                    </Link>
+                    <button
+                      onClick={handleSignOut}
+                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-red-100 px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign Out
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    <Link
+                      to="/login"
+                      onClick={closeMobileMenu}
+                      className="inline-flex items-center justify-center rounded-lg border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600"
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      to="/signup"
+                      onClick={closeMobileMenu}
+                      className="inline-flex items-center justify-center rounded-lg bg-orange-600 px-4 py-3 text-sm font-semibold text-white hover:bg-orange-700"
+                    >
+                      Sign Up
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );

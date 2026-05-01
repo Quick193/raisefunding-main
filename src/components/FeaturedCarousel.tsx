@@ -142,14 +142,16 @@ export const FeaturedCarousel = ({ campaigns }: FeaturedCarouselProps) => {
         <>
           <button
             onClick={handlePrev}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-16 lg:-translate-x-20 bg-white text-orange-600 rounded-full p-3 shadow-lg hover:bg-orange-50 transition-all"
+            className="absolute left-2 md:left-0 top-1/2 -translate-y-1/2 md:-translate-x-16 lg:-translate-x-20 bg-white text-orange-600 rounded-full p-3 shadow-lg hover:bg-orange-50 transition-all"
+            aria-label="Previous featured campaign"
           >
             <ChevronLeft className="h-6 w-6" />
           </button>
 
           <button
             onClick={handleNext}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-16 lg:translate-x-20 bg-white text-orange-600 rounded-full p-3 shadow-lg hover:bg-orange-50 transition-all"
+            className="absolute right-2 md:right-0 top-1/2 -translate-y-1/2 md:translate-x-16 lg:translate-x-20 bg-white text-orange-600 rounded-full p-3 shadow-lg hover:bg-orange-50 transition-all"
+            aria-label="Next featured campaign"
           >
             <ChevronRight className="h-6 w-6" />
           </button>

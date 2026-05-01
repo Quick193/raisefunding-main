@@ -95,13 +95,13 @@ export const Home = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-orange-50 via-white to-orange-50" />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-32">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-24 lg:py-32">
           <div className="text-center">
-            <h1 className="animate-fade-in-up text-6xl sm:text-7xl lg:text-8xl font-black text-gray-900 mb-8 leading-tight">
+            <h1 className="animate-fade-in-up text-4xl sm:text-6xl lg:text-8xl font-black text-gray-900 mb-6 sm:mb-8 leading-tight">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">
                 Empowering Dreams
               </span>
@@ -113,7 +113,7 @@ export const Home = () => {
               </span>
             </h1>
 
-            <p className="animate-fade-in-up text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed" style={{ animationDelay: '0.1s' }}>
+            <p className="animate-fade-in-up text-base sm:text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed" style={{ animationDelay: '0.1s' }}>
               Join thousands of changemakers creating impact through intelligent
               fundraising across the globe
             </p>
@@ -121,8 +121,8 @@ export const Home = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 lg:py-24">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {[
             {
               label: 'Total Raised',
@@ -142,7 +142,7 @@ export const Home = () => {
           ].map((stat, idx) => (
             <div
               key={idx}
-              className="animate-count-up bg-gradient-to-br from-orange-50 to-white p-8 rounded-2xl border border-orange-100 text-center hover:shadow-lg transition-all"
+              className="animate-count-up bg-gradient-to-br from-orange-50 to-white p-6 sm:p-8 rounded-2xl border border-orange-100 text-center hover:shadow-lg transition-all"
               style={{ animationDelay: `${idx * 0.1}s` }}
             >
               <div className="text-4xl sm:text-5xl font-black text-orange-600 mb-2">
@@ -157,16 +157,16 @@ export const Home = () => {
         </div>
       </div>
 
-      <div className="bg-white py-16 sm:py-24">
+      <div className="bg-white py-12 sm:py-20 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="animate-fade-in-up text-4xl sm:text-5xl font-black text-gray-900 mb-4">
+            <h2 className="animate-fade-in-up text-3xl sm:text-5xl font-black text-gray-900 mb-4">
               Featured{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">
                 Campaigns
               </span>
             </h2>
-            <p className="animate-fade-in-up text-lg text-gray-600 max-w-2xl mx-auto" style={{ animationDelay: '0.1s' }}>
+            <p className="animate-fade-in-up text-base sm:text-lg text-gray-600 max-w-2xl mx-auto" style={{ animationDelay: '0.1s' }}>
               AI-verified campaigns making real impact worldwide with authentic
               success stories.
             </p>
@@ -176,16 +176,16 @@ export const Home = () => {
         </div>
       </div>
 
-      <div className="bg-gray-50 py-16 sm:py-24">
+      <div className="bg-gray-50 py-12 sm:py-20 lg:py-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="animate-fade-in-up text-4xl sm:text-5xl font-black text-gray-900 mb-4">
+            <h2 className="animate-fade-in-up text-3xl sm:text-5xl font-black text-gray-900 mb-4">
               Frequently Asked{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">
                 Questions
               </span>
             </h2>
-            <p className="animate-fade-in-up text-lg text-gray-600" style={{ animationDelay: '0.1s' }}>
+            <p className="animate-fade-in-up text-base sm:text-lg text-gray-600" style={{ animationDelay: '0.1s' }}>
               Everything you need to know about launching and funding your
               campaign successfully.
             </p>
@@ -195,18 +195,18 @@ export const Home = () => {
         </div>
       </div>
 
-      <div className="relative overflow-hidden bg-gradient-to-r from-orange-600 via-orange-500 to-orange-600 py-20 sm:py-28">
+      <div className="relative overflow-hidden bg-gradient-to-r from-orange-600 via-orange-500 to-orange-600 py-14 sm:py-24 lg:py-28">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-white rounded-full blur-3xl" />
           <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-white rounded-full blur-3xl" />
         </div>
 
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="animate-float text-4xl sm:text-5xl font-black text-white mb-6">
+          <h2 className="animate-float text-3xl sm:text-5xl font-black text-white mb-6">
             Ready to Turn Your Dream Into Reality?
           </h2>
 
-          <p className="animate-float text-xl text-orange-50 mb-8 max-w-2xl mx-auto" style={{ animationDelay: '0.2s' }}>
+          <p className="animate-float text-base sm:text-xl text-orange-50 mb-8 max-w-2xl mx-auto" style={{ animationDelay: '0.2s' }}>
             Join thousands of successful campaigners who've raised millions with
             our AI-powered platform. Start your journey in just 2 minutes.
           </p>
@@ -214,7 +214,7 @@ export const Home = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center" style={{ animationDelay: '0.4s' }}>
             <Link
               to="/create"
-              className="inline-flex items-center justify-center px-8 py-4 bg-white text-orange-600 font-bold rounded-xl hover:shadow-2xl transition-all hover:scale-105"
+              className="inline-flex w-full sm:w-auto items-center justify-center px-6 sm:px-8 py-4 bg-white text-orange-600 font-bold rounded-xl hover:shadow-2xl transition-all hover:scale-105"
             >
               Start Your Campaign Now
               <Zap className="h-5 w-5 ml-2" />
@@ -222,7 +222,7 @@ export const Home = () => {
 
             <Link
               to="/campaigns"
-              className="inline-flex items-center justify-center px-8 py-4 bg-orange-700 bg-opacity-50 border-2 border-white text-white font-bold rounded-xl hover:bg-opacity-70 transition-all group"
+              className="inline-flex w-full sm:w-auto items-center justify-center px-6 sm:px-8 py-4 bg-orange-700 bg-opacity-50 border-2 border-white text-white font-bold rounded-xl hover:bg-opacity-70 transition-all group"
             >
               <Star className="h-5 w-5 mr-2 group-hover:animate-bounce" />
               Browse Success Stories
