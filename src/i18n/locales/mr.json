@@ -130,8 +130,8 @@
     "media_uploading": "फाईल्स अपलोड होत आहेत…",
     "video_url_placeholder": "किंवा YouTube/Vimeo URL पेस्ट करा",
     "feature_label": "माझी मोहीम विशेष करा",
-    "feature_description": "विशेष बॅजसह ब्राउज मोहिमांच्या वरती पिन केले जा. ₹499 पासून सुरुवात.",
-    "feature_unavailable": "पेमेंट कॉन्फिगर केल्यावर विशेष स्थान उपलब्ध होईल.",
+    "feature_description": "Get pinned at the top of Browse Campaigns with a Featured badge while payment testing is disabled.",
+    "feature_unavailable": "Featured placement is available for testing without payment.",
     "cancel_btn": "रद्द करा",
     "submit_btn": "मोहीम तयार करा",
     "submitting": "तयार होत आहे…",
@@ -323,16 +323,18 @@
   },
   "feature_modal": {
     "title": "तुमची मोहीम विशेष करा",
-    "subtitle": "जास्तीत जास्त दृश्यमानता मिळवा आणि अधिक देणगीदारांपर्यंत पोहोचा",
+    "subtitle": "Preview featured placement without payment while Razorpay is disabled.",
     "perk_1": "ब्राउज मोहिमांच्या वरती पिन केले",
     "perk_2": "तुमच्या मोहीम कार्डवर विशेष बॅज",
     "perk_3": "शोध निकालांमध्ये ठळकपणे दाखवले",
     "perk_4": "अधिक दृश्यमानता = अधिक देणगीदार",
     "popular": "लोकप्रिय",
-    "pay_btn": "{{price}} भरा · {{duration}} साठी विशेष",
-    "skip_btn": "आत्ता वगळा — डॅशबोर्डवरून नंतर विशेष करेन",
+    "pay_btn": "Feature for {{duration}}",
+    "skip_btn": "Skip for now",
     "success_title": "मोहीम विशेष झाली!",
-    "success_message": "तुमची मोहीम आता {{duration}} साठी विशेष आहे. पुनर्निर्देशित होत आहे…"
+    "success_message": "तुमची मोहीम आता {{duration}} साठी विशेष आहे. पुनर्निर्देशित होत आहे…",
+    "test_mode": "Test mode",
+    "feature_btn": "Feature for {{duration}}"
   },
   "common": {
     "loading": "लोड होत आहे…",

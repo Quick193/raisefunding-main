@@ -130,8 +130,8 @@
     "media_uploading": "கோப்புகள் பதிவேற்றப்படுகின்றன…",
     "video_url_placeholder": "அல்லது YouTube/Vimeo URL ஒட்டுங்கள்",
     "feature_label": "என் பிரச்சாரத்தை சிறப்பாக காட்டு",
-    "feature_description": "சிறப்பு பேட்ஜுடன் பிரச்சாரங்களை உலாவுவதில் மேலே பின் செய்யப்படுங்கள். ₹499 முதல் தொடங்குகிறது.",
-    "feature_unavailable": "கட்டணங்கள் அமைக்கப்பட்டதும் சிறப்பு இடம் கிடைக்கும்.",
+    "feature_description": "Get pinned at the top of Browse Campaigns with a Featured badge while payment testing is disabled.",
+    "feature_unavailable": "Featured placement is available for testing without payment.",
     "cancel_btn": "ரத்து செய்",
     "submit_btn": "பிரச்சாரம் உருவாக்கு",
     "submitting": "உருவாக்குகிறோம்…",
@@ -323,16 +323,18 @@
   },
   "feature_modal": {
     "title": "உங்கள் பிரச்சாரத்தை சிறப்பாக காட்டுங்கள்",
-    "subtitle": "அதிகபட்ச தெரிவுநிலை பெற்று அதிக நன்கொடையாளர்களை அடையுங்கள்",
+    "subtitle": "Preview featured placement without payment while Razorpay is disabled.",
     "perk_1": "பிரச்சாரங்களை உலாவுவதில் மேலே பின் செய்யப்படும்",
     "perk_2": "உங்கள் பிரச்சார அட்டையில் சிறப்பு பேட்ஜ்",
     "perk_3": "தேடல் முடிவுகளில் முன்னிலைப்படுத்தப்படும்",
     "perk_4": "அதிக தெரிவுநிலை = அதிக நன்கொடையாளர்கள்",
     "popular": "பிரபலமானது",
-    "pay_btn": "{{price}} செலுத்து · {{duration}} சிறப்பு இடம் பெறு",
-    "skip_btn": "இப்போது தவிர்க்கவும் — டாஷ்போர்டிலிருந்து பின்னர் சிறப்பு இடம் பெறுவேன்",
+    "pay_btn": "Feature for {{duration}}",
+    "skip_btn": "Skip for now",
     "success_title": "பிரச்சாரம் சிறப்பாக்கப்பட்டது!",
-    "success_message": "உங்கள் பிரச்சாரம் இப்போது {{duration}} க்கு சிறப்பாக காட்டப்படுகிறது. திருப்பி அனுப்புகிறோம்…"
+    "success_message": "உங்கள் பிரச்சாரம் இப்போது {{duration}} க்கு சிறப்பாக காட்டப்படுகிறது. திருப்பி அனுப்புகிறோம்…",
+    "test_mode": "Test mode",
+    "feature_btn": "Feature for {{duration}}"
   },
   "common": {
     "loading": "ஏற்றுகிறோம்…",

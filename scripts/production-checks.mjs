@@ -29,8 +29,14 @@ const checks = [
     },
   },
   {
-    name: 'Razorpay public key is documented',
-    pass: () => read('.env.example').includes('VITE_RAZORPAY_KEY_ID='),
+    name: 'Featured campaign flow does not require Razorpay while in test mode',
+    pass: () => {
+      const create = read('src/pages/CreateCampaign.tsx');
+      const modal = read('src/components/FeatureModal.tsx');
+      return !create.includes('VITE_RAZORPAY_KEY_ID') &&
+        !modal.includes('checkout.razorpay.com') &&
+        modal.includes("is_featured: true");
+    },
   },
   {
     name: 'Mobile navbar menu is present',

@@ -4,14 +4,10 @@ import { Star, X, Check, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
-declare global {
-  interface Window { Razorpay: new (options: object) => { open(): void }; }
-}
-
 const PLANS = [
-  { days: 7,  amountPaise: 49900,   display: '₹499',   label: '7 Days',  perDay: '₹71/day' },
-  { days: 30, amountPaise: 149900,  display: '₹1,499', label: '30 Days', perDay: '₹50/day', popular: true },
-  { days: 90, amountPaise: 299900,  display: '₹2,999', label: '90 Days', perDay: '₹33/day' },
+  { days: 7, label: '7 Days' },
+  { days: 30, label: '30 Days', popular: true },
+  { days: 90, label: '90 Days' },
 ];
 
 interface Props {
@@ -34,89 +30,31 @@ export const FeatureModal = ({ campaignId, campaignTitle, onClose, onSuccess }: 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  const loadSDK = (): Promise<boolean> =>
-    new Promise((resolve) => {
-      if (window.Razorpay) { resolve(true); return; }
-      const s = document.createElement('script');
-      s.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      s.onload = () => resolve(true);
-      s.onerror = () => resolve(false);
-      document.body.appendChild(s);
-    });
-
-  const handlePay = async () => {
+  const handleFeature = async () => {
     setLoading(true);
     setError('');
 
     try {
-      const loaded = await loadSDK();
-      if (!loaded) throw new Error('Payment gateway failed to load.');
+      const featuredUntil = new Date();
+      featuredUntil.setDate(featuredUntil.getDate() + plan.days);
 
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('Session expired. Please refresh and try again.');
+      const { error: updateError } = await supabase
+        .from('campaigns')
+        .update({
+          is_featured: true,
+          featured_until: featuredUntil.toISOString(),
+        })
+        .eq('id', campaignId)
+        .select('id')
+        .single();
 
-      // Create Razorpay order via Edge Function
-      const orderRes = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/razorpay-order`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({ amount: plan.amountPaise, campaign_id: campaignId }),
-        }
-      );
-      if (!orderRes.ok) {
-        const body = await orderRes.json().catch(() => ({}));
-        throw new Error(body.error || 'Could not create payment order.');
-      }
-      const order = await orderRes.json();
+      if (updateError) throw updateError;
 
-      // Open Razorpay checkout
-      new window.Razorpay({
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: plan.amountPaise,
-        currency: 'INR',
-        name: 'RaiseFunding',
-        description: `Feature "${campaignTitle}" for ${plan.label}`,
-        order_id: order.id,
-        theme: { color: '#ea580c' },
-        handler: async (response: {
-          razorpay_order_id: string;
-          razorpay_payment_id: string;
-          razorpay_signature: string;
-        }) => {
-          // Verify payment + activate featuring on the server
-          const verifyRes = await fetch(
-            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/razorpay-verify`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${session.access_token}`,
-              },
-              body: JSON.stringify({
-                ...response,
-                campaign_id: campaignId,
-                days: plan.days,
-              }),
-            }
-          );
-          if (!verifyRes.ok) {
-            const body = await verifyRes.json().catch(() => ({}));
-            setError(body.error || 'Payment verification failed. Contact support.');
-            setLoading(false);
-            return;
-          }
-          setSuccess(true);
-          setLoading(false);
-          setTimeout(onSuccess, 2000);
-        },
-        modal: { ondismiss: () => setLoading(false) },
-      }).open();
+      setSuccess(true);
+      setTimeout(onSuccess, 1500);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong.');
+    } finally {
       setLoading(false);
     }
   };
@@ -142,6 +80,9 @@ export const FeatureModal = ({ campaignId, campaignTitle, onClose, onSuccess }: 
           </div>
           <p className="text-orange-100 text-sm">
             {t('feature_modal.subtitle')}
+          </p>
+          <p className="text-orange-50 text-xs mt-1 truncate">
+            {campaignTitle}
           </p>
         </div>
 
@@ -187,10 +128,9 @@ export const FeatureModal = ({ campaignId, campaignTitle, onClose, onSuccess }: 
                         </span>
                       )}
                       <div className={`text-lg font-bold ${plan.days === p.days ? 'text-orange-600' : 'text-gray-900'}`}>
-                        {p.display}
+                        {p.label}
                       </div>
-                      <div className="text-xs font-semibold text-gray-700">{p.label}</div>
-                      <div className="text-xs text-gray-400 mt-0.5">{p.perDay}</div>
+                      <div className="text-xs text-gray-500 mt-1">{t('feature_modal.test_mode')}</div>
                     </button>
                   ))}
                 </div>
@@ -202,7 +142,7 @@ export const FeatureModal = ({ campaignId, campaignTitle, onClose, onSuccess }: 
                 )}
 
                 <button
-                  onClick={handlePay}
+                  onClick={handleFeature}
                   disabled={loading}
                   className="w-full bg-gradient-to-r from-orange-600 to-orange-500 text-white py-3.5 rounded-xl font-bold text-lg hover:from-orange-700 hover:to-orange-600 disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-lg flex items-center justify-center gap-2"
                 >
@@ -212,7 +152,7 @@ export const FeatureModal = ({ campaignId, campaignTitle, onClose, onSuccess }: 
                   ) : (
                     <>
                       <Star className="h-5 w-5 fill-white" />
-                      {t('feature_modal.pay_btn', { price: plan.display, duration: plan.label })}
+                      {t('feature_modal.feature_btn', { duration: plan.label })}
                     </>
                   )}
                 </button>

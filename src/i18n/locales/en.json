@@ -130,8 +130,8 @@
     "media_uploading": "Uploading files…",
     "video_url_placeholder": "Or paste a YouTube/Vimeo URL",
     "feature_label": "Feature my campaign",
-    "feature_description": "Get pinned at the top of Browse Campaigns with a Featured badge. Starting from ₹499.",
-    "feature_unavailable": "Featured placement will be available once payments are configured.",
+    "feature_description": "Get pinned at the top of Browse Campaigns with a Featured badge while payment testing is disabled.",
+    "feature_unavailable": "Featured placement is available for testing without payment.",
     "cancel_btn": "Cancel",
     "submit_btn": "Create Campaign",
     "submitting": "Creating…",
@@ -323,16 +323,18 @@
   },
   "feature_modal": {
     "title": "Feature Your Campaign",
-    "subtitle": "Get maximum visibility and reach more donors",
+    "subtitle": "Preview featured placement without payment while Razorpay is disabled.",
     "perk_1": "Pinned at the top of Browse Campaigns",
     "perk_2": "Featured badge on your campaign card",
     "perk_3": "Highlighted in search results",
     "perk_4": "More visibility = more donors",
     "popular": "POPULAR",
-    "pay_btn": "Pay {{price}} · Feature for {{duration}}",
-    "skip_btn": "Skip for now — I'll feature it later from the dashboard",
+    "pay_btn": "Feature for {{duration}}",
+    "skip_btn": "Skip for now",
     "success_title": "Campaign Featured!",
-    "success_message": "Your campaign is now featured for {{duration}}. Redirecting…"
+    "success_message": "Your campaign is now featured for {{duration}}. Redirecting…",
+    "test_mode": "Test mode",
+    "feature_btn": "Feature for {{duration}}"
   },
   "common": {
     "loading": "Loading…",

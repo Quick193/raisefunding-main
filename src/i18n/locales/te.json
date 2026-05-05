@@ -130,8 +130,8 @@
     "media_uploading": "ఫైళ్ళు అప్‌లోడ్ అవుతున్నాయి…",
     "video_url_placeholder": "లేదా YouTube/Vimeo URL అతికించండి",
     "feature_label": "నా క్యాంపెయిన్‌ను ప్రత్యేకంగా చూపించండి",
-    "feature_description": "ప్రత్యేక బ్యాడ్జ్‌తో బ్రౌజ్ క్యాంపెయిన్స్ పైభాగంలో పిన్ చేయబడండి. ₹499 నుండి ప్రారంభించి.",
-    "feature_unavailable": "పేమెంట్లు కాన్ఫిగర్ చేసిన తర్వాత ప్రత్యేక స్థానం అందుబాటులో ఉంటుంది.",
+    "feature_description": "Get pinned at the top of Browse Campaigns with a Featured badge while payment testing is disabled.",
+    "feature_unavailable": "Featured placement is available for testing without payment.",
     "cancel_btn": "రద్దు చేయండి",
     "submit_btn": "క్యాంపెయిన్ సృష్టించండి",
     "submitting": "సృష్టిస్తున్నాము…",
@@ -323,16 +323,18 @@
   },
   "feature_modal": {
     "title": "మీ క్యాంపెయిన్‌ను ప్రత్యేకంగా చూపించండి",
-    "subtitle": "గరిష్ట దృశ్యమానత పొందండి మరియు మరింత మంది దాతలను చేరుకోండి",
+    "subtitle": "Preview featured placement without payment while Razorpay is disabled.",
     "perk_1": "బ్రౌజ్ క్యాంపెయిన్స్ పైభాగంలో పిన్ చేయబడింది",
     "perk_2": "మీ క్యాంపెయిన్ కార్డ్‌పై ప్రత్యేక బ్యాడ్జ్",
     "perk_3": "శోధన ఫలితాల్లో హైలైట్ చేయబడింది",
     "perk_4": "అధిక దృశ్యమానత = అధిక దాతలు",
     "popular": "పాపులర్",
-    "pay_btn": "{{price}} చెల్లించండి · {{duration}} కోసం ప్రత్యేకం",
-    "skip_btn": "ఇప్పుడు వదిలేయండి — డాష్‌బోర్డ్ నుండి తర్వాత ప్రత్యేకంగా చూపిస్తాను",
+    "pay_btn": "Feature for {{duration}}",
+    "skip_btn": "Skip for now",
     "success_title": "క్యాంపెయిన్ ప్రత్యేకంగా చూపించబడింది!",
-    "success_message": "మీ క్యాంపెయిన్ ఇప్పుడు {{duration}} కోసం ప్రత్యేకంగా చూపించబడింది. దారి మళ్ళిస్తున్నాము…"
+    "success_message": "మీ క్యాంపెయిన్ ఇప్పుడు {{duration}} కోసం ప్రత్యేకంగా చూపించబడింది. దారి మళ్ళిస్తున్నాము…",
+    "test_mode": "Test mode",
+    "feature_btn": "Feature for {{duration}}"
   },
   "common": {
     "loading": "లోడ్ అవుతున్నాము…",

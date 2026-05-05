@@ -130,8 +130,8 @@
     "media_uploading": "ફાઇલ અپلوड થઈ રહી છે…",
     "video_url_placeholder": "અથવા YouTube/Vimeo URL પેસ્ટ કરો",
     "feature_label": "મારી ઝુંબેશ ખાસ કરો",
-    "feature_description": "ખાસ બૅજ સાથે બ્રાઉઝ ઝુંબેશ ઉપર પિન થાઓ. ₹૪૯૯ થી શરૂ.",
-    "feature_unavailable": "ચુકવણી ગોઠવ્યા પછી ખાસ સ્થાન ઉપલબ્ધ થશે.",
+    "feature_description": "Get pinned at the top of Browse Campaigns with a Featured badge while payment testing is disabled.",
+    "feature_unavailable": "Featured placement is available for testing without payment.",
     "cancel_btn": "રદ કરો",
     "submit_btn": "ઝુંબેશ બનાવો",
     "submitting": "બનાવી રહ્યા છીએ…",
@@ -323,16 +323,18 @@
   },
   "feature_modal": {
     "title": "तमारी ઝुंबेश खास करो",
-    "subtitle": "वधारे दृश्यता मेळवो अने वधारे दानकर्ताओसुधी पहोंचो",
+    "subtitle": "Preview featured placement without payment while Razorpay is disabled.",
     "perk_1": "ব্রাউজ ਝुंबেশोना ऊपर पिन करायेलुं",
     "perk_2": "तमारा ∦ ਝুंবেশ कार्ड पर खास बेज",
     "perk_3": "शोध परिणामोमां हाइलाइट करायेलुं",
     "perk_4": "वधु दृश्यता = वधु दानकर्ताओ",
     "popular": "लोकप्रिय",
-    "pay_btn": "{{price}} चूकवो · {{duration}} माटे खास",
-    "skip_btn": "हमणां छोडो — ड्याशबोर्डमांथी पछी खास करीश",
+    "pay_btn": "Feature for {{duration}}",
+    "skip_btn": "Skip for now",
     "success_title": "ঝুংবেশ ਖаस बनी!",
-    "success_message": "तमारी ∦ ਝুংবেশ हमणां {{duration}} माटे ਖаस छे. पुनर्निर्देशित थई रह्युं छे…"
+    "success_message": "तमारी ∦ ਝুংবেশ हमणां {{duration}} माटे ਖаस छे. पुनर्निर्देशित थई रह्युं छे…",
+    "test_mode": "Test mode",
+    "feature_btn": "Feature for {{duration}}"
   },
   "common": {
     "loading": "लोड थई रह्युं छे…",

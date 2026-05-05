@@ -9,7 +9,7 @@ A modern crowdfunding platform built with React, TypeScript, Vite, and Supabase.
 - **User Authentication**: Secure signup and login with Supabase Auth
 - **Analytics Dashboard**: Real-time campaign statistics and donation tracking
 - **Interactive Charts**: Visualize donation trends with Chart.js
-- **Featured Placement**: Optional featured campaign placement through Razorpay checkout
+- **Featured Placement**: Optional featured campaign placement for testing visibility flows
 - **Campaign Reporting**: Public reporting flow for suspicious or unsafe campaigns
 - **Responsive Design**: Beautiful UI built with Tailwind CSS
 
@@ -21,7 +21,7 @@ A modern crowdfunding platform built with React, TypeScript, Vite, and Supabase.
 - **Charts**: Chart.js with react-chartjs-2
 - **Routing**: React Router v6
 - **Icons**: Lucide React
-- **Payments**: Razorpay integration in progress
+- **Payments**: Razorpay integration planned
 
 ## Getting Started
 
@@ -42,7 +42,6 @@ A modern crowdfunding platform built with React, TypeScript, Vite, and Supabase.
    ```env
    VITE_SUPABASE_URL=your_supabase_url
    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   VITE_RAZORPAY_KEY_ID=your_razorpay_key_id
    ```
 
 4. Apply the Supabase schema from the files in `supabase/migrations/` or use `supabase/setup.sql` for a fresh local setup.
@@ -61,7 +60,6 @@ A modern crowdfunding platform built with React, TypeScript, Vite, and Supabase.
 3. Add environment variables:
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
-   - `VITE_RAZORPAY_KEY_ID` once payment checkout is enabled
 4. Deploy
 
 The `vercel.json` configuration is already included.
@@ -76,7 +74,7 @@ Set these for Supabase Edge Functions:
 - `RAZORPAY_KEY_ID`
 - `RAZORPAY_KEY_SECRET`
 
-The Razorpay donation flow still needs server-side order creation and verification before production launch. Direct public donation inserts are disabled in the UI until that flow is completed.
+The Razorpay donation flow still needs server-side order creation and verification before production launch. Direct public donation inserts are disabled in the UI until that flow is completed. Featured placement currently runs in no-payment test mode so you can verify the product flow.
 
 ## Project Structure
 

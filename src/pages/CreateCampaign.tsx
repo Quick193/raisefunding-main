@@ -15,8 +15,6 @@ const CATEGORY_OPTIONS = [
   'Environment', 'Animal Welfare', 'Other',
 ];
 
-const paymentsConfigured = Boolean(import.meta.env.VITE_RAZORPAY_KEY_ID);
-
 export const CreateCampaign = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -151,7 +149,7 @@ export const CreateCampaign = () => {
         .select()
         .single();
       if (campaignError) throw campaignError;
-      if (wantFeature && paymentsConfigured) {
+      if (wantFeature) {
         setCreatedCampaign({ id: data.id, title: data.title });
       } else {
         navigate(`/campaign/${data.id}`);
@@ -345,10 +343,8 @@ export const CreateCampaign = () => {
 
             {/* ── Feature Campaign ──────────────────────────────────── */}
             <div
-              onClick={() => paymentsConfigured && setWantFeature((v) => !v)}
-              className={`rounded-2xl border-2 p-5 transition-all ${
-                paymentsConfigured ? 'cursor-pointer' : 'cursor-not-allowed opacity-75'
-              } ${
+              onClick={() => setWantFeature((v) => !v)}
+              className={`cursor-pointer rounded-2xl border-2 p-5 transition-all ${
                 wantFeature
                   ? 'border-orange-500 bg-orange-50'
                   : 'border-gray-200 hover:border-orange-300'
@@ -370,11 +366,7 @@ export const CreateCampaign = () => {
                     </div>
                   </div>
                   <p className="text-sm text-gray-600 mt-1">
-                    {paymentsConfigured ? (
-                      t('create.feature_description')
-                    ) : (
-                      t('create.feature_unavailable')
-                    )}
+                    {t('create.feature_description')}
                   </p>
                 </div>
               </div>

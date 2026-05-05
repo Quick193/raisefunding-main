@@ -130,8 +130,8 @@
     "media_uploading": "ফাইল আপলোড হচ্ছে…",
     "video_url_placeholder": "অথবা YouTube/Vimeo URL পেস্ট করুন",
     "feature_label": "আমার ক্যাম্পেইন বিশেষভাবে দেখান",
-    "feature_description": "বিশেষ ব্যাজ সহ ব্রাউজ ক্যাম্পেইনের শীর্ষে পিন হয়ে যান। ₹৪৯৯ থেকে শুরু।",
-    "feature_unavailable": "পেমেন্ট কনফিগার করা হলে বিশেষ স্থান পাওয়া যাবে।",
+    "feature_description": "Get pinned at the top of Browse Campaigns with a Featured badge while payment testing is disabled.",
+    "feature_unavailable": "Featured placement is available for testing without payment.",
     "cancel_btn": "বাতিল করুন",
     "submit_btn": "ক্যাম্পেইন তৈরি করুন",
     "submitting": "তৈরি হচ্ছে…",
@@ -323,16 +323,18 @@
   },
   "feature_modal": {
     "title": "আপনার ক্যাম্পেইন বিশেষভাবে দেখান",
-    "subtitle": "সর্বোচ্চ দৃশ্যমানতা পান এবং আরও বেশি দাতার কাছে পৌঁছান",
+    "subtitle": "Preview featured placement without payment while Razorpay is disabled.",
     "perk_1": "ব্রাউজ ক্যাম্পেইনের শীর্ষে পিন করা",
     "perk_2": "আপনার ক্যাম্পেইন কার্ডে বিশেষ ব্যাজ",
     "perk_3": "অনুসন্ধান ফলাফলে হাইলাইট করা",
     "perk_4": "বেশি দৃশ্যমানতা = বেশি দাতা",
     "popular": "জনপ্রিয়",
-    "pay_btn": "{{price}} দিন · {{duration}} এর জন্য বিশেষ",
-    "skip_btn": "এখন এড়িয়ে যান — পরে ড্যাশবোর্ড থেকে বিশেষ করব",
+    "pay_btn": "Feature for {{duration}}",
+    "skip_btn": "Skip for now",
     "success_title": "ক্যাম্পেইন বিশেষ হয়েছে!",
-    "success_message": "আপনার ক্যাম্পেইন এখন {{duration}} এর জন্য বিশেষ। পুনঃনির্দেশিত হচ্ছে…"
+    "success_message": "আপনার ক্যাম্পেইন এখন {{duration}} এর জন্য বিশেষ। পুনঃনির্দেশিত হচ্ছে…",
+    "test_mode": "Test mode",
+    "feature_btn": "Feature for {{duration}}"
   },
   "common": {
     "loading": "লোড হচ্ছে…",

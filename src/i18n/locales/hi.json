@@ -130,8 +130,8 @@
     "media_uploading": "फाइलें अपलोड हो रही हैं…",
     "video_url_placeholder": "या YouTube/Vimeo URL पेस्ट करें",
     "feature_label": "मेरे अभियान को फीचर करें",
-    "feature_description": "Browse Campaigns के शीर्ष पर पिन करें और Featured बैज पाएं। ₹499 से शुरुआत।",
-    "feature_unavailable": "पेमेंट कॉन्फ़िगर होने के बाद फीचर्ड प्लेसमेंट उपलब्ध होगा।",
+    "feature_description": "Get pinned at the top of Browse Campaigns with a Featured badge while payment testing is disabled.",
+    "feature_unavailable": "Featured placement is available for testing without payment.",
     "cancel_btn": "रद्द करें",
     "submit_btn": "अभियान बनाएं",
     "submitting": "बनाया जा रहा है…",
@@ -323,16 +323,18 @@
   },
   "feature_modal": {
     "title": "अपने अभियान को फीचर करें",
-    "subtitle": "अधिकतम दृश्यता पाएं और अधिक दानकर्ताओं तक पहुंचें",
+    "subtitle": "Preview featured placement without payment while Razorpay is disabled.",
     "perk_1": "Browse Campaigns के शीर्ष पर पिन किया जाएगा",
     "perk_2": "आपके अभियान कार्ड पर Featured बैज",
     "perk_3": "खोज परिणामों में हाइलाइट किया जाएगा",
     "perk_4": "अधिक दृश्यता = अधिक दानकर्ता",
     "popular": "लोकप्रिय",
-    "pay_btn": "{{price}} भुगतान करें · {{duration}} के लिए फीचर करें",
-    "skip_btn": "अभी छोड़ें — डैशबोर्ड से बाद में फीचर करूंगा/करूंगी",
+    "pay_btn": "Feature for {{duration}}",
+    "skip_btn": "Skip for now",
     "success_title": "अभियान फीचर हो गया!",
-    "success_message": "आपका अभियान अब {{duration}} के लिए फीचर हो गया है। रीडायरेक्ट हो रहा है…"
+    "success_message": "आपका अभियान अब {{duration}} के लिए फीचर हो गया है। रीडायरेक्ट हो रहा है…",
+    "test_mode": "Test mode",
+    "feature_btn": "Feature for {{duration}}"
   },
   "common": {
     "loading": "लोड हो रहा है…",
