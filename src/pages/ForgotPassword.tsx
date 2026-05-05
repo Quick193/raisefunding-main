@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Wallet } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export const ForgotPassword = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -53,7 +55,7 @@ export const ForgotPassword = () => {
           transition={{ delay: 0.4, duration: 0.5 }}
           className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent mb-1"
         >
-          Reset Password
+          {t('auth.forgot_title')}
         </motion.h2>
 
         <motion.p
@@ -62,7 +64,7 @@ export const ForgotPassword = () => {
           transition={{ delay: 0.5, duration: 0.4 }}
           className="text-gray-600 text-sm mb-6 text-center"
         >
-          Enter your email and we'll send you a link to reset your password.
+          {t('auth.forgot_subtitle')}
         </motion.p>
 
         {sent ? (
@@ -71,8 +73,8 @@ export const ForgotPassword = () => {
             animate={{ opacity: 1, scale: 1 }}
             className="w-full text-center bg-green-50 border border-green-200 text-green-700 p-4 rounded-xl mb-4"
           >
-            <p className="font-semibold">Check your inbox!</p>
-            <p className="text-sm mt-1">A password reset link has been sent to <strong>{email}</strong>.</p>
+            <p className="font-semibold">{t('auth.forgot_success_title')}</p>
+            <p className="text-sm mt-1">{t('auth.forgot_success_detail')} <strong>{email}</strong>.</p>
           </motion.div>
         ) : (
           <motion.form
@@ -89,7 +91,7 @@ export const ForgotPassword = () => {
               whileFocus={{ scale: 1.02, boxShadow: '0 0 25px rgba(251, 146, 60, 0.3)' }}
               type="email"
               required
-              placeholder="Email address"
+              placeholder={t('auth.forgot_email_placeholder')}
               className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 bg-white/80 text-gray-800 backdrop-blur-lg transition-all duration-300"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -119,7 +121,7 @@ export const ForgotPassword = () => {
               disabled={loading}
               className="w-full py-3 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold shadow-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {loading ? 'Sending...' : 'Send Reset Link'}
+              {loading ? t('auth.forgot_btn_loading') : t('auth.forgot_btn')}
             </motion.button>
           </motion.form>
         )}
@@ -131,7 +133,7 @@ export const ForgotPassword = () => {
           className="mt-4 text-sm text-center"
         >
           <Link to="/login" className="text-orange-600 hover:underline font-semibold transition-colors hover:text-orange-700">
-            Back to Sign In
+            {t('auth.forgot_back')}
           </Link>
         </motion.div>
       </motion.div>

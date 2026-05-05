@@ -18,6 +18,7 @@ import {
   Filler,
 } from 'chart.js';
 import type { ChartOptions, TooltipItem } from 'chart.js';
+import { useTranslation } from 'react-i18next';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
@@ -25,6 +26,7 @@ const isAnonymous = (d: Donation) =>
   d.donor_name === 'Anonymous' || d.donor_email === 'anonymous@raise.app';
 
 export const CampaignStats = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -69,7 +71,7 @@ export const CampaignStats = () => {
   if (!campaign) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <h2 className="text-2xl font-bold text-gray-900">Campaign not found</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{t('campaign.not_found')}</h2>
       </div>
     );
   }
@@ -127,29 +129,29 @@ export const CampaignStats = () => {
 
   const statCards = [
     {
-      label: 'Total Raised',
+      label: t('stats.total_raised'),
       value: formatCurrency(Number(campaign.current_amount)),
-      sub: `of ${formatCurrency(Number(campaign.goal_amount))} goal`,
+      sub: `of ${formatCurrency(Number(campaign.goal_amount))} ${t('campaign.goal_suffix')}`,
       icon: <IndianRupee className="h-5 w-5 text-orange-500" />,
       accent: true,
     },
     {
-      label: 'Progress',
+      label: t('stats.progress'),
       value: `${progress}%`,
       sub: null,
       icon: <TrendingUp className="h-5 w-5 text-orange-500" />,
       progress: true,
     },
     {
-      label: 'Total Donors',
+      label: t('stats.total_donors'),
       value: String(totalDonors),
-      sub: 'supporters',
+      sub: t('stats.supporters'),
       icon: <Users className="h-5 w-5 text-orange-500" />,
     },
     {
-      label: 'Avg Donation',
+      label: t('stats.avg_donation'),
       value: formatCurrency(averageDonation),
-      sub: 'per supporter',
+      sub: t('stats.per_supporter'),
       icon: <IndianRupee className="h-5 w-5 text-orange-500" />,
     },
   ];
@@ -162,9 +164,9 @@ export const CampaignStats = () => {
         <div className="mb-8">
           <Link to="/dashboard" className="inline-flex items-center text-orange-600 hover:text-orange-700 font-medium mb-4 transition-colors">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
+            {t('stats.back')}
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">Campaign Analytics</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-1">{t('stats.title')}</h1>
           <p className="text-gray-600">{campaign.title}</p>
         </div>
 
@@ -192,19 +194,19 @@ export const CampaignStats = () => {
         {/* Chart + Campaign Info */}
         <div className="grid lg:grid-cols-3 gap-6 mb-8">
           <div className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-md border border-orange-100">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Donation Timeline</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">{t('stats.timeline_title')}</h2>
             <div style={{ height: '300px' }}>
               <Line data={chartConfig} options={chartOptions} />
             </div>
           </div>
 
           <div className="bg-white p-6 rounded-2xl shadow-md border border-orange-100">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Campaign Info</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">{t('stats.campaign_info')}</h2>
             <div className="space-y-4">
               <div>
                 <div className="flex items-center text-gray-500 text-sm mb-1">
                   <Calendar className="h-4 w-4 mr-2 text-orange-400" />
-                  <span>Created</span>
+                  <span>{t('stats.info_created')}</span>
                 </div>
                 <div className="font-semibold text-gray-900">{formatDate(campaign.created_at)}</div>
               </div>
@@ -213,24 +215,24 @@ export const CampaignStats = () => {
                 <div>
                   <div className="flex items-center text-gray-500 text-sm mb-1">
                     <Calendar className="h-4 w-4 mr-2 text-orange-400" />
-                    <span>End Date</span>
+                    <span>{t('stats.info_end_date')}</span>
                   </div>
                   <div className="font-semibold text-gray-900">{formatDate(campaign.end_date)}</div>
                 </div>
               )}
 
               <div>
-                <div className="text-gray-500 text-sm mb-1">Status</div>
+                <div className="text-gray-500 text-sm mb-1">{t('stats.info_status')}</div>
                 <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
                   campaign.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                 }`}>
-                  {campaign.status === 'active' ? 'Active' : 'Completed'}
+                  {campaign.status === 'active' ? t('stats.status_active') : t('stats.status_completed')}
                 </span>
               </div>
 
               <div>
-                <div className="text-gray-500 text-sm mb-1">Donation Rate</div>
-                <div className="font-semibold text-gray-900">{donationRate.toFixed(2)} donations/day</div>
+                <div className="text-gray-500 text-sm mb-1">{t('stats.donation_rate')}</div>
+                <div className="font-semibold text-gray-900">{donationRate.toFixed(2)} {t('stats.rate_suffix')}</div>
               </div>
             </div>
           </div>
@@ -238,15 +240,15 @@ export const CampaignStats = () => {
 
         {/* Donations Table */}
         <div className="bg-white p-6 rounded-2xl shadow-md border border-orange-100">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Donations</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">{t('stats.recent_donations')}</h2>
           {donations.length === 0 ? (
-            <p className="text-gray-500">No donations yet.</p>
+            <p className="text-gray-500">{t('stats.no_donations')}</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-orange-100">
                 <thead>
                   <tr>
-                    {['Donor', 'Email', 'Amount', 'Date'].map((h) => (
+                    {[t('stats.col_donor'), t('stats.col_email'), t('stats.col_amount'), t('stats.col_date')].map((h) => (
                       <th key={h} className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                         {h}
                       </th>

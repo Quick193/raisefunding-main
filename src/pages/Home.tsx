@@ -5,8 +5,11 @@ import { Campaign } from '../types';
 import { FeaturedCarousel } from '../components/FeaturedCarousel';
 import { FAQAccordion } from '../components/FAQAccordion';
 import { Zap, Star } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export const Home = () => {
+  const { t } = useTranslation();
+
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [stats, setStats] = useState({
     totalRaised: 0,
@@ -66,31 +69,11 @@ export const Home = () => {
   };
 
   const faqItems = [
-    {
-      question: 'How fast can I launch?',
-      answer:
-        'You can create and publish a campaign in minutes once you have your story, goal, timeline, and media ready.',
-    },
-    {
-      question: 'What fees do you charge?',
-      answer:
-        'Raise is set up for no platform fee on donations. Standard payment processing fees may apply once live payments are enabled.',
-    },
-    {
-      question: 'Can I fundraise in multiple categories?',
-      answer:
-        'Yes, you can create multiple campaigns across different categories. Each campaign is managed independently with its own analytics and funding goal.',
-    },
-    {
-      question: 'What tools do campaign creators get?',
-      answer:
-        'Creators get campaign editing, media uploads, a dashboard, donation analytics, supporter visibility, and optional featured placement.',
-    },
-    {
-      question: 'What payment methods do you accept?',
-      answer:
-        'Online payments are the next production step. Razorpay will be used for secure payment collection and verification.',
-    },
+    { question: t('home.faq_q1'), answer: t('home.faq_a1') },
+    { question: t('home.faq_q2'), answer: t('home.faq_a2') },
+    { question: t('home.faq_q3'), answer: t('home.faq_a3') },
+    { question: t('home.faq_q4'), answer: t('home.faq_a4') },
+    { question: t('home.faq_q5'), answer: t('home.faq_a5') },
   ];
 
   return (
@@ -102,19 +85,18 @@ export const Home = () => {
           <div className="text-center">
             <h1 className="animate-fade-in-up text-4xl sm:text-6xl lg:text-8xl font-black text-gray-900 mb-6 sm:mb-8 leading-tight">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">
-                Empowering Dreams
+                {t('home.hero_title_1')}
               </span>
               <br />
-              <span>with Community</span>
+              <span>{t('home.hero_title_2')}</span>
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">
-                Crowdfunding
+                {t('home.hero_title_3')}
               </span>
             </h1>
 
             <p className="animate-fade-in-up text-base sm:text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed" style={{ animationDelay: '0.1s' }}>
-              Join thousands of changemakers creating impact through intelligent
-              fundraising across the globe
+              {t('home.hero_subtitle')}
             </p>
           </div>
         </div>
@@ -124,19 +106,19 @@ export const Home = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {[
             {
-              label: 'Total Raised',
+              label: t('home.total_raised'),
               value: `$${(stats.totalRaised / 1000000).toFixed(1)}M`,
-              subtext: 'Funds mobilized for causes',
+              subtext: t('home.funds_mobilized'),
             },
             {
-              label: 'Active Campaigns',
+              label: t('home.active_campaigns'),
               value: stats.activeCampaigns,
-              subtext: 'Dreams being funded right now',
+              subtext: t('home.dreams_funded'),
             },
             {
-              label: 'Supporters',
+              label: t('home.supporters'),
               value: `${stats.totalSupporters / 1000 > 1 ? (stats.totalSupporters / 1000).toFixed(0) + 'K' : stats.totalSupporters}`,
-              subtext: 'Community of changemakers',
+              subtext: t('home.community'),
             },
           ].map((stat, idx) => (
             <div
@@ -160,14 +142,13 @@ export const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="animate-fade-in-up text-3xl sm:text-5xl font-black text-gray-900 mb-4">
-              Featured{' '}
+              {t('home.featured_title')}{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">
-                Campaigns
+                {t('home.featured_title_2')}
               </span>
             </h2>
             <p className="animate-fade-in-up text-base sm:text-lg text-gray-600 max-w-2xl mx-auto" style={{ animationDelay: '0.1s' }}>
-              Featured campaigns making real impact with clear stories and
-              transparent progress.
+              {t('home.featured_subtitle')}
             </p>
           </div>
 
@@ -179,14 +160,13 @@ export const Home = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="animate-fade-in-up text-3xl sm:text-5xl font-black text-gray-900 mb-4">
-              Frequently Asked{' '}
+              {t('home.faq_title')}{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">
-                Questions
+                {t('home.faq_title_2')}
               </span>
             </h2>
             <p className="animate-fade-in-up text-base sm:text-lg text-gray-600" style={{ animationDelay: '0.1s' }}>
-              Everything you need to know about launching and funding your
-              campaign successfully.
+              {t('home.faq_subtitle')}
             </p>
           </div>
 
@@ -202,12 +182,11 @@ export const Home = () => {
 
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="animate-float text-3xl sm:text-5xl font-black text-white mb-6">
-            Ready to Turn Your Dream Into Reality?
+            {t('home.cta_title')}
           </h2>
 
           <p className="animate-float text-base sm:text-xl text-orange-50 mb-8 max-w-2xl mx-auto" style={{ animationDelay: '0.2s' }}>
-            Join thousands of successful campaigners who've raised millions with
-            Raise. Start your journey in just 2 minutes.
+            {t('home.cta_subtitle')}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center" style={{ animationDelay: '0.4s' }}>
@@ -215,7 +194,7 @@ export const Home = () => {
               to="/create"
               className="inline-flex w-full sm:w-auto items-center justify-center px-6 sm:px-8 py-4 bg-white text-orange-600 font-bold rounded-xl hover:shadow-2xl transition-all hover:scale-105"
             >
-              Start Your Campaign Now
+              {t('home.cta_start')}
               <Zap className="h-5 w-5 ml-2" />
             </Link>
 
@@ -224,7 +203,7 @@ export const Home = () => {
               className="inline-flex w-full sm:w-auto items-center justify-center px-6 sm:px-8 py-4 bg-orange-700 bg-opacity-50 border-2 border-white text-white font-bold rounded-xl hover:bg-opacity-70 transition-all group"
             >
               <Star className="h-5 w-5 mr-2 group-hover:animate-bounce" />
-              Browse Success Stories
+              {t('home.cta_browse')}
             </Link>
           </div>
         </div>

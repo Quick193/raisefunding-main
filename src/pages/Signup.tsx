@@ -3,8 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import { Eye, EyeOff, Wallet } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export const Signup = () => {
+  const { t } = useTranslation();
   const [fullName, setFullName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
@@ -20,37 +22,37 @@ export const Signup = () => {
 
   const validateForm = () => {
     if (!fullName.trim()) {
-      setError('Full name is required');
+      setError(t('auth.signup_error_name'));
       return false;
     }
 
     if (!phoneNumber.trim()) {
-      setError('Phone number is required');
+      setError(t('auth.signup_error_phone_required'));
       return false;
     }
 
     if (phoneNumber.trim().length < 10) {
-      setError('Phone number must be at least 10 digits');
+      setError(t('auth.signup_error_phone_min'));
       return false;
     }
 
     if (!email.trim()) {
-      setError('Email is required');
+      setError(t('auth.signup_error_email'));
       return false;
     }
 
     if (!password) {
-      setError('Password is required');
+      setError(t('auth.signup_error_password_required'));
       return false;
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters long');
+      setError(t('auth.signup_error_password_min'));
       return false;
     }
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('auth.signup_error_password_match'));
       return false;
     }
 
@@ -102,7 +104,7 @@ export const Signup = () => {
           transition={{ delay: 0.4, duration: 0.5 }}
           className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent mb-1"
         >
-          Sign Up for Raise
+          {t('auth.signup_title')}
         </motion.h2>
 
         <motion.p
@@ -111,7 +113,7 @@ export const Signup = () => {
           transition={{ delay: 0.5, duration: 0.4 }}
           className="text-gray-600 text-sm mb-6"
         >
-          Create an account to get started
+          {t('auth.signup_subtitle')}
         </motion.p>
 
         {verificationSent ? (
@@ -121,14 +123,14 @@ export const Signup = () => {
             className="w-full text-center space-y-4"
           >
             <div className="bg-green-50 border border-green-200 text-green-700 p-5 rounded-xl">
-              <p className="font-bold text-lg mb-1">Account created!</p>
-              <p className="text-sm">We've sent a verification email to <strong>{email}</strong>. Please check your inbox and click the link to activate your account.</p>
+              <p className="font-bold text-lg mb-1">{t('auth.signup_verified_title')}</p>
+              <p className="text-sm">{t('auth.signup_verified_message')} <strong>{email}</strong>. {t('auth.signup_verified_instruction')}</p>
             </div>
             <button
               onClick={() => navigate('/login')}
               className="w-full py-3 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold shadow-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-300"
             >
-              Go to Sign In
+              {t('auth.signup_verified_btn')}
             </button>
           </motion.div>
         ) : (
@@ -146,7 +148,7 @@ export const Signup = () => {
             whileFocus={{ scale: 1.02, boxShadow: '0 0 25px rgba(251, 146, 60, 0.3)' }}
             type="text"
             required
-            placeholder="Full Name"
+            placeholder={t('auth.signup_fullname_placeholder')}
             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 bg-white/80 text-gray-800 backdrop-blur-lg transition-all duration-300"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
@@ -159,7 +161,7 @@ export const Signup = () => {
             whileFocus={{ scale: 1.02, boxShadow: '0 0 25px rgba(251, 146, 60, 0.3)' }}
             type="tel"
             required
-            placeholder="Phone Number"
+            placeholder={t('auth.signup_phone_placeholder')}
             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 bg-white/80 text-gray-800 backdrop-blur-lg transition-all duration-300"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
@@ -172,7 +174,7 @@ export const Signup = () => {
             whileFocus={{ scale: 1.02, boxShadow: '0 0 25px rgba(251, 146, 60, 0.3)' }}
             type="email"
             required
-            placeholder="Email address"
+            placeholder={t('auth.signup_email_placeholder')}
             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 bg-white/80 text-gray-800 backdrop-blur-lg transition-all duration-300"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -188,7 +190,7 @@ export const Signup = () => {
               whileFocus={{ scale: 1.02, boxShadow: '0 0 25px rgba(251, 146, 60, 0.3)' }}
               type={showPassword ? 'text' : 'password'}
               required
-              placeholder="Password"
+              placeholder={t('auth.signup_password_placeholder')}
               className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 bg-white/80 text-gray-800 backdrop-blur-lg pr-12 transition-all duration-300"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -200,7 +202,7 @@ export const Signup = () => {
               tabIndex={-1}
               className="absolute right-3 top-3 text-gray-500 hover:text-orange-500 transition-colors"
               onClick={() => setShowPassword((v) => !v)}
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-label={showPassword ? t('auth.signup_hide_password') : t('auth.signup_show_password')}
             >
               <AnimatePresence mode="wait">
                 {showPassword ? (
@@ -238,7 +240,7 @@ export const Signup = () => {
               whileFocus={{ scale: 1.02, boxShadow: '0 0 25px rgba(251, 146, 60, 0.3)' }}
               type={showConfirmPassword ? 'text' : 'password'}
               required
-              placeholder="Confirm Password"
+              placeholder={t('auth.signup_confirm_placeholder')}
               className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 bg-white/80 text-gray-800 backdrop-blur-lg pr-12 transition-all duration-300"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -250,7 +252,7 @@ export const Signup = () => {
               tabIndex={-1}
               className="absolute right-3 top-3 text-gray-500 hover:text-orange-500 transition-colors"
               onClick={() => setShowConfirmPassword((v) => !v)}
-              aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+              aria-label={showConfirmPassword ? t('auth.signup_hide_password') : t('auth.signup_show_password')}
             >
               <AnimatePresence mode="wait">
                 {showConfirmPassword ? (
@@ -298,12 +300,12 @@ export const Signup = () => {
             transition={{ delay: 0.9, duration: 0.4 }}
             className="text-center text-sm mb-2"
           >
-            <span>Already have an account?{' '}</span>
+            <span>{t('auth.signup_have_account')}{' '}</span>
             <Link
               to="/login"
               className="text-orange-600 hover:underline font-semibold transition-colors hover:text-orange-700"
             >
-              Sign in
+              {t('auth.signup_login_link')}
             </Link>
           </motion.div>
 
@@ -331,7 +333,7 @@ export const Signup = () => {
                     transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                     className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
                   />
-                  Creating account...
+                  {t('auth.signup_btn_loading')}
                 </motion.span>
               ) : (
                 <motion.span
@@ -340,7 +342,7 @@ export const Signup = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                 >
-                  Sign Up
+                  {t('auth.signup_btn')}
                 </motion.span>
               )}
             </AnimatePresence>

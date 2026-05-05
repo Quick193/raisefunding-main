@@ -6,8 +6,10 @@ import { Campaign } from '../types';
 import { CampaignCard } from '../components/CampaignCard';
 import { Plus, TrendingUp, Pencil, Trash2 } from 'lucide-react';
 import { formatCurrency } from '../utils/format';
+import { useTranslation } from 'react-i18next';
 
 export const Dashboard = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -45,14 +47,14 @@ export const Dashboard = () => {
   }, [fetchCampaigns]);
 
   const handleDelete = async (id: string, title: string) => {
-    if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return;
+    if (!window.confirm(t('dashboard.delete_confirm', { title }))) return;
     setDeletingId(id);
     try {
       const { error } = await supabase.from('campaigns').delete().eq('id', id);
       if (error) throw error;
       setCampaigns((prev) => prev.filter((c) => c.id !== id));
     } catch {
-      alert('Failed to delete campaign. Please try again.');
+      alert(t('dashboard.delete_failed'));
     } finally {
       setDeletingId(null);
     }
@@ -85,10 +87,10 @@ export const Dashboard = () => {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                My Campaigns
+                {t('dashboard.title')}
               </h1>
               <p className="text-gray-600">
-                Manage and track your crowdfunding campaigns
+                {t('dashboard.subtitle')}
               </p>
             </div>
             <Link
@@ -96,7 +98,7 @@ export const Dashboard = () => {
               className="flex items-center space-x-2 bg-orange-600 text-white px-6 py-3 rounded-md hover:bg-orange-700 font-medium"
             >
               <Plus className="h-5 w-5" />
-              <span>New Campaign</span>
+              <span>{t('dashboard.new_campaign')}</span>
             </Link>
           </div>
         </div>
@@ -104,7 +106,7 @@ export const Dashboard = () => {
         <div className="grid md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white p-6 rounded-2xl shadow-lg border border-orange-100">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-600 text-sm">Total Campaigns</span>
+              <span className="text-gray-600 text-sm">{t('dashboard.total_campaigns')}</span>
               <TrendingUp className="h-5 w-5 text-gray-400" />
             </div>
             <div className="text-3xl font-bold text-gray-900">{stats.total}</div>
@@ -112,7 +114,7 @@ export const Dashboard = () => {
 
           <div className="bg-white p-6 rounded-2xl shadow-lg border border-orange-100">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-600 text-sm">Active</span>
+              <span className="text-gray-600 text-sm">{t('dashboard.active')}</span>
               <div className="h-3 w-3 bg-green-500 rounded-full"></div>
             </div>
             <div className="text-3xl font-bold text-gray-900">{stats.active}</div>
@@ -120,7 +122,7 @@ export const Dashboard = () => {
 
           <div className="bg-white p-6 rounded-2xl shadow-lg border border-orange-100">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-600 text-sm">Completed</span>
+              <span className="text-gray-600 text-sm">{t('dashboard.completed')}</span>
               <div className="h-3 w-3 bg-gray-400 rounded-full"></div>
             </div>
             <div className="text-3xl font-bold text-gray-900">{stats.completed}</div>
@@ -128,7 +130,7 @@ export const Dashboard = () => {
 
           <div className="bg-white p-6 rounded-2xl shadow-lg border border-orange-100">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-600 text-sm">Total Raised</span>
+              <span className="text-gray-600 text-sm">{t('dashboard.total_raised')}</span>
               <TrendingUp className="h-5 w-5 text-orange-600" />
             </div>
             <div className="text-3xl font-bold text-orange-600">
@@ -147,7 +149,7 @@ export const Dashboard = () => {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              All ({campaigns.length})
+              {`${t('dashboard.filter_all')} (${campaigns.length})`}
             </button>
             <button
               onClick={() => setFilter('active')}
@@ -157,7 +159,7 @@ export const Dashboard = () => {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              Active ({stats.active})
+              {`${t('dashboard.filter_active')} (${stats.active})`}
             </button>
             <button
               onClick={() => setFilter('completed')}
@@ -167,7 +169,7 @@ export const Dashboard = () => {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              Completed ({stats.completed})
+              {`${t('dashboard.filter_completed')} (${stats.completed})`}
             </button>
           </div>
 
@@ -175,15 +177,15 @@ export const Dashboard = () => {
             <div className="text-center py-12">
               <p className="text-gray-600 mb-4">
                 {filter === 'all'
-                  ? "You haven't created any campaigns yet"
-                  : `No ${filter} campaigns`}
+                  ? t('dashboard.no_campaigns')
+                  : t('dashboard.no_filtered', { status: filter })}
               </p>
               {filter === 'all' && (
                 <Link
                   to="/create"
                   className="inline-block bg-orange-600 text-white px-6 py-2 rounded-md hover:bg-orange-700 font-medium"
                 >
-                  Create Your First Campaign
+                  {t('dashboard.create_first')}
                 </Link>
               )}
             </div>
@@ -197,14 +199,14 @@ export const Dashboard = () => {
                       to={`/dashboard/campaign/${campaign.id}`}
                       className="flex-1 text-center bg-orange-50 border border-orange-200 px-3 py-2 rounded-xl text-sm font-semibold text-orange-600 hover:bg-orange-100 transition-colors"
                     >
-                      View Stats
+                      {t('dashboard.view_stats')}
                     </Link>
                     <button
                       onClick={() => navigate(`/campaign/${campaign.id}/edit`)}
                       className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-100 transition-colors"
                     >
                       <Pencil className="h-3.5 w-3.5" />
-                      Edit
+                      {t('dashboard.edit')}
                     </button>
                     <button
                       onClick={() => handleDelete(campaign.id, campaign.title)}
@@ -212,7 +214,7 @@ export const Dashboard = () => {
                       className="flex items-center gap-1.5 bg-red-50 border border-red-200 px-3 py-2 rounded-xl text-sm font-semibold text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
-                      {deletingId === campaign.id ? '…' : 'Delete'}
+                      {deletingId === campaign.id ? '…' : t('dashboard.delete')}
                     </button>
                   </div>
                 </div>

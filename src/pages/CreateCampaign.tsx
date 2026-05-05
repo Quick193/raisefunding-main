@@ -8,6 +8,7 @@ import { CustomSelect } from '../components/CustomSelect';
 import { DatePicker } from '../components/DatePicker';
 import { FeatureModal } from '../components/FeatureModal';
 import { MediaItem } from '../types';
+import { useTranslation } from 'react-i18next';
 
 const CATEGORY_OPTIONS = [
   'Medical', 'Education', 'Social Impact', 'Emergency',
@@ -17,6 +18,7 @@ const CATEGORY_OPTIONS = [
 const paymentsConfigured = Boolean(import.meta.env.VITE_RAZORPAY_KEY_ID);
 
 export const CreateCampaign = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -60,8 +62,8 @@ export const CreateCampaign = () => {
   };
 
   const handleCoverImage = async (file: File) => {
-    if (!file.type.startsWith('image/')) { setError('Please select an image file.'); return; }
-    if (file.size > 5 * 1024 * 1024) { setError('Cover image must be under 5 MB.'); return; }
+    if (!file.type.startsWith('image/')) { setError(t('create.error_image_type')); return; }
+    if (file.size > 5 * 1024 * 1024) { setError(t('create.error_image_size')); return; }
     setImageUploading(true);
     setError('');
     try {
@@ -69,7 +71,7 @@ export const CreateCampaign = () => {
       setFormData((p) => ({ ...p, imageUrl: url }));
       setImagePreview(url);
     } catch {
-      setError('Cover image upload failed. You can paste a URL instead.');
+      setError(t('create.error_image_upload'));
     } finally {
       setImageUploading(false);
     }
@@ -104,13 +106,13 @@ export const CreateCampaign = () => {
   };
 
   const validate = (): string | null => {
-    if (formData.title.trim().length < 10) return 'Title must be at least 10 characters.';
-    if (formData.title.trim().length > 100) return 'Title must be 100 characters or fewer.';
-    if (formData.description.trim().length < 50) return 'Description must be at least 50 characters.';
-    if (formData.description.trim().length > 5000) return 'Description must be 5,000 characters or fewer.';
+    if (formData.title.trim().length < 10) return t('create.error_title_min');
+    if (formData.title.trim().length > 100) return t('create.error_title_max');
+    if (formData.description.trim().length < 50) return t('create.error_desc_min');
+    if (formData.description.trim().length > 5000) return t('create.error_desc_max');
     const goal = parseFloat(formData.goalAmount);
-    if (isNaN(goal) || goal < 100) return 'Funding goal must be at least ₹100.';
-    if (goal > 100_000_000) return 'Funding goal cannot exceed ₹10 crore.';
+    if (isNaN(goal) || goal < 100) return t('create.error_goal_min');
+    if (goal > 100_000_000) return t('create.error_goal_max');
     return null;
   };
 
@@ -167,8 +169,8 @@ export const CreateCampaign = () => {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 py-10">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mb-8">
-          <h1 className="text-3xl font-black text-gray-900 mb-2">Create a New Campaign</h1>
-          <p className="text-gray-600">Share your vision and start raising funds for your project</p>
+          <h1 className="text-3xl font-black text-gray-900 mb-2">{t('create.title')}</h1>
+          <p className="text-gray-600">{t('create.subtitle')}</p>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
@@ -180,43 +182,43 @@ export const CreateCampaign = () => {
 
             {/* Title */}
             <div>
-              <label htmlFor="title" className="block text-sm font-semibold text-gray-700 mb-1.5">Campaign Title</label>
+              <label htmlFor="title" className="block text-sm font-semibold text-gray-700 mb-1.5">{t('create.title_label')}</label>
               <input id="title" name="title" type="text" value={formData.title} onChange={handleChange} required
                 className="w-full px-4 py-3 border border-orange-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white transition-all"
-                placeholder="Give your campaign a clear, compelling title (10–100 characters)" />
+                placeholder={t('create.title_placeholder')} />
             </div>
 
             {/* Description */}
             <div>
-              <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-1.5">Description</label>
+              <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-1.5">{t('create.description_label')}</label>
               <textarea id="description" name="description" value={formData.description} onChange={handleChange} required rows={7}
                 className="w-full px-4 py-3 border border-orange-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white transition-all resize-none"
-                placeholder="Tell your story. Explain what you're raising funds for, why it matters, and how funds will be used. (50–5000 characters)" />
+                placeholder={t('create.description_placeholder')} />
               <p className="text-xs text-gray-400 mt-1 text-right">{formData.description.length} / 5000</p>
             </div>
 
             {/* Category + Location */}
             <div className="grid md:grid-cols-2 gap-5">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Category</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t('create.category_label')}</label>
                 <CustomSelect value={formData.category}
                   onChange={(val) => setFormData((p) => ({ ...p, category: val }))}
                   options={CATEGORY_OPTIONS} />
               </div>
               <div>
                 <label htmlFor="location" className="block text-sm font-semibold text-gray-700 mb-1.5">
-                  Location <span className="text-gray-400 font-normal">(Optional)</span>
+                  {t('create.location_label')} <span className="text-gray-400 font-normal">{t('create.location_optional')}</span>
                 </label>
                 <input id="location" name="location" type="text" value={formData.location} onChange={handleChange}
                   className="w-full px-4 py-3 border border-orange-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white transition-all"
-                  placeholder="City, State" />
+                  placeholder={t('create.location_placeholder')} />
               </div>
             </div>
 
             {/* Goal + End Date */}
             <div className="grid md:grid-cols-2 gap-5">
               <div>
-                <label htmlFor="goalAmount" className="block text-sm font-semibold text-gray-700 mb-1.5">Funding Goal (₹)</label>
+                <label htmlFor="goalAmount" className="block text-sm font-semibold text-gray-700 mb-1.5">{t('create.goal_label')}</label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">₹</span>
                   <input id="goalAmount" name="goalAmount" type="number" value={formData.goalAmount} onChange={handleChange}
@@ -227,7 +229,7 @@ export const CreateCampaign = () => {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                  End Date <span className="text-gray-400 font-normal">(Optional)</span>
+                  {t('create.end_date_label')} <span className="text-gray-400 font-normal">{t('create.end_date_optional')}</span>
                 </label>
                 <DatePicker value={formData.endDate}
                   onChange={(val) => setFormData((p) => ({ ...p, endDate: val }))}
@@ -239,7 +241,7 @@ export const CreateCampaign = () => {
             {/* ── Cover Image ───────────────────────────────────────── */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                Cover Image <span className="text-gray-400 font-normal">(Optional — shown on campaign cards)</span>
+                {t('create.cover_label')} <span className="text-gray-400 font-normal">{t('create.cover_optional')}</span>
               </label>
               {(imagePreview || formData.imageUrl) && (
                 <div className="relative mb-3 rounded-xl overflow-hidden h-48 border border-orange-200">
@@ -261,13 +263,13 @@ export const CreateCampaign = () => {
                     ? <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                         className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full" />
                     : <Upload className="h-4 w-4" />}
-                  {imageUploading ? 'Uploading…' : 'Upload Cover'}
+                  {imageUploading ? t('common.uploading') : t('create.cover_upload_btn')}
                 </button>
                 <div className="relative flex-1">
                   <ImagePlus className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
                   <input name="imageUrl" type="url" value={formData.imageUrl} onChange={handleChange}
                     className="w-full pl-9 pr-4 py-2.5 border border-orange-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white text-sm transition-all"
-                    placeholder="…or paste image URL"
+                    placeholder={t('create.cover_url_placeholder')}
                     onBlur={(e) => { if (e.target.value) setImagePreview(e.target.value); }} />
                 </div>
               </div>
@@ -276,7 +278,7 @@ export const CreateCampaign = () => {
             {/* ── Additional Photos & Videos ────────────────────────── */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                Photos &amp; Videos <span className="text-gray-400 font-normal">(Optional — multiple files)</span>
+                {t('create.media_label')} <span className="text-gray-400 font-normal">{t('create.media_optional')}</span>
               </label>
 
               {/* Thumbnails grid */}
@@ -319,9 +321,9 @@ export const CreateCampaign = () => {
                         className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full" />
                     : <Upload className="h-6 w-6 text-orange-400" />}
                   <span className="text-sm text-gray-500">
-                    {mediaUploading ? 'Uploading files…' : 'Click to upload photos & videos'}
+                    {mediaUploading ? t('create.media_uploading') : t('create.media_upload_btn')}
                   </span>
-                  <span className="text-xs text-gray-400">Images up to 5 MB · Videos up to 100 MB · Multiple files allowed</span>
+                  <span className="text-xs text-gray-400">{t('create.media_upload_info')}</span>
                 </button>
               )}
 
@@ -334,7 +336,7 @@ export const CreateCampaign = () => {
                 <input name="videoUrl" type="url" value={formData.videoUrl}
                   onChange={handleChange}
                   className="w-full pl-9 pr-4 py-2.5 border border-orange-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white text-sm transition-all"
-                  placeholder="Or paste a YouTube/Vimeo URL" />
+                  placeholder={t('create.video_url_placeholder')} />
               </div>
               <p className="mt-1.5 text-xs text-gray-400">
                 Requires Supabase Storage — run <code className="bg-gray-100 px-1 rounded">supabase/storage_setup.sql</code> once.
@@ -360,7 +362,7 @@ export const CreateCampaign = () => {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-bold text-gray-900">Feature my campaign</h3>
+                    <h3 className="font-bold text-gray-900">{t('create.feature_label')}</h3>
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                       wantFeature ? 'border-orange-500 bg-orange-500' : 'border-gray-300'
                     }`}>
@@ -369,11 +371,9 @@ export const CreateCampaign = () => {
                   </div>
                   <p className="text-sm text-gray-600 mt-1">
                     {paymentsConfigured ? (
-                      <>
-                        Get pinned at the top of Browse Campaigns with a Featured badge. Starting from <span className="font-semibold text-orange-600">₹499</span> — you'll choose your duration after creating.
-                      </>
+                      t('create.feature_description')
                     ) : (
-                      'Featured placement will be available once Razorpay keys are configured.'
+                      t('create.feature_unavailable')
                     )}
                   </p>
                 </div>
@@ -384,11 +384,11 @@ export const CreateCampaign = () => {
             <div className="flex gap-4 pt-2">
               <button type="button" onClick={() => navigate('/dashboard')}
                 className="flex-1 bg-white text-gray-700 border border-gray-300 py-3 rounded-xl hover:bg-gray-50 font-semibold transition-all">
-                Cancel
+                {t('create.cancel_btn')}
               </button>
               <button type="submit" disabled={loading}
                 className="flex-1 bg-gradient-to-r from-orange-600 to-orange-500 text-white py-3 rounded-xl hover:from-orange-700 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-all shadow-lg">
-                {loading ? 'Creating…' : 'Create Campaign'}
+                {loading ? t('create.submitting') : t('create.submit_btn')}
               </button>
             </div>
           </form>

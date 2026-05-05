@@ -17,8 +17,10 @@ import {
 } from 'lucide-react';
 import { Campaign } from '../types';
 import { formatCurrency } from '../utils/format';
+import { useTranslation } from 'react-i18next';
 
 export const CampaignDetail = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
@@ -101,7 +103,7 @@ export const CampaignDetail = () => {
     if (!campaign) return;
 
     if (reportReason.trim().length < 10) {
-      setReportError('Please describe the concern in at least 10 characters.');
+      setReportError(t('campaign.report_error_min'));
       return;
     }
 
@@ -135,7 +137,7 @@ export const CampaignDetail = () => {
 
     if (platform === 'copy') {
       navigator.clipboard.writeText(shareUrl);
-      alert('Link copied to clipboard!');
+      alert(t('common.copied'));
     } else if (platform === 'twitter') {
       window.open(
         `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`,
@@ -170,7 +172,7 @@ export const CampaignDetail = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-2xl font-bold text-gray-900 mb-4"
           >
-            Campaign not found
+            {t('campaign.not_found')}
           </motion.h1>
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -179,7 +181,7 @@ export const CampaignDetail = () => {
             className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-600 to-orange-500 text-white rounded-xl hover:shadow-xl transition-all font-semibold"
           >
             <ArrowLeft className="h-5 w-5 mr-2" />
-            Back to Campaigns
+            {t('campaign.back')}
           </motion.button>
         </div>
       </div>
@@ -212,7 +214,7 @@ export const CampaignDetail = () => {
           className="mb-6 inline-flex items-center text-orange-600 hover:text-orange-700 font-semibold transition-all"
         >
           <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to Campaigns
+          {t('campaign.back')}
         </motion.button>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -266,7 +268,7 @@ export const CampaignDetail = () => {
                     <span className={`px-4 py-2 rounded-full font-bold text-sm text-white shadow-lg ${
                       daysLeft > 0 ? 'bg-orange-600' : 'bg-gray-600'
                     }`}>
-                      {daysLeft > 0 ? `${daysLeft} days left` : 'Campaign ended'}
+                      {daysLeft > 0 ? `${daysLeft} ${t('campaign.days_left')}` : t('campaign.campaign_ended')}
                     </span>
                   </motion.div>
                 )}
@@ -315,7 +317,7 @@ export const CampaignDetail = () => {
                     className="flex items-center gap-2 px-4 py-2 bg-orange-50 hover:bg-orange-100 rounded-xl transition-all text-sm font-medium border border-orange-200/50"
                   >
                     <Share2 className="h-4 w-4 text-orange-600" />
-                    Share
+                    {t('campaign.share')}
                   </motion.button>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -324,7 +326,7 @@ export const CampaignDetail = () => {
                     className="flex items-center gap-2 px-4 py-2 bg-orange-50 hover:bg-orange-100 rounded-xl transition-all text-sm font-medium border border-orange-200/50"
                   >
                     <Bookmark className="h-4 w-4 text-orange-600" />
-                    Copy Link
+                    {t('campaign.copy_link')}
                   </motion.button>
                 </motion.div>
 
@@ -337,17 +339,17 @@ export const CampaignDetail = () => {
                 >
                   <div className="text-center">
                     <p className="text-3xl font-black text-orange-600">{Math.round(progress)}%</p>
-                    <p className="text-xs text-gray-600 font-medium mt-1">Funded</p>
+                    <p className="text-xs text-gray-600 font-medium mt-1">{t('campaign.funded_label')}</p>
                   </div>
                   <div className="text-center">
                     <p className="text-3xl font-black text-orange-600">{campaign.supporter_count || 0}</p>
-                    <p className="text-xs text-gray-600 font-medium mt-1">Supporters</p>
+                    <p className="text-xs text-gray-600 font-medium mt-1">{t('campaign.supporters_label')}</p>
                   </div>
                   <div className="text-center">
                     <p className="text-3xl font-black text-orange-600">
                       {daysLeft && daysLeft > 0 ? daysLeft : 0}
                     </p>
-                    <p className="text-xs text-gray-600 font-medium mt-1">Days Left</p>
+                    <p className="text-xs text-gray-600 font-medium mt-1">{t('campaign.days_left_label')}</p>
                   </div>
                 </motion.div>
 
@@ -357,7 +359,7 @@ export const CampaignDetail = () => {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.9 }}
                 >
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">About this campaign</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('campaign.about_title')}</h2>
                   <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
                     {campaign.description}
                   </p>
@@ -366,7 +368,7 @@ export const CampaignDetail = () => {
                 {/* Photo gallery (additional media images) */}
                 {campaign.media && campaign.media.filter((m) => m.type === 'image').length > 0 && (
                   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.95 }} className="mt-8">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Gallery</h2>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('campaign.gallery_title')}</h2>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {campaign.media.filter((m) => m.type === 'image').map((item, i) => (
                         <div key={i} className="rounded-xl overflow-hidden aspect-square border border-orange-100">
@@ -388,7 +390,7 @@ export const CampaignDetail = () => {
                   return (
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.0 }} className="mt-8">
                       <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                        {allVideos.length === 1 ? 'Campaign Video' : 'Videos'}
+                        {allVideos.length === 1 ? t('campaign.video_title') : t('campaign.videos_title')}
                       </h2>
                       <div className="space-y-6">
                         {allVideos.map((v, i) => {
@@ -426,7 +428,7 @@ export const CampaignDetail = () => {
                     <div className="bg-orange-50/80 rounded-xl p-4 border border-orange-200/50">
                       <div className="flex items-center gap-3 mb-2">
                         <MapPin className="w-5 h-5 text-green-500" />
-                        <span className="text-gray-900 font-semibold">Location</span>
+                        <span className="text-gray-900 font-semibold">{t('campaign.location_label')}</span>
                       </div>
                       <p className="text-gray-700">{campaign.location}</p>
                     </div>
@@ -434,7 +436,7 @@ export const CampaignDetail = () => {
                   <div className="bg-orange-50/80 rounded-xl p-4 border border-orange-200/50">
                     <div className="flex items-center gap-3 mb-2">
                       <Target className="w-5 h-5 text-orange-500" />
-                      <span className="text-gray-900 font-semibold">Goal</span>
+                      <span className="text-gray-900 font-semibold">{t('campaign.goal_label')}</span>
                     </div>
                     <p className="text-gray-700">{formatCurrency(campaign.goal_amount)}</p>
                   </div>
@@ -450,7 +452,7 @@ export const CampaignDetail = () => {
                 transition={{ delay: 1.1 }}
                 className="bg-white/80 backdrop-blur-lg rounded-2xl p-8 border border-orange-200/50 shadow-xl"
               >
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Similar Campaigns</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('campaign.similar_title')}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {relatedCampaigns.map((related, idx) => (
                     <motion.div
@@ -558,12 +560,12 @@ export const CampaignDetail = () => {
                 transition={{ delay: 0.5 }}
                 className="border-b pb-6"
               >
-                <p className="text-sm text-gray-600 font-medium mb-2">RAISED SO FAR</p>
+                <p className="text-sm text-gray-600 font-medium mb-2">{t('campaign.raised_so_far')}</p>
                 <p className="text-4xl font-black text-orange-600 mb-2">
                   {formatCurrency(campaign.current_amount)}
                 </p>
                 <p className="text-sm text-gray-600">
-                  of {formatCurrency(campaign.goal_amount)} goal
+                  of {formatCurrency(campaign.goal_amount)} {t('campaign.goal_suffix')}
                 </p>
 
                 {/* Progress Bar */}
@@ -579,10 +581,9 @@ export const CampaignDetail = () => {
                 <div className="flex items-start gap-3">
                   <Heart className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-bold text-gray-900">Online donations are being connected</p>
+                    <p className="font-bold text-gray-900">{t('campaign.donations_notice_title')}</p>
                     <p className="text-sm text-gray-700 mt-1">
-                      Razorpay verification will be enabled before real donations are accepted.
-                      This prevents unverified pledge records from changing campaign totals.
+                      {t('campaign.donations_notice_body')}
                     </p>
                   </div>
                 </div>
@@ -590,7 +591,7 @@ export const CampaignDetail = () => {
 
               {reportStatus === 'success' && (
                 <div className="rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-700">
-                  Thanks. Your report has been submitted for review.
+                  {t('campaign.report_success')}
                 </div>
               )}
 
@@ -601,29 +602,29 @@ export const CampaignDetail = () => {
                   className="w-full flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 transition-colors"
                 >
                   <Flag className="h-4 w-4" />
-                  Report this campaign
+                  {t('campaign.report_button')}
                 </button>
               ) : (
                 <form onSubmit={handleReportSubmit} className="space-y-3 rounded-xl border border-gray-200 bg-white p-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Email (optional)</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">{t('campaign.report_email_label')}</label>
                     <input
                       type="email"
                       value={reporterEmail}
                       onChange={(e) => setReporterEmail(e.target.value)}
                       className="w-full rounded-lg border border-orange-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      placeholder="you@example.com"
+                      placeholder={t('campaign.report_email_placeholder')}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Concern</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">{t('campaign.report_concern_label')}</label>
                     <textarea
                       required
                       rows={4}
                       value={reportReason}
                       onChange={(e) => setReportReason(e.target.value)}
                       className="w-full rounded-lg border border-orange-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      placeholder="Tell us what looks wrong or unsafe."
+                      placeholder={t('campaign.report_concern_placeholder')}
                     />
                   </div>
                   {reportError && (
@@ -637,14 +638,14 @@ export const CampaignDetail = () => {
                       disabled={reportStatus === 'submitting'}
                       className="flex-1 rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-60"
                     >
-                      {reportStatus === 'submitting' ? 'Submitting...' : 'Submit report'}
+                      {reportStatus === 'submitting' ? t('common.loading') : t('campaign.report_submit')}
                     </button>
                     <button
                       type="button"
                       onClick={() => setShowReportForm(false)}
                       className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-200"
                     >
-                      Cancel
+                      {t('campaign.report_cancel')}
                     </button>
                   </div>
                 </form>
@@ -657,12 +658,12 @@ export const CampaignDetail = () => {
                 transition={{ delay: 0.9 }}
                 className="space-y-4 pt-6 border-t"
               >
-                <h3 className="font-bold text-gray-900">Campaign Info</h3>
+                <h3 className="font-bold text-gray-900">{t('stats.campaign_info')}</h3>
 
                 <div className="flex items-start gap-3">
                   <Users className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{campaign.supporter_count || 0} supporters</p>
+                    <p className="text-sm font-medium text-gray-900">{campaign.supporter_count || 0} {t('campaign.supporters_label').toLowerCase()}</p>
                     <p className="text-xs text-gray-600">People backing this campaign</p>
                   </div>
                 </div>
@@ -671,7 +672,7 @@ export const CampaignDetail = () => {
                   <Target className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="text-sm font-medium text-gray-900">{Math.round(progress)}% funded</p>
-                    <p className="text-xs text-gray-600">Progress towards goal</p>
+                    <p className="text-xs text-gray-600">{t('campaign.progress_label')}</p>
                   </div>
                 </div>
 
@@ -679,7 +680,7 @@ export const CampaignDetail = () => {
                   <Calendar className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="text-sm font-medium text-gray-900">
-                      {daysLeft && daysLeft > 0 ? daysLeft : 0} days left
+                      {daysLeft && daysLeft > 0 ? daysLeft : 0} {t('campaign.days_left')}
                     </p>
                     <p className="text-xs text-gray-600">Time to support</p>
                   </div>

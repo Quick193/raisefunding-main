@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { motion } from 'framer-motion';
 import {
@@ -21,6 +22,7 @@ import {
 } from 'lucide-react';
 
 export const AboutUs = () => {
+  const { t } = useTranslation();
   const [stats, setStats] = useState({
     campaignsCreated: 0,
     totalRaised: 0,
@@ -81,39 +83,33 @@ export const AboutUs = () => {
   const features = [
     {
       icon: Lightbulb,
-      title: 'Guided Campaign Setup',
-      description:
-        'Use clear prompts and structured fields to tell your story, set a goal, and prepare a stronger campaign.',
+      title: t('about.feature_setup_title'),
+      description: t('about.feature_setup_desc'),
     },
     {
       icon: Shield,
-      title: 'Trust & Security First',
-      description:
-        'Supabase authentication, row-level security, and creator-owned dashboards help protect account and campaign data.',
+      title: t('about.feature_security_title'),
+      description: t('about.feature_security_desc'),
     },
     {
       icon: Zap,
-      title: 'Lightning Fast Setup',
-      description:
-        'Launch your campaign in just 2 minutes with our intuitive, guided process.',
+      title: t('about.feature_speed_title'),
+      description: t('about.feature_speed_desc'),
     },
     {
       icon: Globe,
-      title: 'Global Reach',
-      description:
-        'Connect with supporters in 150+ countries and access diverse funding opportunities worldwide.',
+      title: t('about.feature_global_title'),
+      description: t('about.feature_global_desc'),
     },
     {
       icon: TrendingUp,
-      title: 'Real-time Analytics',
-      description:
-        'Track every metric that matters with detailed dashboards and actionable insights.',
+      title: t('about.feature_analytics_title'),
+      description: t('about.feature_analytics_desc'),
     },
     {
       icon: Users,
-      title: 'Community Driven',
-      description:
-        'Join a thriving ecosystem of creators, supporters, and changemakers.',
+      title: t('about.feature_community_title'),
+      description: t('about.feature_community_desc'),
     },
   ];
 
@@ -127,7 +123,7 @@ export const AboutUs = () => {
             transition={{ duration: 0.6 }}
             className="text-5xl sm:text-6xl font-black text-orange-600 mb-6"
           >
-            About Us
+            {t('about.title')}
           </motion.h1>
 
           <motion.p 
@@ -136,8 +132,7 @@ export const AboutUs = () => {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="text-xl text-gray-700 max-w-3xl mx-auto mb-8"
           >
-            A focused crowdfunding platform connecting campaign creators with
-            supporters to turn urgent needs and meaningful ideas into reality.
+            {t('about.subtitle')}
           </motion.p>
 
           <motion.div 
@@ -152,7 +147,7 @@ export const AboutUs = () => {
                 className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-orange-600 to-orange-500 text-white font-bold rounded-xl hover:shadow-xl transition-all"
               >
                 <Rocket className="h-5 w-5 mr-2" />
-                Start Your Campaign
+                {t('about.cta_campaign')}
               </Link>
             </motion.div>
 
@@ -162,7 +157,7 @@ export const AboutUs = () => {
                 className="inline-flex items-center justify-center px-8 py-4 bg-white border-2 border-orange-600 text-orange-600 font-bold rounded-xl hover:bg-orange-50 transition-all"
               >
                 <Globe className="h-5 w-5 mr-2" />
-                Browse Campaigns
+                {t('about.cta_browse')}
               </Link>
             </motion.div>
           </motion.div>
@@ -178,9 +173,9 @@ export const AboutUs = () => {
             viewport={{ once: true }}
             className="text-4xl sm:text-5xl font-black text-gray-900 mb-4"
           >
-            Powering Dreams{' '}
+            {t('about.powering_title')}{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">
-              Worldwide
+              {t('about.powering_title_2')}
             </span>
           </motion.h2>
 
@@ -191,8 +186,7 @@ export const AboutUs = () => {
             viewport={{ once: true }}
             className="text-lg text-gray-600 max-w-2xl mx-auto"
           >
-            Raise brings campaign creation, public discovery, donor updates, and
-            creator analytics into one practical fundraising workspace.
+            {t('about.powering_desc')}
           </motion.p>
         </div>
 
@@ -201,22 +195,22 @@ export const AboutUs = () => {
             {
               icon: Target,
               value: loading ? '—' : stats.campaignsCreated,
-              label: 'Campaigns Created',
+              label: t('about.stat_campaigns'),
             },
             {
               icon: Lightbulb,
               value: loading ? '—' : `₹${(stats.totalRaised / 100000).toFixed(1)}L`,
-              label: 'Raised on Raise',
+              label: t('about.stat_raised'),
             },
             {
               icon: TrendingUp,
               value: loading ? '—' : `${stats.successRate}%`,
-              label: 'Success Rate',
+              label: t('about.stat_success'),
             },
             {
               icon: Globe,
               value: stats.statesSupported,
-              label: 'States Supported',
+              label: t('about.stat_states'),
             },
           ].map((stat, idx) => (
             <motion.div
@@ -254,7 +248,7 @@ export const AboutUs = () => {
                 viewport={{ once: true }}
                 className="text-4xl sm:text-5xl font-black text-gray-900 mb-8"
               >
-                Our Mission
+                {t('about.mission_title')}
               </motion.h2>
 
               <motion.p 
@@ -264,9 +258,7 @@ export const AboutUs = () => {
                 viewport={{ once: true }}
                 className="text-lg text-gray-700 mb-6 leading-relaxed"
               >
-                We believe every credible cause deserves a clear way to reach
-                supporters. Raise makes campaign creation, sharing, and tracking
-                straightforward for individuals and communities.
+                {t('about.mission_p1')}
               </motion.p>
 
               <motion.p 
@@ -276,8 +268,7 @@ export const AboutUs = () => {
                 viewport={{ once: true }}
                 className="text-lg text-gray-700 mb-8 leading-relaxed"
               >
-                Our tools help creators present their story, add media, monitor
-                donor activity, and keep momentum as their campaign grows.
+                {t('about.mission_p2')}
               </motion.p>
 
               <motion.div
@@ -292,7 +283,7 @@ export const AboutUs = () => {
                   href="#features"
                   className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-600 to-orange-500 text-white font-bold rounded-xl hover:shadow-lg transition-all"
                 >
-                  <span>Learn More</span>
+                  <span>{t('about.mission_learn_more')}</span>
                   <Sparkles className="h-5 w-5 ml-2" />
                 </a>
               </motion.div>
@@ -316,17 +307,16 @@ export const AboutUs = () => {
                 </motion.div>
 
                 <h3 className="text-2xl font-black text-gray-900 text-center mb-4">
-                  Campaigns Built for Clarity
+                  {t('about.mission_box_title')}
                 </h3>
 
                 <p className="text-center text-gray-700 mb-6">
-                  Structured campaign pages, media support, progress tracking,
-                  and creator analytics help supporters understand the cause.
+                  {t('about.mission_box_desc')}
                 </p>
 
                 <div className="flex items-center justify-center text-orange-600 font-bold">
                   <Sparkles className="h-5 w-5 mr-2 animate-pulse" />
-                  <span>Built for Fundraising Workflows</span>
+                  <span>{t('about.mission_box_feature')}</span>
                 </div>
               </div>
             </motion.div>
@@ -343,9 +333,9 @@ export const AboutUs = () => {
             viewport={{ once: true }}
             className="text-4xl sm:text-5xl font-black text-gray-900 mb-4"
           >
-            Simple, Transparent{' '}
+            {t('about.pricing_title')}{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">
-              Pricing
+              {t('about.pricing_title_2')}
             </span>
           </motion.h2>
 
@@ -356,36 +346,32 @@ export const AboutUs = () => {
             viewport={{ once: true }}
             className="text-lg text-gray-600 max-w-2xl mx-auto"
           >
-            We believe in transparency. Here's exactly what you'll pay and how
-            our platform works.
+            {t('about.pricing_desc')}
           </motion.p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             {
-              title: 'Platform Fee',
+              title: t('about.pricing_platform_title'),
               value: '0%',
               icon: PiggyBank,
               color: 'bg-green-50',
-              description:
-                'No platform fees on donations. Keep 100% of what you raise (minus payment processing).',
+              description: t('about.pricing_platform_desc'),
             },
             {
-              title: 'Payment Processing',
+              title: t('about.pricing_payment_title'),
               value: '2%',
               icon: CreditCard,
               color: 'bg-blue-50',
-              description:
-                'Industry-standard payment gateway fees for secure transactions worldwide.',
+              description: t('about.pricing_payment_desc'),
             },
             {
-              title: 'Premium Placement',
+              title: t('about.pricing_premium_title'),
               value: '1%',
               icon: Star,
               color: 'bg-green-50',
-              description:
-                'Optional premium placement on homepage for increased visibility and donations.',
+              description: t('about.pricing_premium_desc'),
             },
           ].map((pricing, idx) => (
             <motion.div
@@ -424,9 +410,9 @@ export const AboutUs = () => {
             viewport={{ once: true }}
             className="text-4xl sm:text-5xl font-black text-gray-900 mb-4"
           >
-            Why Choose Our{' '}
+            {t('about.features_title')}{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">
-              Platform
+              {t('about.features_title_2')}
             </span>
           </motion.h2>
         </div>
@@ -482,7 +468,7 @@ export const AboutUs = () => {
               viewport={{ once: true }}
               className="text-4xl sm:text-5xl font-black text-white mb-4"
             >
-              Calculate Your Earnings
+              {t('about.calc_title')}
             </motion.h2>
 
             <motion.p 
@@ -492,7 +478,7 @@ export const AboutUs = () => {
               viewport={{ once: true }}
               className="text-xl text-orange-100"
             >
-              See exactly how much you'll receive from your campaign
+              {t('about.calc_subtitle')}
             </motion.p>
           </div>
 
@@ -506,7 +492,7 @@ export const AboutUs = () => {
             >
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="font-bold text-lg">Fundraising Goal</label>
+                  <label className="font-bold text-lg">{t('about.calc_goal_label')}</label>
                   <span className="text-2xl font-black">₹{calculatorInput.goal}</span>
                 </div>
                 <input
@@ -522,12 +508,12 @@ export const AboutUs = () => {
                   }
                   className="w-full h-2 bg-white bg-opacity-30 rounded-lg appearance-none cursor-pointer"
                 />
-                <div className="text-sm text-orange-100 mt-2">₹100 - ₹1,000,000</div>
+                <div className="text-sm text-orange-100 mt-2">{t('about.calc_goal_range')}</div>
               </div>
 
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="font-bold text-lg">Expected Donors</label>
+                  <label className="font-bold text-lg">{t('about.calc_donors_label')}</label>
                   <span className="text-2xl font-black">{calculatorInput.donors}</span>
                 </div>
                 <input
@@ -546,9 +532,9 @@ export const AboutUs = () => {
               </div>
 
               <div className="bg-white bg-opacity-15 border border-white border-opacity-20 rounded-xl p-6">
-                <p className="text-orange-100 text-sm mb-2">Platform Fee</p>
+                <p className="text-orange-100 text-sm mb-2">{t('about.calc_fee_label')}</p>
                 <p className="text-2xl font-black mb-3">₹0.00</p>
-                <p className="text-sm text-orange-100">No hidden charges to start</p>
+                <p className="text-sm text-orange-100">{t('about.calc_fee_note')}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3 mt-6">
@@ -577,32 +563,32 @@ export const AboutUs = () => {
             >
               <div className="mb-8">
                 <p className="text-orange-100 text-sm mb-2 flex items-center">
-                  <Wallet className="h-5 w-5 mr-2" /> You will receive
+                  <Wallet className="h-5 w-5 mr-2" /> {t('about.calc_you_receive')}
                 </p>
                 <p className="text-5xl font-black mb-4">
                   ₹{earnings.net.toFixed(2)}
                 </p>
-                <p className="text-orange-100">directly in your bank account</p>
+                <p className="text-orange-100">{t('about.calc_bank')}</p>
               </div>
 
               <div className="space-y-3 mb-6">
                 <div className="flex items-center justify-between bg-white bg-opacity-10 rounded-lg p-4">
                   <span className="flex items-center text-orange-100">
-                    <CreditCard className="h-5 w-5 mr-2" /> Payment processing
+                    <CreditCard className="h-5 w-5 mr-2" /> {t('about.calc_processing')}
                   </span>
                   <span className="font-bold">₹{earnings.processing.toFixed(2)}</span>
                 </div>
 
                 <div className="flex items-center justify-between bg-green-500 bg-opacity-20 rounded-lg p-4">
                   <span className="flex items-center">
-                    <CheckCircle className="h-5 w-5 mr-2" /> Platform fee
+                    <CheckCircle className="h-5 w-5 mr-2" /> {t('about.calc_platform')}
                   </span>
                   <span className="font-bold">₹{earnings.platform.toFixed(2)}</span>
                 </div>
               </div>
 
               <p className="text-xs text-orange-100 text-center">
-                *2% processing fee per donation
+                {t('about.calc_note')}
               </p>
             </motion.div>
           </div>
@@ -627,12 +613,11 @@ export const AboutUs = () => {
           </div>
 
           <h2 className="text-4xl sm:text-5xl font-black text-gray-900 mb-4">
-            Ready to Change the World?
+            {t('about.cta_final_title')}
           </h2>
 
           <p className="text-xl text-gray-700 max-w-2xl mx-auto mb-8">
-            Every dream funded is a step towards creating positive change. Join
-            our community of changemakers today.
+            {t('about.cta_final_desc')}
           </p>
 
           <motion.div
@@ -643,7 +628,7 @@ export const AboutUs = () => {
               to="/create"
               className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-600 to-orange-500 text-white font-bold rounded-xl hover:shadow-xl transition-all"
             >
-              <span>Start Your Campaign Now</span>
+              <span>{t('about.cta_final_btn')}</span>
               <Zap className="h-5 w-5 ml-2 animate-pulse" />
             </Link>
           </motion.div>

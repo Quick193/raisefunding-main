@@ -6,6 +6,7 @@ import { Campaign } from '../types';
 import { ImagePlus, Video } from 'lucide-react';
 import { CustomSelect } from '../components/CustomSelect';
 import { DatePicker } from '../components/DatePicker';
+import { useTranslation } from 'react-i18next';
 
 const CATEGORY_OPTIONS = [
   'Medical',
@@ -18,6 +19,7 @@ const CATEGORY_OPTIONS = [
 ];
 
 export const EditCampaign = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -86,13 +88,13 @@ export const EditCampaign = () => {
   };
 
   const validate = (): string | null => {
-    if (formData.title.trim().length < 10) return 'Title must be at least 10 characters.';
-    if (formData.title.trim().length > 100) return 'Title must be 100 characters or fewer.';
-    if (formData.description.trim().length < 50) return 'Description must be at least 50 characters.';
-    if (formData.description.trim().length > 5000) return 'Description must be 5,000 characters or fewer.';
+    if (formData.title.trim().length < 10) return t('edit.error_title_min');
+    if (formData.title.trim().length > 100) return t('edit.error_title_max');
+    if (formData.description.trim().length < 50) return t('edit.error_desc_min');
+    if (formData.description.trim().length > 5000) return t('edit.error_desc_max');
     const goal = parseFloat(formData.goalAmount);
-    if (isNaN(goal) || goal < 100) return 'Funding goal must be at least ₹100.';
-    if (goal > 100_000_000) return 'Funding goal cannot exceed ₹10 crore.';
+    if (isNaN(goal) || goal < 100) return t('edit.error_goal_min');
+    if (goal > 100_000_000) return t('edit.error_goal_max');
     return null;
   };
 
@@ -137,7 +139,7 @@ export const EditCampaign = () => {
   };
 
   const handleEndCampaign = async () => {
-    if (!confirm('Are you sure you want to end this campaign? This action cannot be undone.')) {
+    if (!confirm(t('edit.confirm_end'))) {
       return;
     }
 
@@ -170,7 +172,7 @@ export const EditCampaign = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Campaign not found</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('edit.not_found')}</h2>
         </div>
       </div>
     );
@@ -181,10 +183,10 @@ export const EditCampaign = () => {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Edit Campaign
+            {t('edit.title')}
           </h1>
           <p className="text-gray-600">
-            Update your campaign details
+            {t('edit.subtitle')}
           </p>
         </div>
 
@@ -198,7 +200,7 @@ export const EditCampaign = () => {
 
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                Campaign Title
+                {t('edit.title_label')}
               </label>
               <input
                 id="title"
@@ -213,7 +215,7 @@ export const EditCampaign = () => {
 
             <div>
               <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                Description
+                {t('edit.description_label')}
               </label>
               <textarea
                 id="description"
@@ -228,7 +230,7 @@ export const EditCampaign = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category
+                {t('edit.category_label')}
               </label>
               <CustomSelect
                 value={formData.category}
@@ -240,7 +242,7 @@ export const EditCampaign = () => {
 
             <div>
               <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
-                Location (Optional)
+                {t('edit.location_label')}
               </label>
               <input
                 id="location"
@@ -249,14 +251,14 @@ export const EditCampaign = () => {
                 value={formData.location}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-orange-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                placeholder="City, State"
+                placeholder={t('edit.location_placeholder')}
               />
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="goalAmount" className="block text-sm font-medium text-gray-700 mb-1">
-                  Funding Goal
+                  {t('edit.goal_label')}
                 </label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
@@ -278,7 +280,7 @@ export const EditCampaign = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  End Date (Optional)
+                  {t('edit.end_date_label')}
                 </label>
                 <DatePicker
                   value={formData.endDate}
@@ -291,7 +293,7 @@ export const EditCampaign = () => {
 
             <div>
               <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">
-                Campaign Image URL (Optional)
+                {t('edit.image_url_label')}
               </label>
               <div className="flex items-center space-x-3">
                 <ImagePlus className="h-5 w-5 text-gray-400" />
@@ -308,7 +310,7 @@ export const EditCampaign = () => {
 
             <div>
               <label htmlFor="videoUrl" className="block text-sm font-medium text-gray-700 mb-1">
-                Video URL (Optional — YouTube or Vimeo)
+                {t('edit.video_url_label')}
               </label>
               <div className="flex items-center space-x-3">
                 <Video className="h-5 w-5 text-gray-400" />
@@ -316,14 +318,14 @@ export const EditCampaign = () => {
                   id="videoUrl" name="videoUrl" type="url"
                   value={formData.videoUrl} onChange={handleChange}
                   className="flex-1 px-4 py-2 border border-orange-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  placeholder="https://youtube.com/watch?v=..."
+                  placeholder={t('edit.video_url_placeholder')}
                 />
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Campaign Status
+                {t('edit.status_label')}
               </label>
               <CustomSelect
                 value={formData.status === 'active' ? 'Active' : 'Completed'}
@@ -339,7 +341,7 @@ export const EditCampaign = () => {
                 onClick={() => navigate(`/campaign/${id}`)}
                 className="flex-1 bg-white text-gray-700 border border-gray-300 py-3 rounded-md hover:bg-gray-50 font-medium"
               >
-                Cancel
+                {t('edit.cancel_btn')}
               </button>
               {campaign.status === 'active' && (
                 <button
@@ -347,7 +349,7 @@ export const EditCampaign = () => {
                   onClick={handleEndCampaign}
                   className="flex-1 bg-red-600 text-white py-3 rounded-md hover:bg-red-700 font-medium"
                 >
-                  End Campaign
+                  {t('edit.end_campaign_btn')}
                 </button>
               )}
               <button
@@ -355,7 +357,7 @@ export const EditCampaign = () => {
                 disabled={loading}
                 className="flex-1 bg-orange-600 text-white py-3 rounded-md hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
               >
-                {loading ? 'Saving...' : 'Save Changes'}
+                {loading ? t('edit.submitting') : t('edit.submit_btn')}
               </button>
             </div>
           </form>

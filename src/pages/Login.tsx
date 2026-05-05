@@ -3,8 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import { Eye, EyeOff, Wallet } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export const Login = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -53,7 +55,7 @@ export const Login = () => {
           transition={{ delay: 0.4, duration: 0.5 }}
           className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent mb-1"
         >
-          Sign In to Raise
+          {t('auth.login_title')}
         </motion.h2>
         <motion.p 
           initial={{ opacity: 0, y: 10 }}
@@ -61,7 +63,7 @@ export const Login = () => {
           transition={{ delay: 0.5, duration: 0.4 }}
           className="text-gray-600 text-sm mb-6"
         >
-          Welcome back! Sign in to your account
+          {t('auth.login_subtitle')}
         </motion.p>
         <motion.form 
           initial={{ opacity: 0 }}
@@ -77,7 +79,7 @@ export const Login = () => {
             whileFocus={{ scale: 1.02, boxShadow: "0 0 25px rgba(59, 130, 246, 0.3)" }}
             type="email"
             required
-            placeholder="Email address"
+            placeholder={t('auth.login_email_placeholder')}
             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 bg-white/80 text-gray-800 backdrop-blur-lg transition-all duration-300"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -92,7 +94,7 @@ export const Login = () => {
               whileFocus={{ scale: 1.02, boxShadow: "0 0 25px rgba(59, 130, 246, 0.3)" }}
               type={showPassword ? "text" : "password"}
               required
-              placeholder="Password"
+              placeholder={t('auth.login_password_placeholder')}
               className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 bg-white/80 text-gray-800 backdrop-blur-lg pr-12 transition-all duration-300"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -104,7 +106,7 @@ export const Login = () => {
               tabIndex={-1}
               className="absolute right-3 top-3 text-gray-500 hover:text-orange-500 transition-colors"
               onClick={() => setShowPassword(v => !v)}
-              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-label={showPassword ? t('auth.login_hide_password') : t('auth.login_show_password')}
             >
               <AnimatePresence mode="wait">
                 {showPassword ? (
@@ -150,14 +152,14 @@ export const Login = () => {
             transition={{ delay: 0.8, duration: 0.4 }}
             className="flex flex-col gap-2 text-center sm:flex-row sm:justify-between sm:text-left items-center text-sm mb-2"
           >
-            <Link to="/forgot-password" className="text-orange-600 hover:underline transition-colors hover:text-orange-700">Forgot password?</Link>
+            <Link to="/forgot-password" className="text-orange-600 hover:underline transition-colors hover:text-orange-700">{t('auth.login_forgot')}</Link>
             <span>
-              New here?{' '}
-              <Link 
+              {t('auth.login_no_account')}{' '}
+              <Link
                 to="/signup"
                 className="text-orange-600 hover:underline font-semibold transition-colors hover:text-orange-700"
               >
-                Sign up
+                {t('auth.login_signup_link')}
               </Link>
             </span>
           </motion.div>
@@ -185,7 +187,7 @@ export const Login = () => {
                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                     className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
                   />
-                  Signing in...
+                  {t('auth.login_btn_loading')}
                 </motion.span>
               ) : (
                 <motion.span
@@ -194,7 +196,7 @@ export const Login = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                 >
-                  Sign in
+                  {t('auth.login_btn')}
                 </motion.span>
               )}
             </AnimatePresence>

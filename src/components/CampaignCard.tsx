@@ -2,12 +2,14 @@ import { Link } from 'react-router-dom';
 import { Campaign } from '../types';
 import { formatCurrency, calculateProgress } from '../utils/format';
 import { Calendar, User } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface CampaignCardProps {
   campaign: Campaign;
 }
 
 export const CampaignCard = ({ campaign }: CampaignCardProps) => {
+  const { t } = useTranslation();
   const progress = calculateProgress(campaign.current_amount, campaign.goal_amount);
 
   return (
@@ -40,7 +42,7 @@ export const CampaignCard = ({ campaign }: CampaignCardProps) => {
                 : 'bg-gray-100 text-gray-800'
             }`}
           >
-            {campaign.status === 'active' ? 'Active' : 'Completed'}
+            {campaign.status === 'active' ? t('common.active') : t('common.completed')}
           </span>
           {campaign.profiles && (
             <div className="flex items-center text-sm text-gray-600">
@@ -73,7 +75,7 @@ export const CampaignCard = ({ campaign }: CampaignCardProps) => {
               style={{ width: `${progress}%` }}
             />
           </div>
-          <div className="text-xs text-gray-600 mt-1">{progress}% funded</div>
+          <div className="text-xs text-gray-600 mt-1">{progress}% {t('campaigns.funded')}</div>
         </div>
 
         {campaign.end_date && (

@@ -6,6 +6,7 @@ import { Users, ChevronLeft, ChevronRight, Search, Star } from 'lucide-react';
 import { CustomSelect } from '../components/CustomSelect';
 import { motion } from 'framer-motion';
 import { formatCurrency } from '../utils/format';
+import { useTranslation } from 'react-i18next';
 
 const CAMPAIGNS_PER_PAGE = 28;
 
@@ -21,6 +22,7 @@ const CATEGORY_OPTIONS = [
 ];
 
 export const Campaigns = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const topRef = useRef<HTMLDivElement>(null);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -118,9 +120,9 @@ export const Campaigns = () => {
             className="text-4xl sm:text-5xl font-black text-center mb-4 text-gray-900"
           >
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">
-              Browse
+              {t('campaigns.title')}
             </span>{' '}
-            Campaigns
+            {t('campaigns.title_2')}
           </motion.h1>
 
           <motion.p
@@ -129,7 +131,7 @@ export const Campaigns = () => {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="text-center text-gray-600 mb-10 text-base sm:text-lg"
           >
-            Discover and support amazing projects from creators around the world
+            {t('campaigns.subtitle')}
           </motion.p>
 
           {/* ── Featured Campaigns ─────────────────────────────── */}
@@ -142,7 +144,7 @@ export const Campaigns = () => {
             >
               <div className="flex items-center gap-2 mb-5">
                 <Star className="h-5 w-5 fill-orange-500 text-orange-500" />
-                <h2 className="text-xl font-bold text-gray-900">Featured Campaigns</h2>
+                <h2 className="text-xl font-bold text-gray-900">{t('campaigns.featured_section')}</h2>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {featuredCampaigns.map((campaign, idx) => {
@@ -162,7 +164,7 @@ export const Campaigns = () => {
                       {/* Featured badge */}
                       <div className="absolute top-3 left-3 z-10 flex items-center gap-1 bg-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md">
                         <Star className="h-3 w-3 fill-white" />
-                        Featured
+                        {t('campaigns.featured_badge')}
                       </div>
 
                       <div className="relative h-52">
@@ -196,7 +198,7 @@ export const Campaigns = () => {
                           <div className="bg-gradient-to-r from-orange-600 to-orange-400 h-2 rounded-full" style={{ width: `${progress}%` }} />
                         </div>
                         <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
-                          <span className="font-medium">{Math.round(progress)}% funded</span>
+                          <span className="font-medium">{Math.round(progress)}% {t('campaigns.funded')}</span>
                           <span className="flex items-center gap-1">
                             <Users className="h-3 w-3" />
                             {campaign.supporter_count || 0}
@@ -229,7 +231,7 @@ export const Campaigns = () => {
                   whileFocus={{ scale: 1.01 }}
                   type="text"
                   className="min-w-0 flex-1 py-3 pr-2 bg-transparent text-base sm:text-lg focus:outline-none focus:ring-0 focus:border-transparent placeholder:text-gray-500 text-gray-700 transition-all duration-300"
-                  placeholder="Search campaigns..."
+                  placeholder={t('campaigns.search_placeholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -264,7 +266,7 @@ export const Campaigns = () => {
                     : 'bg-white/60 text-gray-700 border border-orange-200 hover:bg-orange-50'
                 }`}
               >
-                {status.charAt(0).toUpperCase() + status.slice(1)}
+                {status === 'all' ? t('campaigns.filter_all') : status === 'active' ? t('campaigns.filter_active') : t('campaigns.filter_completed')}
               </motion.button>
             ))}
           </motion.div>
@@ -284,11 +286,11 @@ export const Campaigns = () => {
                   transition={{ duration: 0.6 }}
                   className="bg-white/80 backdrop-blur-lg rounded-2xl p-8 shadow-lg border border-orange-200/50 max-w-md mx-auto"
                 >
-                  <h3 className="text-2xl font-bold text-gray-800 mb-4">No campaigns found</h3>
+                  <h3 className="text-2xl font-bold text-gray-800 mb-4">{t('campaigns.no_results_title')}</h3>
                   <p className="text-gray-600 mb-4">
                     {searchTerm || filter !== 'all' || selectedCategory !== 'All'
-                      ? "Try adjusting your search terms or filters."
-                      : "No campaigns are currently available."}
+                      ? t('campaigns.no_results_filtered')
+                      : t('campaigns.no_results_empty')}
                   </p>
                   {(searchTerm || filter !== 'all' || selectedCategory !== 'All') && (
                     <motion.button
@@ -301,7 +303,7 @@ export const Campaigns = () => {
                       }}
                       className="bg-gradient-to-r from-orange-600 to-orange-500 hover:shadow-xl text-white px-6 py-2 rounded-full font-semibold transition-all"
                     >
-                      Clear filters
+                      {t('campaigns.clear_filters')}
                     </motion.button>
                   )}
                 </motion.div>
@@ -339,7 +341,7 @@ export const Campaigns = () => {
 
                     {/* Status badge */}
                     <div className="absolute top-3 right-3 bg-orange-600 text-white px-3 py-1 rounded-full text-xs font-bold">
-                      {campaign.status}
+                      {campaign.status === 'active' ? t('common.active') : t('common.completed')}
                     </div>
 
                     {/* Content overlay */}
@@ -388,7 +390,7 @@ export const Campaigns = () => {
 
                     <div className="flex items-center text-xs text-gray-600 font-medium">
                       <Users className="h-3 w-3 mr-1" />
-                      {campaign.supporter_count || 0} supporters
+                      {campaign.supporter_count || 0} {t('campaigns.supporters')}
                     </div>
                   </div>
                 </motion.div>
@@ -415,7 +417,7 @@ export const Campaigns = () => {
                 <ChevronLeft size={24} />
               </motion.button>
               <span className="text-base sm:text-lg font-semibold text-gray-700 bg-white/80 backdrop-blur-lg px-4 sm:px-6 py-2 rounded-full shadow-lg border border-orange-200/50">
-                Page {page} of {totalPages}
+                {t('campaigns.page_of', { page, total: totalPages })}
               </span>
               <motion.button
                 whileHover={{ scale: 1.05 }}

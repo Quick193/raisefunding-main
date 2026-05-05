@@ -2,22 +2,24 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import { Wallet, LogOut, LayoutDashboard, Plus, ChevronDown, Globe, Menu, X } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
-
-const LANGUAGES = [
-  { code: 'en', label: 'English' },
-  { code: 'hi', label: 'हिन्दी' },
-  { code: 'ta', label: 'தமிழ்' },
-  { code: 'te', label: 'తెలుగు' },
-  { code: 'mr', label: 'मराठी' },
-];
+import { useTranslation } from 'react-i18next';
+import { LANGUAGES } from '../i18n';
 
 export const Navbar = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const [langOpen, setLangOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [selectedLang, setSelectedLang] = useState(LANGUAGES[0]);
+  const currentLang = LANGUAGES.find((l) => l.code === i18n.language) ?? LANGUAGES[0];
   const langRef = useRef<HTMLDivElement>(null);
+
+  const changeLanguage = (code: string) => {
+    i18n.changeLanguage(code);
+    localStorage.setItem('raise_lang', code);
+    setLangOpen(false);
+    setMobileOpen(false);
+  };
 
   // Close language dropdown on outside click
   useEffect(() => {
@@ -61,14 +63,14 @@ export const Navbar = () => {
               to="/campaigns"
               className="text-gray-700 hover:text-orange-600 text-sm font-medium transition-colors"
             >
-              Browse
+              {t('nav.browse')}
             </Link>
 
             <Link
               to="/about"
               className="text-gray-700 hover:text-orange-600 text-sm font-medium transition-colors"
             >
-              About Us
+              {t('nav.about')}
             </Link>
 
             {/* Language dropdown */}
@@ -78,20 +80,20 @@ export const Navbar = () => {
                 className="flex items-center space-x-1.5 text-gray-700 hover:text-orange-600 text-sm font-medium transition-colors"
               >
                 <Globe className="h-4 w-4" />
-                <span>{selectedLang.label}</span>
+                <span>{currentLang.label}</span>
                 <ChevronDown
                   className={`h-4 w-4 transition-transform duration-200 ${langOpen ? 'rotate-180' : ''}`}
                 />
               </button>
 
               {langOpen && (
-                <div className="absolute top-full mt-2 left-0 w-40 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-50">
+                <div className="absolute top-full mt-2 left-0 w-44 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-50">
                   {LANGUAGES.map((lang) => (
                     <button
                       key={lang.code}
-                      onClick={() => { setSelectedLang(lang); setLangOpen(false); }}
+                      onClick={() => changeLanguage(lang.code)}
                       className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
-                        selectedLang.code === lang.code
+                        currentLang.code === lang.code
                           ? 'bg-orange-50 text-orange-600 font-semibold'
                           : 'text-gray-700 hover:bg-orange-50 hover:text-orange-600'
                       }`}
@@ -113,7 +115,7 @@ export const Navbar = () => {
                   className="flex items-center space-x-2 bg-orange-600 text-white hover:bg-orange-700 px-4 py-2 rounded-lg text-sm font-medium transition-all hover:shadow-lg"
                 >
                   <Plus className="h-4 w-4" />
-                  <span className="hidden sm:inline">Create Campaign</span>
+                  <span className="hidden sm:inline">{t('nav.create')}</span>
                 </Link>
 
                 {/* User menu */}
@@ -133,14 +135,14 @@ export const Navbar = () => {
                       className="flex items-center space-x-2 text-gray-700 hover:bg-orange-50 hover:text-orange-600 px-4 py-3 text-sm font-medium transition-colors w-full"
                     >
                       <LayoutDashboard className="h-4 w-4" />
-                      <span>Dashboard</span>
+                      <span>{t('nav.dashboard')}</span>
                     </Link>
                     <button
                       onClick={handleSignOut}
                       className="flex items-center space-x-2 text-gray-700 hover:bg-red-50 hover:text-red-600 px-4 py-3 text-sm font-medium transition-colors w-full border-t border-gray-100"
                     >
                       <LogOut className="h-4 w-4" />
-                      <span>Sign Out</span>
+                      <span>{t('nav.signout')}</span>
                     </button>
                   </div>
                 </div>
@@ -151,13 +153,13 @@ export const Navbar = () => {
                   to="/login"
                   className="text-gray-700 hover:text-orange-600 text-sm font-medium transition-colors hidden sm:block"
                 >
-                  Login
+                  {t('nav.login')}
                 </Link>
                 <Link
                   to="/signup"
                   className="bg-orange-600 text-white hover:bg-orange-700 px-4 py-2 rounded-lg text-sm font-medium transition-all hover:shadow-lg"
                 >
-                  Sign Up
+                  {t('nav.signup')}
                 </Link>
               </>
             )}
@@ -182,29 +184,29 @@ export const Navbar = () => {
                 onClick={closeMobileMenu}
                 className="rounded-lg px-3 py-3 text-sm font-semibold text-gray-700 hover:bg-orange-50 hover:text-orange-600"
               >
-                Browse
+                {t('nav.browse')}
               </Link>
               <Link
                 to="/about"
                 onClick={closeMobileMenu}
                 className="rounded-lg px-3 py-3 text-sm font-semibold text-gray-700 hover:bg-orange-50 hover:text-orange-600"
               >
-                About Us
+                {t('nav.about')}
               </Link>
 
               <div className="px-3 py-3">
                 <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-700">
                   <Globe className="h-4 w-4 text-orange-600" />
-                  Language
+                  {t('nav.language')}
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {LANGUAGES.map((lang) => (
                     <button
                       key={lang.code}
                       type="button"
-                      onClick={() => setSelectedLang(lang)}
+                      onClick={() => changeLanguage(lang.code)}
                       className={`rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
-                        selectedLang.code === lang.code
+                        currentLang.code === lang.code
                           ? 'border-orange-300 bg-orange-50 text-orange-600 font-semibold'
                           : 'border-gray-200 text-gray-700 hover:border-orange-200 hover:bg-orange-50'
                       }`}
@@ -224,7 +226,7 @@ export const Navbar = () => {
                       className="inline-flex items-center justify-center gap-2 rounded-lg bg-orange-600 px-4 py-3 text-sm font-semibold text-white hover:bg-orange-700"
                     >
                       <Plus className="h-4 w-4" />
-                      Create Campaign
+                      {t('nav.create')}
                     </Link>
                     <Link
                       to="/dashboard"
@@ -232,14 +234,14 @@ export const Navbar = () => {
                       className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600"
                     >
                       <LayoutDashboard className="h-4 w-4" />
-                      Dashboard
+                      {t('nav.dashboard')}
                     </Link>
                     <button
                       onClick={handleSignOut}
                       className="inline-flex items-center justify-center gap-2 rounded-lg border border-red-100 px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50"
                     >
                       <LogOut className="h-4 w-4" />
-                      Sign Out
+                      {t('nav.signout')}
                     </button>
                   </div>
                 ) : (
@@ -249,14 +251,14 @@ export const Navbar = () => {
                       onClick={closeMobileMenu}
                       className="inline-flex items-center justify-center rounded-lg border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600"
                     >
-                      Login
+                      {t('nav.login')}
                     </Link>
                     <Link
                       to="/signup"
                       onClick={closeMobileMenu}
                       className="inline-flex items-center justify-center rounded-lg bg-orange-600 px-4 py-3 text-sm font-semibold text-white hover:bg-orange-700"
                     >
-                      Sign Up
+                      {t('nav.signup')}
                     </Link>
                   </div>
                 )}

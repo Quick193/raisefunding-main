@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Star, X, Check, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 declare global {
   interface Window { Razorpay: new (options: object) => { open(): void }; }
@@ -13,13 +14,6 @@ const PLANS = [
   { days: 90, amountPaise: 299900,  display: '₹2,999', label: '90 Days', perDay: '₹33/day' },
 ];
 
-const PERKS = [
-  'Pinned at the top of Browse Campaigns',
-  'Featured badge on your campaign card',
-  'Highlighted in search results',
-  'More visibility = more donors',
-];
-
 interface Props {
   campaignId: string;
   campaignTitle: string;
@@ -28,6 +22,13 @@ interface Props {
 }
 
 export const FeatureModal = ({ campaignId, campaignTitle, onClose, onSuccess }: Props) => {
+  const { t } = useTranslation();
+  const perks = [
+    t('feature_modal.perk_1'),
+    t('feature_modal.perk_2'),
+    t('feature_modal.perk_3'),
+    t('feature_modal.perk_4'),
+  ];
   const [plan, setPlan] = useState(PLANS[1]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -137,10 +138,10 @@ export const FeatureModal = ({ campaignId, campaignTitle, onClose, onSuccess }: 
           </button>
           <div className="flex items-center gap-3 mb-1">
             <Star className="h-6 w-6 fill-white" />
-            <h2 className="text-xl font-bold">Feature Your Campaign</h2>
+            <h2 className="text-xl font-bold">{t('feature_modal.title')}</h2>
           </div>
           <p className="text-orange-100 text-sm">
-            Get maximum visibility and reach more donors
+            {t('feature_modal.subtitle')}
           </p>
         </div>
 
@@ -152,14 +153,14 @@ export const FeatureModal = ({ campaignId, campaignTitle, onClose, onSuccess }: 
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Check className="h-8 w-8 text-green-600" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Campaign Featured!</h3>
-                <p className="text-gray-600">Your campaign is now featured for {plan.label}. Redirecting…</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{t('feature_modal.success_title')}</h3>
+                <p className="text-gray-600">{t('feature_modal.success_message', { duration: plan.label })}</p>
               </motion.div>
             ) : (
               <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                 {/* Perks */}
                 <ul className="space-y-2 mb-6">
-                  {PERKS.map((perk) => (
+                  {perks.map((perk) => (
                     <li key={perk} className="flex items-center gap-2 text-sm text-gray-700">
                       <Zap className="h-4 w-4 text-orange-500 flex-shrink-0" />
                       {perk}
@@ -182,7 +183,7 @@ export const FeatureModal = ({ campaignId, campaignTitle, onClose, onSuccess }: 
                     >
                       {p.popular && (
                         <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
-                          POPULAR
+                          {t('feature_modal.popular')}
                         </span>
                       )}
                       <div className={`text-lg font-bold ${plan.days === p.days ? 'text-orange-600' : 'text-gray-900'}`}>
@@ -211,13 +212,13 @@ export const FeatureModal = ({ campaignId, campaignTitle, onClose, onSuccess }: 
                   ) : (
                     <>
                       <Star className="h-5 w-5 fill-white" />
-                      Pay {plan.display} · Feature for {plan.label}
+                      {t('feature_modal.pay_btn', { price: plan.display, duration: plan.label })}
                     </>
                   )}
                 </button>
 
                 <button onClick={onClose} className="w-full mt-3 text-sm text-gray-500 hover:text-gray-700 transition-colors">
-                  Skip for now — I'll feature it later from the dashboard
+                  {t('feature_modal.skip_btn')}
                 </button>
               </motion.div>
             )}

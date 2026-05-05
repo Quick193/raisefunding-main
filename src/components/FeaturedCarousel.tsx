@@ -3,12 +3,14 @@ import { ChevronLeft, ChevronRight, Users } from 'lucide-react';
 import { Campaign } from '../types';
 import { formatCurrency, calculateProgress } from '../utils/format';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface FeaturedCarouselProps {
   campaigns: Campaign[];
 }
 
 export const FeaturedCarousel = ({ campaigns }: FeaturedCarouselProps) => {
+  const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [autoPlay, setAutoPlay] = useState(true);
 
@@ -45,7 +47,7 @@ export const FeaturedCarousel = ({ campaigns }: FeaturedCarouselProps) => {
   if (visibleCampaigns.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-600">No campaigns available yet</p>
+        <p className="text-gray-600">{t('campaigns.no_results_empty')}</p>
       </div>
     );
   }
@@ -87,7 +89,7 @@ export const FeaturedCarousel = ({ campaigns }: FeaturedCarouselProps) => {
 
                   {daysLeft !== null && (
                     <div className="absolute top-3 right-3 bg-orange-600 text-white px-3 py-1 rounded-full text-xs font-bold">
-                      {daysLeft > 0 ? `${daysLeft}d left` : 'Ended'}
+                      {daysLeft > 0 ? t('campaigns.days_left', { count: daysLeft }) : t('campaigns.ended')}
                     </div>
                   )}
 
@@ -98,7 +100,7 @@ export const FeaturedCarousel = ({ campaigns }: FeaturedCarouselProps) => {
 
                 <div className="p-5 flex-1 flex flex-col">
                   <p className="text-xs font-bold text-orange-600 mb-2 uppercase tracking-wider">
-                    Social Impact
+                    {campaign.category || 'Other'}
                   </p>
                   <h3 className="text-lg font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-orange-600 transition-colors">
                     {campaign.title}
@@ -123,11 +125,11 @@ export const FeaturedCarousel = ({ campaigns }: FeaturedCarouselProps) => {
 
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-gray-600 font-medium">
-                        {progress}% funded
+                        {progress}% {t('campaigns.funded')}
                       </span>
                       <div className="flex items-center text-xs text-gray-600 font-medium">
                         <Users className="h-3 w-3 mr-1" />
-                        <span>{campaign.supporter_count ?? 0} supporters</span>
+                        <span>{campaign.supporter_count ?? 0} {t('campaigns.supporters')}</span>
                       </div>
                     </div>
                   </div>
