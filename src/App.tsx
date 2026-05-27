@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
+import { Footer } from './components/Footer';
+import { CookieBanner } from './components/CookieBanner';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ScrollToTop } from './components/ScrollToTop';
@@ -15,6 +17,8 @@ import { CampaignStats } from './pages/CampaignStats';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { ForgotPassword } from './pages/ForgotPassword';
+import { PrivacyPolicy } from './pages/PrivacyPolicy';
+import { TermsOfService } from './pages/TermsOfService';
 
 function App() {
   return (
@@ -22,49 +26,55 @@ function App() {
     <Router>
       <AuthProvider>
         <ScrollToTop />
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 flex flex-col">
           <Navbar />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<AboutUs />} />
-            <Route path="/campaigns" element={<Campaigns />} />
-            <Route path="/campaign/:id" element={<CampaignDetail />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route
-              path="/create"
-              element={
-                <ProtectedRoute>
-                  <CreateCampaign />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/campaign/:id/edit"
-              element={
-                <ProtectedRoute>
-                  <EditCampaign />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/campaign/:id"
-              element={
-                <ProtectedRoute>
-                  <CampaignStats />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
+          <main className="flex-1">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<AboutUs />} />
+              <Route path="/campaigns" element={<Campaigns />} />
+              <Route path="/campaign/:id" element={<CampaignDetail />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/terms" element={<TermsOfService />} />
+              <Route
+                path="/create"
+                element={
+                  <ProtectedRoute>
+                    <CreateCampaign />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/campaign/:id/edit"
+                element={
+                  <ProtectedRoute>
+                    <EditCampaign />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/campaign/:id"
+                element={
+                  <ProtectedRoute>
+                    <CampaignStats />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </main>
+          <Footer />
+          <CookieBanner />
         </div>
       </AuthProvider>
     </Router>

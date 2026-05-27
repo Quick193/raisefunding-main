@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
-import { Wallet, LogOut, LayoutDashboard, Plus, ChevronDown, Globe, Menu, X } from 'lucide-react';
+import { LogOut, LayoutDashboard, Plus, ChevronDown, Globe, Menu, X } from 'lucide-react';
+import { RaiseLogo } from './RaiseLogo';
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LANGUAGES } from '../i18n';
@@ -50,11 +51,8 @@ export const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 min-w-0">
           {/* Logo */}
-          <Link to="/" onClick={closeMobileMenu} className="flex items-center space-x-2 group min-w-0">
-            <div className="p-2 bg-orange-100 rounded-lg group-hover:bg-orange-200 transition-colors">
-              <Wallet className="h-6 w-6 text-orange-600" />
-            </div>
-            <span className="text-xl sm:text-2xl font-bold text-gray-900">Raise</span>
+          <Link to="/" onClick={closeMobileMenu} className="flex items-center min-w-0 text-gray-900 hover:text-orange-600 transition-colors">
+            <RaiseLogo iconSize={28} textSize="text-2xl" />
           </Link>
 
           {/* Centre nav */}
