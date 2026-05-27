@@ -15,7 +15,7 @@ export const RaiseLogo = ({
   useSvgIcon = false,
 }: RaiseLogoProps) => {
   return (
-    <div className={`flex items-center gap-1.5 ${className}`}>
+    <div className={`flex items-center gap-1 ${className}`}>
       {useSvgIcon ? (
         /* SVG blob — used on dark backgrounds (footer, etc.) */
         <svg
@@ -39,9 +39,9 @@ export const RaiseLogo = ({
           />
         </svg>
       ) : (
-        /* Actual PNG logo — white bg blends on light backgrounds (navbar) */
+        /* Actual PNG logo — square crop, white bg blends on light backgrounds */
         <img
-          src="/logo-icon.png"
+          src="/favicon.png"
           alt=""
           aria-hidden="true"
           style={{

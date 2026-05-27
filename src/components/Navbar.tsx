@@ -52,7 +52,7 @@ export const Navbar = () => {
         <div className="flex justify-between items-center h-16 min-w-0">
           {/* Logo */}
           <Link to="/" onClick={closeMobileMenu} className="flex items-center min-w-0 text-gray-900 hover:text-orange-600 transition-colors">
-            <RaiseLogo iconSize={52} textSize="text-2xl" />
+            <RaiseLogo iconSize={32} textSize="text-2xl" />
           </Link>
 
           {/* Centre nav */}
