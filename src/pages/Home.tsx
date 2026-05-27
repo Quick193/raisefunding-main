@@ -6,6 +6,7 @@ import { FeaturedCarousel } from '../components/FeaturedCarousel';
 import { FAQAccordion } from '../components/FAQAccordion';
 import { Zap, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 
 export const Home = () => {
   const { t } = useTranslation();
@@ -32,7 +33,7 @@ export const Home = () => {
         .eq('is_featured', true)
         .gt('featured_until', now)
         .order('featured_until', { ascending: false })
-        .limit(12);
+        .limit(30);
 
       if (campaignsError) throw campaignsError;
 
@@ -83,7 +84,7 @@ export const Home = () => {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-24 lg:py-32">
           <div className="text-center">
-            <h1 className="animate-fade-in-up text-4xl sm:text-6xl lg:text-8xl font-black text-gray-900 mb-6 sm:mb-8 leading-tight">
+            <h1 className="animate-fade-in-up text-4xl sm:text-6xl lg:text-8xl font-black text-gray-900 mb-6 sm:mb-8 leading-snug break-words">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">
                 {t('home.hero_title_1')}
               </span>
@@ -121,10 +122,14 @@ export const Home = () => {
               subtext: t('home.community'),
             },
           ].map((stat, idx) => (
-            <div
+            <motion.div
               key={idx}
-              className="animate-count-up bg-gradient-to-br from-orange-50 to-white p-6 sm:p-8 rounded-2xl border border-orange-100 text-center hover:shadow-lg transition-all"
-              style={{ animationDelay: `${idx * 0.1}s` }}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: idx * 0.12 }}
+              whileHover={{ y: -4, boxShadow: '0 10px 30px rgba(0,0,0,0.10)' }}
+              className="bg-gradient-to-br from-orange-50 to-white p-6 sm:p-8 rounded-2xl border border-orange-100 text-center transition-all"
             >
               <div className="text-4xl sm:text-5xl font-black text-orange-600 mb-2">
                 {loading ? '—' : stat.value}
@@ -133,7 +138,7 @@ export const Home = () => {
                 {stat.label}
               </p>
               <p className="text-gray-600 text-sm">{stat.subtext}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -153,6 +158,18 @@ export const Home = () => {
           </div>
 
           {!loading && <FeaturedCarousel campaigns={campaigns} />}
+
+          {!loading && campaigns.length > 0 && (
+            <div className="text-center mt-10">
+              <Link
+                to="/campaigns"
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-600 to-orange-500 text-white font-bold rounded-xl hover:shadow-xl transition-all hover:scale-105"
+              >
+                <Star className="h-5 w-5 mr-2" />
+                Browse All Featured Campaigns
+              </Link>
+            </div>
+          )}
         </div>
       </div>
 

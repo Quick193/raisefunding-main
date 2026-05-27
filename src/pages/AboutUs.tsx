@@ -29,14 +29,12 @@ export const AboutUs = () => {
     successRate: 0,
     statesSupported: 5,
   });
-  const [calculatorInput, setCalculatorInput] = useState({
-    goal: 1000,
-    donors: 4,
-  });
+  const [goalStr, setGoalStr] = useState('1000');
+  const [donorsStr, setDonorsStr] = useState('4');
   const [loading, setLoading] = useState(true);
 
   const earnings = useMemo(() => {
-    const totalFunds = calculatorInput.goal;
+    const totalFunds = parseInt(goalStr) || 0;
     const processing = totalFunds * 0.02;
     const platform = 0;
     return {
@@ -44,7 +42,7 @@ export const AboutUs = () => {
       processing,
       platform,
     };
-  }, [calculatorInput.goal]);
+  }, [goalStr]);
 
   useEffect(() => {
     fetchStats();
@@ -293,9 +291,12 @@ export const AboutUs = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              transition={{ duration: 0.6 }}
             >
+              <motion.div
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              >
               <div className="bg-gradient-to-br from-orange-100 to-orange-50 rounded-3xl p-8 border border-orange-200 relative overflow-hidden">
                 <div className="absolute -top-20 -right-20 w-40 h-40 bg-orange-200 rounded-full blur-3xl opacity-40" />
 
@@ -319,6 +320,7 @@ export const AboutUs = () => {
                   <span>{t('about.mission_box_feature')}</span>
                 </div>
               </div>
+              </motion.div>
             </motion.div>
           </div>
         </div>
@@ -493,19 +495,29 @@ export const AboutUs = () => {
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-2">
                   <label className="font-bold text-lg">{t('about.calc_goal_label')}</label>
-                  <span className="text-2xl font-black">₹{calculatorInput.goal}</span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-2xl font-black">₹</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max="1000000"
+                      value={goalStr}
+                      onFocus={(e) => e.target.select()}
+                      onChange={(e) => setGoalStr(e.target.value)}
+                      onBlur={() => {
+                        const val = Math.min(1000000, Math.max(0, parseInt(goalStr) || 0));
+                        setGoalStr(String(val));
+                      }}
+                      className="w-28 text-right text-2xl font-black bg-transparent border-b-2 border-white border-opacity-60 focus:outline-none focus:border-opacity-100 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                  </div>
                 </div>
                 <input
                   type="range"
-                  min="100"
+                  min="0"
                   max="1000000"
-                  value={calculatorInput.goal}
-                  onChange={(e) =>
-                    setCalculatorInput({
-                      ...calculatorInput,
-                      goal: parseInt(e.target.value),
-                    })
-                  }
+                  value={parseInt(goalStr) || 0}
+                  onChange={(e) => setGoalStr(e.target.value)}
                   className="w-full h-2 bg-white bg-opacity-30 rounded-lg appearance-none cursor-pointer"
                 />
                 <div className="text-sm text-orange-100 mt-2">{t('about.calc_goal_range')}</div>
@@ -514,19 +526,26 @@ export const AboutUs = () => {
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-2">
                   <label className="font-bold text-lg">{t('about.calc_donors_label')}</label>
-                  <span className="text-2xl font-black">{calculatorInput.donors}</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="10000"
+                    value={donorsStr}
+                    onFocus={(e) => e.target.select()}
+                    onChange={(e) => setDonorsStr(e.target.value)}
+                    onBlur={() => {
+                      const val = Math.min(10000, Math.max(0, parseInt(donorsStr) || 0));
+                      setDonorsStr(String(val));
+                    }}
+                    className="w-24 text-right text-2xl font-black bg-transparent border-b-2 border-white border-opacity-60 focus:outline-none focus:border-opacity-100 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
                 </div>
                 <input
                   type="range"
-                  min="1"
+                  min="0"
                   max="10000"
-                  value={calculatorInput.donors}
-                  onChange={(e) =>
-                    setCalculatorInput({
-                      ...calculatorInput,
-                      donors: parseInt(e.target.value),
-                    })
-                  }
+                  value={parseInt(donorsStr) || 0}
+                  onChange={(e) => setDonorsStr(e.target.value)}
                   className="w-full h-2 bg-white bg-opacity-30 rounded-lg appearance-none cursor-pointer"
                 />
               </div>
@@ -543,9 +562,7 @@ export const AboutUs = () => {
                     key={amount}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() =>
-                      setCalculatorInput({ ...calculatorInput, goal: amount })
-                    }
+                    onClick={() => setGoalStr(String(amount))}
                     className="bg-white bg-opacity-20 hover:bg-opacity-30 border border-white border-opacity-30 rounded-lg px-4 py-3 font-bold transition-all"
                   >
                     ₹{amount.toLocaleString()}

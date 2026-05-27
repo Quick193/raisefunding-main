@@ -19,6 +19,17 @@ import { Campaign } from '../types';
 import { formatCurrency } from '../utils/format';
 import { useTranslation } from 'react-i18next';
 
+const getTipMessage = (category: string | null | undefined, title: string): string => {
+  const cat = (category || '').toLowerCase();
+  if (cat === 'medical') return `The team behind "${title}" is fighting for someone's life. Your ₹300 tip keeps this platform free for campaigns that can't wait.`;
+  if (cat === 'education') return `Every child deserves a shot at learning. Your ₹300 tip helps us bring more campaigns like "${title}" to students who need it most.`;
+  if (cat === 'social impact') return `Change starts with someone caring enough to act. Your ₹300 tip helps amplify voices like the one behind "${title}".`;
+  if (cat === 'emergency') return `Emergencies don't wait. Your ₹300 tip keeps our servers running so campaigns like "${title}" reach people in their darkest hour.`;
+  if (cat === 'environment') return `The planet needs more people like you. Your ₹300 tip helps us grow more campaigns like "${title}" for a greener future.`;
+  if (cat === 'animal welfare') return `Animals can't speak for themselves — but you can. Your ₹300 tip helps more causes like "${title}" find the support they deserve.`;
+  return `Your ₹300 tip helps us keep Raise free and accessible for everyone, so campaigns like "${title}" can keep making a difference.`;
+};
+
 export const CampaignDetail = () => {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
@@ -33,6 +44,15 @@ export const CampaignDetail = () => {
   const [reportReason, setReportReason] = useState('');
   const [reportStatus, setReportStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [reportError, setReportError] = useState('');
+  const [donateStep, setDonateStep] = useState<'idle' | 'amount' | 'tip' | 'summary' | 'success'>('idle');
+  const [donateAmountStr, setDonateAmountStr] = useState('500');
+  const [donateName, setDonateName] = useState('');
+  const [tipAmount, setTipAmount] = useState(0);
+  const [showPersuasion, setShowPersuasion] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [donateError, setDonateError] = useState('');
+  const [localDonors, setLocalDonors] = useState<{ donor_name: string; amount: number; created_at: string }[]>([]);
+  const [showAllDonors, setShowAllDonors] = useState(false);
   const { user } = useAuth();
 
   const fetchSupporters = useCallback(async (campaignId: string) => {
@@ -61,7 +81,21 @@ export const CampaignDetail = () => {
       if (error) throw error;
 
       if (data) {
-        setCampaign(data);
+        let campaignData = data;
+
+        // Auto-complete expired campaigns (campaigns end at 11:59 PM on their end_date)
+        if (data.end_date && data.status === 'active') {
+          const dateStr = data.end_date.split('T')[0] + 'T23:59:59';
+          const daysRemaining = Math.ceil(
+            (new Date(dateStr).getTime() - Date.now()) / 86400000
+          );
+          if (daysRemaining <= 0) {
+            await supabase.from('campaigns').update({ status: 'completed' }).eq('id', campaignId);
+            campaignData = { ...data, status: 'completed' };
+          }
+        }
+
+        setCampaign(campaignData as typeof data);
 
         // Pre-load supporters for campaign creator
         if (data.creator_id) fetchSupporters(campaignId);
@@ -151,6 +185,51 @@ export const CampaignDetail = () => {
     }
   };
 
+  const resetDonate = () => {
+    setDonateStep('idle');
+    setDonateAmountStr('500');
+    setDonateName('');
+    setTipAmount(0);
+    setShowPersuasion(false);
+    setDonateError('');
+  };
+
+  const handlePayment = async () => {
+    if (!campaign) return;
+    setIsProcessing(true);
+    setDonateError('');
+    const donateAmount = Math.max(1, parseInt(donateAmountStr) || 1);
+    const totalAmount = donateAmount + tipAmount;
+    const donorNameFinal = donateName.trim() || 'Anonymous';
+
+    try {
+      const { error } = await supabase.from('donations').insert({
+        campaign_id: campaign.id,
+        donor_name: donorNameFinal,
+        donor_email: 'donor@example.com',
+        amount: totalAmount,
+      });
+
+      if (error) {
+        setDonateError('Could not record donation. Please try again.');
+        setIsProcessing(false);
+        return;
+      }
+
+      setLocalDonors((prev) => [
+        { donor_name: donorNameFinal, amount: totalAmount, created_at: new Date().toISOString() },
+        ...prev,
+      ]);
+
+      await fetchCampaign(campaign.id);
+      setDonateStep('success');
+    } catch {
+      setDonateError('Something went wrong. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
@@ -196,10 +275,12 @@ export const CampaignDetail = () => {
 
   const daysLeft = campaign.end_date
     ? Math.ceil(
-        (new Date(campaign.end_date).getTime() - new Date().getTime()) /
+        (new Date(campaign.end_date.split('T')[0] + 'T23:59:59').getTime() - new Date().getTime()) /
           (1000 * 60 * 60 * 24)
       )
     : null;
+
+  const isEnded = campaign.status === 'completed' || (daysLeft !== null && daysLeft <= 0);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 relative">
@@ -257,21 +338,25 @@ export const CampaignDetail = () => {
                   </motion.div>
                 )}
 
-                {/* Days Left Badge */}
-                {daysLeft !== null && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.4 }}
-                    className="absolute top-4 right-4"
-                  >
-                    <span className={`px-4 py-2 rounded-full font-bold text-sm text-white shadow-lg ${
-                      daysLeft > 0 ? 'bg-orange-600' : 'bg-gray-600'
-                    }`}>
-                      {daysLeft > 0 ? `${daysLeft} ${t('campaign.days_left')}` : t('campaign.campaign_ended')}
-                    </span>
-                  </motion.div>
-                )}
+                {/* Status / Days Left Badge */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="absolute top-4 right-4"
+                >
+                  <span className={`px-4 py-2 rounded-full font-bold text-sm text-white shadow-lg ${
+                    isEnded ? 'bg-gray-600' : 'bg-green-600'
+                  }`}>
+                    {isEnded
+                      ? t('campaign.campaign_ended')
+                      : daysLeft === 1
+                        ? 'Ending today'
+                        : daysLeft !== null
+                          ? `${daysLeft} ${t('campaign.days_left')}`
+                          : t('common.active')}
+                  </span>
+                </motion.div>
               </div>
 
               {/* Campaign Details */}
@@ -347,9 +432,15 @@ export const CampaignDetail = () => {
                   </div>
                   <div className="text-center">
                     <p className="text-3xl font-black text-orange-600">
-                      {daysLeft && daysLeft > 0 ? daysLeft : 0}
+                      {isEnded ? '—' : daysLeft !== null ? daysLeft : '∞'}
                     </p>
-                    <p className="text-xs text-gray-600 font-medium mt-1">{t('campaign.days_left_label')}</p>
+                    <p className="text-xs text-gray-600 font-medium mt-1">
+                      {isEnded
+                        ? t('campaign.campaign_ended')
+                        : daysLeft === 1
+                          ? 'Ending today'
+                          : t('campaign.days_left_label')}
+                    </p>
                   </div>
                 </motion.div>
 
@@ -577,6 +668,234 @@ export const CampaignDetail = () => {
                 </div>
               </motion.div>
 
+              {/* Donate Section */}
+              {!isEnded && (
+                <div>
+                  {donateStep === 'idle' && (
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setDonateStep('amount')}
+                      className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-orange-600 to-orange-500 text-white font-bold py-4 rounded-xl hover:shadow-xl transition-all text-lg"
+                    >
+                      <Heart className="h-5 w-5" />
+                      Donate Now
+                    </motion.button>
+                  )}
+
+                  {donateStep === 'amount' && (
+                    <div className="space-y-4 rounded-xl border border-orange-200 bg-white p-5">
+                      <h3 className="font-bold text-gray-900 text-lg">Choose an amount</h3>
+                      <div className="grid grid-cols-4 gap-2">
+                        {[100, 500, 1000, 5000].map((amt) => (
+                          <button
+                            type="button"
+                            key={amt}
+                            onClick={() => setDonateAmountStr(String(amt))}
+                            className={`rounded-lg py-2 text-sm font-bold transition-all border ${
+                              donateAmountStr === String(amt)
+                                ? 'bg-orange-500 text-white border-orange-500'
+                                : 'bg-white text-gray-700 border-gray-200 hover:border-orange-300'
+                            }`}
+                          >
+                            ₹{amt.toLocaleString()}
+                          </button>
+                        ))}
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Custom amount (₹)</label>
+                        <input
+                          type="number"
+                          min="1"
+                          value={donateAmountStr}
+                          onFocus={(e) => e.target.select()}
+                          onChange={(e) => setDonateAmountStr(e.target.value)}
+                          onBlur={() => {
+                            const val = Math.max(1, parseInt(donateAmountStr) || 1);
+                            setDonateAmountStr(String(val));
+                          }}
+                          className="w-full rounded-lg border border-orange-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Your name (optional)</label>
+                        <input
+                          type="text"
+                          value={donateName}
+                          onChange={(e) => setDonateName(e.target.value)}
+                          placeholder="Anonymous"
+                          className="w-full rounded-lg border border-orange-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => { setShowPersuasion(false); setDonateStep('tip'); }}
+                          disabled={!donateAmountStr || (parseInt(donateAmountStr) || 0) < 1}
+                          className="flex-1 bg-gradient-to-r from-orange-600 to-orange-500 text-white font-bold py-3 rounded-xl hover:shadow-lg transition-all disabled:opacity-50"
+                        >
+                          Continue
+                        </button>
+                        <button
+                          type="button"
+                          onClick={resetDonate}
+                          className="rounded-xl bg-gray-100 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-200"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {donateStep === 'tip' && (
+                    <div className="space-y-4 rounded-xl border border-orange-200 bg-white p-5">
+                      <div className="text-center">
+                        <Heart className="h-8 w-8 text-orange-500 mx-auto mb-2" />
+                        <h3 className="font-bold text-gray-900 text-lg">One more thing...</h3>
+                        <p className="text-sm text-gray-600 mt-2 leading-relaxed">
+                          {getTipMessage(campaign?.category, campaign?.title || '')}
+                        </p>
+                      </div>
+                      <div className="bg-orange-50 rounded-xl p-4 text-center border border-orange-100">
+                        <p className="text-xs text-gray-500 mb-1">Suggested tip to Raise</p>
+                        <p className="text-3xl font-black text-orange-600">₹300</p>
+                      </div>
+                      {showPersuasion && (
+                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800 text-center">
+                          Just ₹300 — less than a cup of chai — keeps this platform running for thousands of campaigns. Every rupee counts.
+                        </div>
+                      )}
+                      <div className="flex flex-col gap-2">
+                        <button
+                          type="button"
+                          onClick={() => { setTipAmount(300); setDonateStep('summary'); }}
+                          className="w-full bg-gradient-to-r from-orange-600 to-orange-500 text-white font-bold py-3 rounded-xl hover:shadow-lg transition-all"
+                        >
+                          Add ₹300 tip
+                        </button>
+                        {!showPersuasion ? (
+                          <button
+                            type="button"
+                            onClick={() => setShowPersuasion(true)}
+                            className="w-full text-gray-400 text-sm py-2 hover:text-gray-600 transition-colors"
+                          >
+                            No thanks
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => { setTipAmount(0); setDonateStep('summary'); }}
+                            className="w-full text-gray-400 text-sm py-2 hover:text-gray-600 transition-colors"
+                          >
+                            Continue without tip
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {donateStep === 'summary' && (
+                    <div className="space-y-4 rounded-xl border border-orange-200 bg-white p-5">
+                      <h3 className="font-bold text-gray-900 text-lg">Payment Summary</h3>
+                      <div className="space-y-2 bg-orange-50 rounded-xl p-4">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Donation to campaign</span>
+                          <span className="font-semibold">₹{(parseInt(donateAmountStr) || 0).toLocaleString()}</span>
+                        </div>
+                        {tipAmount > 0 && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Tip to Raise</span>
+                            <span className="font-semibold">₹{tipAmount.toLocaleString()}</span>
+                          </div>
+                        )}
+                        <div className="border-t border-orange-200 pt-2 flex justify-between font-bold text-base">
+                          <span>Total</span>
+                          <span className="text-orange-600">
+                            ₹{((parseInt(donateAmountStr) || 0) + tipAmount).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                      {donateError && (
+                        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">{donateError}</p>
+                      )}
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={handlePayment}
+                          disabled={isProcessing}
+                          className="flex-1 bg-gradient-to-r from-orange-600 to-orange-500 text-white font-bold py-3 rounded-xl hover:shadow-lg transition-all disabled:opacity-60"
+                        >
+                          {isProcessing ? 'Processing...' : 'Complete Payment'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDonateStep('tip')}
+                          className="rounded-xl bg-gray-100 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-200"
+                        >
+                          Back
+                        </button>
+                      </div>
+                      <p className="text-xs text-center text-gray-500">Payment processing via Razorpay coming soon.</p>
+                    </div>
+                  )}
+
+                  {donateStep === 'success' && (
+                    <div className="rounded-xl border border-green-200 bg-green-50 p-5 text-center">
+                      <Heart className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                      <p className="font-bold text-green-800 text-lg mb-1">
+                        Thank you, {donateName.trim() || 'friend'}!
+                      </p>
+                      <p className="text-sm text-green-700 mb-1">
+                        Your contribution of{' '}
+                        <span className="font-bold">
+                          ₹{((parseInt(donateAmountStr) || 0) + tipAmount).toLocaleString()}
+                        </span>{' '}
+                        has been recorded.
+                      </p>
+                      <p className="text-xs text-green-600 mb-4">
+                        Full payment integration is coming soon via Razorpay.
+                      </p>
+                      <button
+                        onClick={resetDonate}
+                        className="text-sm text-green-600 underline"
+                      >
+                        Donate again
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Recent Supporters */}
+              {localDonors.length > 0 && (
+                <div>
+                  <h3 className="font-bold text-gray-900 text-sm mb-3">Recent Supporters</h3>
+                  <div className="space-y-2">
+                    {(showAllDonors ? localDonors : localDonors.slice(0, 10)).map((donor, i) => (
+                      <div key={i} className="flex items-center justify-between py-2 px-3 bg-orange-50 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-full bg-orange-200 flex items-center justify-center text-orange-700 font-bold text-xs flex-shrink-0">
+                            {donor.donor_name.charAt(0).toUpperCase()}
+                          </div>
+                          <span className="text-sm font-medium text-gray-800 truncate max-w-[120px]">{donor.donor_name}</span>
+                        </div>
+                        <span className="text-xs font-bold text-orange-600 flex-shrink-0">
+                          ₹{donor.amount.toLocaleString()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  {localDonors.length > 10 && (
+                    <button
+                      onClick={() => setShowAllDonors((v) => !v)}
+                      className="mt-2 text-xs text-orange-600 font-semibold underline"
+                    >
+                      {showAllDonors ? 'Show less' : `Show all ${localDonors.length} supporters`}
+                    </button>
+                  )}
+                </div>
+              )}
+
               <div className="rounded-xl border border-orange-200 bg-orange-50 p-4">
                 <div className="flex items-start gap-3">
                   <Heart className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
@@ -680,9 +999,15 @@ export const CampaignDetail = () => {
                   <Calendar className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="text-sm font-medium text-gray-900">
-                      {daysLeft && daysLeft > 0 ? daysLeft : 0} {t('campaign.days_left')}
+                      {isEnded
+                        ? t('campaign.campaign_ended')
+                        : daysLeft === 1
+                          ? 'Ending today'
+                          : daysLeft !== null
+                            ? `${daysLeft} ${t('campaign.days_left')}`
+                            : t('common.active')}
                     </p>
-                    <p className="text-xs text-gray-600">Time to support</p>
+                    <p className="text-xs text-gray-600">{isEnded ? 'This campaign has closed' : 'Time to support'}</p>
                   </div>
                 </div>
               </motion.div>

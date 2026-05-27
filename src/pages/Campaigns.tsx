@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Campaign } from '../types';
-import { Users, ChevronLeft, ChevronRight, Search, Star } from 'lucide-react';
+import { Users, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { CustomSelect } from '../components/CustomSelect';
 import { motion } from 'framer-motion';
 import { formatCurrency } from '../utils/format';
@@ -24,11 +24,11 @@ const CATEGORY_OPTIONS = [
 export const Campaigns = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const topRef = useRef<HTMLDivElement>(null);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [featuredCampaigns, setFeaturedCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(() => searchParams.get('search') || '');
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [page, setPage] = useState(1);
@@ -39,23 +39,12 @@ export const Campaigns = () => {
 
   const fetchCampaigns = async () => {
     try {
-      const now = new Date().toISOString();
-      const [allRes, featuredRes] = await Promise.all([
-        supabase
-          .from('campaigns')
-          .select('*, profiles(full_name, email)')
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('campaigns')
-          .select('*, profiles(full_name, email)')
-          .eq('is_featured', true)
-          .eq('status', 'active')
-          .gt('featured_until', now)
-          .order('featured_until', { ascending: false }),
-      ]);
-      if (allRes.error) throw allRes.error;
-      setCampaigns(allRes.data || []);
-      setFeaturedCampaigns(featuredRes.data || []);
+      const { data, error } = await supabase
+        .from('campaigns')
+        .select('*, profiles(full_name, email)')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      setCampaigns(data || []);
     } catch (error) {
       console.error('Error fetching campaigns:', error);
     } finally {
@@ -63,15 +52,25 @@ export const Campaigns = () => {
     }
   };
 
-  const filteredCampaigns = campaigns.filter((campaign) => {
-    const matchesSearch = campaign.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase()) ||
-      campaign.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filter === 'all' || campaign.status === filter;
-    const matchesCategory = selectedCategory === 'All' || campaign.category === selectedCategory;
-    return matchesSearch && matchesFilter && matchesCategory;
-  });
+  const nowIso = new Date().toISOString();
+
+  const filteredCampaigns = campaigns
+    .filter((campaign) => {
+      const matchesSearch = campaign.title
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+        campaign.description.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesFilter = filter === 'all' || campaign.status === filter;
+      const matchesCategory = selectedCategory === 'All' || campaign.category === selectedCategory;
+      return matchesSearch && matchesFilter && matchesCategory;
+    })
+    .sort((a, b) => {
+      const aFeatured = !!(a.is_featured && a.featured_until && a.featured_until > nowIso && a.status === 'active');
+      const bFeatured = !!(b.is_featured && b.featured_until && b.featured_until > nowIso && b.status === 'active');
+      if (aFeatured && !bFeatured) return -1;
+      if (!aFeatured && bFeatured) return 1;
+      return 0;
+    });
 
   const totalPages = Math.ceil(filteredCampaigns.length / CAMPAIGNS_PER_PAGE);
   const startIdx = (page - 1) * CAMPAIGNS_PER_PAGE;
@@ -133,84 +132,6 @@ export const Campaigns = () => {
           >
             {t('campaigns.subtitle')}
           </motion.p>
-
-          {/* ── Featured Campaigns ─────────────────────────────── */}
-          {featuredCampaigns.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="mb-12"
-            >
-              <div className="flex items-center gap-2 mb-5">
-                <Star className="h-5 w-5 fill-orange-500 text-orange-500" />
-                <h2 className="text-xl font-bold text-gray-900">{t('campaigns.featured_section')}</h2>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {featuredCampaigns.map((campaign, idx) => {
-                  const progress = Math.min(
-                    (Number(campaign.current_amount) / Number(campaign.goal_amount)) * 100, 100
-                  );
-                  return (
-                    <motion.div
-                      key={campaign.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.1 }}
-                      whileHover={{ scale: 1.03, y: -6 }}
-                      onClick={() => navigate(`/campaign/${campaign.id}`)}
-                      className="relative bg-white rounded-2xl shadow-xl overflow-hidden cursor-pointer border-2 border-orange-400 hover:shadow-2xl transition-all"
-                    >
-                      {/* Featured badge */}
-                      <div className="absolute top-3 left-3 z-10 flex items-center gap-1 bg-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md">
-                        <Star className="h-3 w-3 fill-white" />
-                        {t('campaigns.featured_badge')}
-                      </div>
-
-                      <div className="relative h-52">
-                        {campaign.image_url ? (
-                          <img src={campaign.image_url} alt={campaign.title} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
-                            <span className="text-6xl font-bold text-white opacity-20">
-                              {campaign.title.charAt(0).toUpperCase()}
-                            </span>
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                        <div className="absolute bottom-0 left-0 right-0 p-4">
-                          <h3 className="text-lg font-bold text-white leading-tight drop-shadow-lg line-clamp-2">
-                            {campaign.title}
-                          </h3>
-                        </div>
-                      </div>
-
-                      <div className="p-4">
-                        <div className="flex justify-between items-center mb-2 text-sm">
-                          <span className="font-bold text-gray-900">
-                            {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(Number(campaign.current_amount))}
-                          </span>
-                          <span className="text-gray-500">
-                            of {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(Number(campaign.goal_amount))}
-                          </span>
-                        </div>
-                        <div className="w-full bg-gray-100 rounded-full h-2">
-                          <div className="bg-gradient-to-r from-orange-600 to-orange-400 h-2 rounded-full" style={{ width: `${progress}%` }} />
-                        </div>
-                        <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
-                          <span className="font-medium">{Math.round(progress)}% {t('campaigns.funded')}</span>
-                          <span className="flex items-center gap-1">
-                            <Users className="h-3 w-3" />
-                            {campaign.supporter_count || 0}
-                          </span>
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </motion.div>
-          )}
 
           {/* Search and Filter Section */}
           <motion.div

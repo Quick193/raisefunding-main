@@ -4,6 +4,7 @@ import { Campaign } from '../types';
 import { formatCurrency, calculateProgress } from '../utils/format';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface FeaturedCarouselProps {
   campaigns: Campaign[];
@@ -17,26 +18,27 @@ export const FeaturedCarousel = ({ campaigns }: FeaturedCarouselProps) => {
   const visibleCampaigns = campaigns.length > 0 ? campaigns : [];
   const itemsPerView = 3;
 
-  const maxIndex = Math.max(0, visibleCampaigns.length - itemsPerView);
+  const totalPages = Math.ceil(visibleCampaigns.length / itemsPerView);
+  const maxIndex = Math.max(0, (totalPages - 1) * itemsPerView);
 
   useEffect(() => {
     if (!autoPlay || visibleCampaigns.length === 0) return;
 
     const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
-    }, 5000);
+      setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + itemsPerView));
+    }, 7000);
 
     return () => clearInterval(timer);
   }, [autoPlay, maxIndex, visibleCampaigns.length]);
 
   const handlePrev = () => {
     setAutoPlay(false);
-    setCurrentIndex((prev) => (prev === 0 ? maxIndex : prev - 1));
+    setCurrentIndex((prev) => (prev === 0 ? maxIndex : prev - itemsPerView));
   };
 
   const handleNext = () => {
     setAutoPlay(false);
-    setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
+    setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + itemsPerView));
   };
 
   const visibleItems = visibleCampaigns.slice(
@@ -54,12 +56,20 @@ export const FeaturedCarousel = ({ campaigns }: FeaturedCarouselProps) => {
 
   return (
     <div className="relative">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <AnimatePresence mode="wait">
+      <motion.div
+        key={currentIndex}
+        initial={{ opacity: 0, x: 40 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -40 }}
+        transition={{ duration: 0.35, ease: 'easeInOut' }}
+        className="grid grid-cols-1 md:grid-cols-3 gap-6"
+      >
         {visibleItems.map((campaign, idx) => {
           const progress = calculateProgress(campaign.current_amount, campaign.goal_amount);
           const daysLeft = campaign.end_date
             ? Math.ceil(
-                (new Date(campaign.end_date + 'T00:00:00').getTime() - new Date().getTime()) /
+                (new Date(campaign.end_date.split('T')[0] + 'T23:59:59').getTime() - new Date().getTime()) /
                   (1000 * 60 * 60 * 24)
               )
             : null;
@@ -68,8 +78,7 @@ export const FeaturedCarousel = ({ campaigns }: FeaturedCarouselProps) => {
             <Link
               key={campaign.id}
               to={`/campaign/${campaign.id}`}
-              className="group cursor-pointer animate-fade-in-up"
-              style={{ animationDelay: `${idx * 100}ms` }}
+              className="group cursor-pointer"
             >
               <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
                 <div className="relative h-56 bg-gray-200 overflow-hidden">
@@ -138,7 +147,8 @@ export const FeaturedCarousel = ({ campaigns }: FeaturedCarouselProps) => {
             </Link>
           );
         })}
-      </div>
+      </motion.div>
+      </AnimatePresence>
 
       {visibleCampaigns.length > itemsPerView && (
         <>
@@ -161,15 +171,15 @@ export const FeaturedCarousel = ({ campaigns }: FeaturedCarouselProps) => {
       )}
 
       <div className="flex gap-2 justify-center mt-6">
-        {Array.from({ length: maxIndex + 1 }).map((_, idx) => (
+        {Array.from({ length: totalPages }).map((_, idx) => (
           <button
             key={idx}
             onClick={() => {
               setAutoPlay(false);
-              setCurrentIndex(idx);
+              setCurrentIndex(idx * itemsPerView);
             }}
             className={`h-2 rounded-full transition-all ${
-              idx === currentIndex ? 'bg-orange-600 w-6' : 'bg-gray-300 w-2'
+              idx === Math.floor(currentIndex / itemsPerView) ? 'bg-orange-600 w-6' : 'bg-gray-300 w-2'
             }`}
           />
         ))}
