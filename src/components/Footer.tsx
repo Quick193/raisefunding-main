@@ -15,7 +15,7 @@ export const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-1">
             <div className="text-white mb-4">
-              <RaiseLogo iconSize={30} textSize="text-2xl" />
+              <RaiseLogo iconSize={30} textSize="text-2xl" useSvgIcon />
             </div>
             <p className="text-sm text-gray-400 leading-relaxed mb-5">
               A crowdfunding platform built for India — helping individuals and communities raise funds for causes that matter.
