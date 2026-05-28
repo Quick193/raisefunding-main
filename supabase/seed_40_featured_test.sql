@@ -95,7 +95,7 @@ BEGIN
      NOW() + INTERVAL '30 days', NOW() - INTERVAL '2 hours'),
 
     (pid, 'Protected 15 – Robotics Lab for Government School in Delhi',
-     'Setting up India's first robotics lab in a Delhi government school serving 1200 students from slum areas.',
+     'Setting up India''s first robotics lab in a Delhi government school serving 1200 students from slum areas.',
      350000, 130000, 'active', 'Education', 'New Delhi', NOW() + INTERVAL '60 days', 77, true,
      NOW() + INTERVAL '30 days', NOW() - INTERVAL '2 hours'),
 
