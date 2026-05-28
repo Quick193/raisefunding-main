@@ -23,6 +23,7 @@ export interface Campaign {
   supporter_count?: number;
   is_featured?: boolean;
   featured_until?: string | null;
+  featured_since?: string | null;
   profiles?: {
     full_name: string;
     email: string;

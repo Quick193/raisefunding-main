@@ -26,18 +26,56 @@ export const Home = () => {
   const fetchData = async () => {
     try {
       const now = new Date().toISOString();
-      const { data: campaignsData, error: campaignsError } = await supabase
+      // One day ago — campaigns featured before this are eligible to be displaced
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+      // ── Fairness selection ───────────────────────────────────────────────
+      // Protected: featured < 24 h ago → guaranteed their first day, always shown
+      // Falls back to simple query if featured_since column not yet migrated.
+      const { data: protectedData, error: protectedError } = await supabase
         .from('campaigns')
         .select('*, profiles(full_name, email)')
         .eq('status', 'active')
         .eq('is_featured', true)
         .gt('featured_until', now)
-        .order('featured_until', { ascending: false })
+        .gt('featured_since', oneDayAgo)
+        .order('featured_since', { ascending: false })
         .limit(30);
 
-      if (campaignsError) throw campaignsError;
+      // If featured_since column doesn't exist yet, fall back to simple query
+      if (protectedError) {
+        const { data: fallbackData } = await supabase
+          .from('campaigns')
+          .select('*, profiles(full_name, email)')
+          .eq('status', 'active')
+          .eq('is_featured', true)
+          .gt('featured_until', now)
+          .order('featured_until', { ascending: false })
+          .limit(30);
+        setCampaigns(fallbackData || []);
+      } else {
+        const protectedCampaigns = protectedData || [];
+        const remainingSlots = 30 - protectedCampaigns.length;
 
-      setCampaigns(campaignsData || []);
+        // Eligible: featured ≥ 24 h ago → have had their day, fill leftover slots
+        let eligibleCampaigns: Campaign[] = [];
+        if (remainingSlots > 0) {
+          const { data: eligibleData } = await supabase
+            .from('campaigns')
+            .select('*, profiles(full_name, email)')
+            .eq('status', 'active')
+            .eq('is_featured', true)
+            .gt('featured_until', now)
+            .or(`featured_since.lte.${oneDayAgo},featured_since.is.null`)
+            .order('featured_since', { ascending: false })
+            .limit(remainingSlots);
+
+          eligibleCampaigns = eligibleData || [];
+        }
+
+        setCampaigns([...protectedCampaigns, ...eligibleCampaigns]);
+      }
+      // ────────────────────────────────────────────────────────────────────
 
       const { data: allCampaigns } = await supabase
         .from('campaigns')
@@ -162,7 +200,7 @@ export const Home = () => {
           {!loading && campaigns.length > 0 && (
             <div className="text-center mt-10">
               <Link
-                to="/campaigns"
+                to="/campaigns?featured=true"
                 className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-600 to-orange-500 text-white font-bold rounded-xl hover:shadow-xl transition-all hover:scale-105"
               >
                 <Star className="h-5 w-5 mr-2" />

@@ -31,6 +31,7 @@ export const Campaigns = () => {
   const [searchTerm, setSearchTerm] = useState(() => searchParams.get('search') || '');
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [featuredOnly, setFeaturedOnly] = useState(() => searchParams.get('featured') === 'true');
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -62,7 +63,10 @@ export const Campaigns = () => {
         campaign.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesFilter = filter === 'all' || campaign.status === filter;
       const matchesCategory = selectedCategory === 'All' || campaign.category === selectedCategory;
-      return matchesSearch && matchesFilter && matchesCategory;
+      const matchesFeatured = !featuredOnly || (
+        campaign.is_featured && campaign.featured_until && campaign.featured_until > nowIso
+      );
+      return matchesSearch && matchesFilter && matchesCategory && matchesFeatured;
     })
     .sort((a, b) => {
       const aFeatured = !!(a.is_featured && a.featured_until && a.featured_until > nowIso && a.status === 'active');
@@ -80,7 +84,7 @@ export const Campaigns = () => {
   // Reset to page 1 when filters change
   useEffect(() => {
     setPage(1);
-  }, [searchTerm, filter, selectedCategory]);
+  }, [searchTerm, filter, selectedCategory, featuredOnly]);
 
   // Scroll to top when page changes
   useEffect(() => {
@@ -190,6 +194,18 @@ export const Campaigns = () => {
                 {status === 'all' ? t('campaigns.filter_all') : status === 'active' ? t('campaigns.filter_active') : t('campaigns.filter_completed')}
               </motion.button>
             ))}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setFeaturedOnly((v) => !v)}
+              className={`px-4 sm:px-6 py-2 rounded-full font-semibold transition-all flex items-center gap-1.5 ${
+                featuredOnly
+                  ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow-lg'
+                  : 'bg-white/60 text-gray-700 border border-orange-200 hover:bg-orange-50'
+              }`}
+            >
+              ⭐ Featured
+            </motion.button>
           </motion.div>
 
           {/* Campaigns Grid */}

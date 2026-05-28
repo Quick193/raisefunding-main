@@ -43,6 +43,7 @@ export const FeatureModal = ({ campaignId, campaignTitle, onClose, onSuccess }: 
         .update({
           is_featured: true,
           featured_until: featuredUntil.toISOString(),
+          featured_since: new Date().toISOString(),
         })
         .eq('id', campaignId)
         .select('id')
