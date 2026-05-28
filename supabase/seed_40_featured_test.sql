@@ -167,7 +167,7 @@ BEGIN
      NOW() + INTERVAL '30 days', NOW() - INTERVAL '26 hours'),
 
     (pid, 'Eligible 08 – River Cleanup Campaign in Sabarmati',
-     'Removing 40 tonnes of plastic waste from a 15km stretch of the Sabarmati river in Ahmedabad.',
+     'Removing 40 tonnes of plastic waste from a 15 km stretch of the Sabarmati river in Ahmedabad.',
      350000, 143000, 'active', 'Environment', 'Ahmedabad, Gujarat', NOW() + INTERVAL '30 days', 112, true,
      NOW() + INTERVAL '30 days', NOW() - INTERVAL '26 hours'),
 
@@ -192,7 +192,7 @@ BEGIN
      NOW() + INTERVAL '30 days', NOW() - INTERVAL '26 hours'),
 
     (pid, 'Eligible 13 – Save Olive Ridley Turtle Nesting Grounds in Odisha',
-     'Protecting 12km of nesting beach from illegal construction and light pollution near Gahirmatha sanctuary.',
+     'Protecting 12 km of nesting beach from illegal construction and light pollution near Gahirmatha sanctuary.',
      400000, 167000, 'active', 'Environment', 'Kendrapara, Odisha', NOW() + INTERVAL '70 days', 97, true,
      NOW() + INTERVAL '30 days', NOW() - INTERVAL '26 hours'),
 
