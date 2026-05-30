@@ -108,14 +108,14 @@ export const Campaigns = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white relative">
+    <div className="bg-white relative">
       {/* Background gradient */}
       <div className="fixed inset-0 bg-gradient-to-br from-orange-50 via-white to-orange-50 z-0" />
       
       {/* Invisible top reference for scroll */}
       <div ref={topRef} className="absolute -top-20 left-0 w-full h-1 pointer-events-none z-50" />
 
-      <div className="relative z-10 pt-12 pb-16">
+      <div className="relative z-10 pt-12 pb-10">
         <div className="max-w-7xl mx-auto px-4">
           <motion.h1
             initial={{ opacity: 0, y: -30 }}

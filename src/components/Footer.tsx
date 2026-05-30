@@ -6,7 +6,7 @@ export const Footer = () => {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-950 text-gray-300">
+    <footer className="relative z-10 bg-gray-950 text-gray-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-8">
 
         {/* Top grid */}
