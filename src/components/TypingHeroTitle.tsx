@@ -15,9 +15,10 @@ const ORANGE_CLASS =
 
 interface Props {
   className?: string;
+  onComplete?: () => void;
 }
 
-export const TypingHeroTitle = ({ className = '' }: Props) => {
+export const TypingHeroTitle = ({ className = '', onComplete }: Props) => {
   const [lineIndex, setLineIndex]   = useState(0);
   const [charIndex, setCharIndex]   = useState(0);
   const cursorRef = useRef<HTMLSpanElement>(null);
@@ -36,6 +37,12 @@ export const TypingHeroTitle = ({ className = '' }: Props) => {
       ease: 'power2.inOut',
     });
   }, [lineIndex, isDone]);
+
+  // Fire onComplete once typing finishes
+  useEffect(() => {
+    if (isDone && onComplete) onComplete();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDone]);
 
   // Typing clock
   useEffect(() => {

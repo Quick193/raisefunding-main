@@ -5,6 +5,7 @@ import { Campaign } from '../types';
 import { Users, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { CustomSelect } from '../components/CustomSelect';
 import ShinyText from '../components/ShinyText';
+import GlareHover from '../components/GlareHover';
 import { motion } from 'framer-motion';
 import { formatCurrency } from '../utils/format';
 import { useTranslation } from 'react-i18next';
@@ -256,14 +257,13 @@ export const Campaigns = () => {
               campaignsToShow.map((campaign) => (
                 <motion.div
                   key={campaign.id}
-                  className="bg-white rounded-2xl shadow-lg overflow-hidden cursor-pointer hover:shadow-2xl transition-all duration-300"
-                  initial={{ scale: 1, y: 0 }}
-                  whileHover={{
-                    scale: 1.05,
-                    y: -8
-                  }}
+                  whileHover={{ y: -8 }}
                   whileTap={{ scale: 0.98 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+                >
+                <GlareHover
                   onClick={() => navigate(`/campaign/${campaign.id}`)}
+                  className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 cursor-pointer"
                 >
                   <div className="relative h-56">
                     {campaign.image_url ? (
@@ -337,6 +337,7 @@ export const Campaigns = () => {
                       {campaign.supporter_count || 0} {t('campaigns.supporters')}
                     </div>
                   </div>
+                </GlareHover>
                 </motion.div>
               ))
             )}

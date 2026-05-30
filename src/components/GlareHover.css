@@ -1,0 +1,32 @@
+.glare-hover {
+  position: relative;
+  overflow: hidden;
+}
+
+/* A physical stripe that slides left→right via transform (GPU-accelerated) */
+.glare-hover::before {
+  content: '';
+  position: absolute;
+  top: -60%;
+  left: 0;
+  width: 45%;
+  height: 220%;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--gh-rgba) 45%,
+    var(--gh-rgba) 55%,
+    transparent 100%
+  );
+  transform: translateX(-220%) skewX(-14deg);
+  transition: none; /* instant off-screen reset — no reverse animation */
+  pointer-events: none;
+  z-index: 10;
+  will-change: transform;
+}
+
+/* Transition only on the hover state → plays forward once, never backward */
+.glare-hover:hover::before {
+  transform: translateX(380%) skewX(-14deg);
+  transition: transform var(--gh-duration) cubic-bezier(0.4, 0, 0.2, 1);
+}

@@ -6,6 +6,8 @@ import { FeaturedCarousel } from '../components/FeaturedCarousel';
 import { TypingHeroTitle } from '../components/TypingHeroTitle';
 import { FAQAccordion } from '../components/FAQAccordion';
 import { CountUp } from '../components/CountUp';
+import BlurText from '../components/BlurText';
+import ClickSpark from '../components/ClickSpark';
 import { Zap, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -13,6 +15,7 @@ import { motion } from 'framer-motion';
 export const Home = () => {
   const { t } = useTranslation();
 
+  const [titleDone, setTitleDone] = useState(false);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [stats, setStats] = useState({
     totalRaised: 0,
@@ -126,11 +129,17 @@ export const Home = () => {
           <div className="text-center">
             <TypingHeroTitle
               className="text-4xl sm:text-6xl lg:text-8xl font-black text-gray-900 mb-6 sm:mb-8 leading-snug break-words"
+              onComplete={() => setTitleDone(true)}
             />
 
-            <p className="animate-fade-in-up text-base sm:text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed" style={{ animationDelay: '0.1s' }}>
-              {t('home.hero_subtitle')}
-            </p>
+            <BlurText
+              text={t('home.hero_subtitle')}
+              className="text-base sm:text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed justify-center"
+              delay={80}
+              direction="bottom"
+              stepDuration={0.4}
+              paused={!titleDone}
+            />
           </div>
         </div>
       </div>
@@ -247,21 +256,25 @@ export const Home = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center" style={{ animationDelay: '0.4s' }}>
-            <Link
-              to="/create"
-              className="inline-flex w-full sm:w-auto items-center justify-center px-6 sm:px-8 py-4 bg-white text-orange-600 font-bold rounded-xl hover:shadow-2xl transition-all hover:scale-105"
-            >
-              {t('home.cta_start')}
-              <Zap className="h-5 w-5 ml-2" />
-            </Link>
+            <ClickSpark sparkColor="#fb923c" sparkSize={8} sparkRadius={22} sparkCount={8} duration={480}>
+              <Link
+                to="/create"
+                className="inline-flex w-full sm:w-auto items-center justify-center px-6 sm:px-8 py-4 bg-white text-orange-600 font-bold rounded-xl hover:shadow-2xl transition-all hover:scale-105"
+              >
+                {t('home.cta_start')}
+                <Zap className="h-5 w-5 ml-2" />
+              </Link>
+            </ClickSpark>
 
-            <Link
-              to="/campaigns"
-              className="inline-flex w-full sm:w-auto items-center justify-center px-6 sm:px-8 py-4 bg-orange-700 bg-opacity-50 border-2 border-white text-white font-bold rounded-xl hover:bg-opacity-70 transition-all group"
-            >
-              <Star className="h-5 w-5 mr-2 group-hover:animate-bounce" />
-              {t('home.cta_browse')}
-            </Link>
+            <ClickSpark sparkColor="#fff7ed" sparkSize={8} sparkRadius={22} sparkCount={8} duration={480}>
+              <Link
+                to="/campaigns"
+                className="inline-flex w-full sm:w-auto items-center justify-center px-6 sm:px-8 py-4 bg-orange-700 bg-opacity-50 border-2 border-white text-white font-bold rounded-xl hover:bg-opacity-70 transition-all group"
+              >
+                <Star className="h-5 w-5 mr-2 group-hover:animate-bounce" />
+                {t('home.cta_browse')}
+              </Link>
+            </ClickSpark>
           </div>
         </div>
       </div>
