@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Campaign } from '../types';
 import { FeaturedCarousel } from '../components/FeaturedCarousel';
+import { TypingHeroTitle } from '../components/TypingHeroTitle';
 import { FAQAccordion } from '../components/FAQAccordion';
 import { Zap, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -122,17 +123,9 @@ export const Home = () => {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-24 lg:py-32">
           <div className="text-center">
-            <h1 className="animate-fade-in-up text-4xl sm:text-6xl lg:text-8xl font-black text-gray-900 mb-6 sm:mb-8 leading-snug break-words">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">
-                {t('home.hero_title_1')}
-              </span>
-              <br />
-              <span>{t('home.hero_title_2')}</span>
-              <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">
-                {t('home.hero_title_3')}
-              </span>
-            </h1>
+            <TypingHeroTitle
+              className="text-4xl sm:text-6xl lg:text-8xl font-black text-gray-900 mb-6 sm:mb-8 leading-snug break-words"
+            />
 
             <p className="animate-fade-in-up text-base sm:text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed" style={{ animationDelay: '0.1s' }}>
               {t('home.hero_subtitle')}
