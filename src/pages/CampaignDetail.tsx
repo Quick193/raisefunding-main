@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/useAuth';
 import { motion } from 'framer-motion';
+import { CountUp } from '../components/CountUp';
 import {
   ArrowLeft,
   Share2,
@@ -423,11 +424,15 @@ export const CampaignDetail = () => {
                   className="grid grid-cols-3 gap-4 mb-8 bg-orange-50/80 rounded-xl p-6 border border-orange-200/50"
                 >
                   <div className="text-center">
-                    <p className="text-3xl font-black text-orange-600">{Math.round(progress)}%</p>
+                    <p className="text-3xl font-black text-orange-600">
+                      <CountUp value={Math.round(progress)} format={(n) => `${Math.round(n)}%`} />
+                    </p>
                     <p className="text-xs text-gray-600 font-medium mt-1">{t('campaign.funded_label')}</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-black text-orange-600">{campaign.supporter_count || 0}</p>
+                    <p className="text-3xl font-black text-orange-600">
+                      <CountUp value={campaign.supporter_count || 0} />
+                    </p>
                     <p className="text-xs text-gray-600 font-medium mt-1">{t('campaign.supporters_label')}</p>
                   </div>
                   <div className="text-center">

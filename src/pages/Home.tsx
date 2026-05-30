@@ -5,6 +5,7 @@ import { Campaign } from '../types';
 import { FeaturedCarousel } from '../components/FeaturedCarousel';
 import { TypingHeroTitle } from '../components/TypingHeroTitle';
 import { FAQAccordion } from '../components/FAQAccordion';
+import { CountUp } from '../components/CountUp';
 import { Zap, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -139,17 +140,23 @@ export const Home = () => {
           {[
             {
               label: t('home.total_raised'),
-              value: `$${(stats.totalRaised / 1000000).toFixed(1)}M`,
+              count: stats.totalRaised / 1000000,
+              countFormat: (n: number) => `$${n.toFixed(1)}M`,
               subtext: t('home.funds_mobilized'),
             },
             {
               label: t('home.active_campaigns'),
-              value: stats.activeCampaigns,
+              count: stats.activeCampaigns,
+              countFormat: undefined as ((n: number) => string) | undefined,
               subtext: t('home.dreams_funded'),
             },
             {
               label: t('home.supporters'),
-              value: `${stats.totalSupporters / 1000 > 1 ? (stats.totalSupporters / 1000).toFixed(0) + 'K' : stats.totalSupporters}`,
+              count: stats.totalSupporters,
+              countFormat: (n: number) =>
+                stats.totalSupporters >= 1000
+                  ? `${Math.round(n / 1000)}K`
+                  : String(Math.round(n)),
               subtext: t('home.community'),
             },
           ].map((stat, idx) => (
@@ -163,7 +170,9 @@ export const Home = () => {
               className="bg-gradient-to-br from-orange-50 to-white p-6 sm:p-8 rounded-2xl border border-orange-100 text-center transition-all"
             >
               <div className="text-4xl sm:text-5xl font-black text-orange-600 mb-2">
-                {loading ? '—' : stat.value}
+                {loading ? '—' : (
+                  <CountUp value={stat.count} format={stat.countFormat} />
+                )}
               </div>
               <p className="text-orange-600 font-semibold text-sm mb-2">
                 {stat.label}

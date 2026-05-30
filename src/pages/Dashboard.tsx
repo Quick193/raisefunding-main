@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/useAuth';
 import { Campaign } from '../types';
 import { CampaignCard } from '../components/CampaignCard';
+import { CountUp } from '../components/CountUp';
 import { Plus, TrendingUp, Pencil, Trash2 } from 'lucide-react';
 import { formatCurrency } from '../utils/format';
 import { useTranslation } from 'react-i18next';
@@ -109,7 +110,9 @@ export const Dashboard = () => {
               <span className="text-gray-600 text-sm">{t('dashboard.total_campaigns')}</span>
               <TrendingUp className="h-5 w-5 text-gray-400" />
             </div>
-            <div className="text-3xl font-bold text-gray-900">{stats.total}</div>
+            <div className="text-3xl font-bold text-gray-900">
+              <CountUp value={stats.total} />
+            </div>
           </div>
 
           <div className="bg-white p-6 rounded-2xl shadow-lg border border-orange-100">
@@ -117,7 +120,9 @@ export const Dashboard = () => {
               <span className="text-gray-600 text-sm">{t('dashboard.active')}</span>
               <div className="h-3 w-3 bg-green-500 rounded-full"></div>
             </div>
-            <div className="text-3xl font-bold text-gray-900">{stats.active}</div>
+            <div className="text-3xl font-bold text-gray-900">
+              <CountUp value={stats.active} />
+            </div>
           </div>
 
           <div className="bg-white p-6 rounded-2xl shadow-lg border border-orange-100">
@@ -125,7 +130,9 @@ export const Dashboard = () => {
               <span className="text-gray-600 text-sm">{t('dashboard.completed')}</span>
               <div className="h-3 w-3 bg-gray-400 rounded-full"></div>
             </div>
-            <div className="text-3xl font-bold text-gray-900">{stats.completed}</div>
+            <div className="text-3xl font-bold text-gray-900">
+              <CountUp value={stats.completed} />
+            </div>
           </div>
 
           <div className="bg-white p-6 rounded-2xl shadow-lg border border-orange-100">
@@ -134,7 +141,7 @@ export const Dashboard = () => {
               <TrendingUp className="h-5 w-5 text-orange-600" />
             </div>
             <div className="text-3xl font-bold text-orange-600">
-              {formatCurrency(stats.totalRaised)}
+              <CountUp value={stats.totalRaised} format={(n) => formatCurrency(n)} />
             </div>
           </div>
         </div>

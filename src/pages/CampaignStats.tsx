@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/useAuth';
 import { Campaign, Donation } from '../types';
 import { formatCurrency, formatDate } from '../utils/format';
+import { CountUp } from '../components/CountUp';
 import { TrendingUp, Users, IndianRupee, Calendar, ArrowLeft } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
 import {
@@ -130,29 +131,39 @@ export const CampaignStats = () => {
   const statCards = [
     {
       label: t('stats.total_raised'),
-      value: formatCurrency(Number(campaign.current_amount)),
+      count: Number(campaign.current_amount),
+      countFormat: (n: number) => formatCurrency(n),
       sub: `of ${formatCurrency(Number(campaign.goal_amount))} ${t('campaign.goal_suffix')}`,
       icon: <IndianRupee className="h-5 w-5 text-orange-500" />,
       accent: true,
+      showProgress: false,
     },
     {
       label: t('stats.progress'),
-      value: `${progress}%`,
+      count: progress,
+      countFormat: (n: number) => `${Math.round(n)}%`,
       sub: null,
       icon: <TrendingUp className="h-5 w-5 text-orange-500" />,
-      progress: true,
+      accent: false,
+      showProgress: true,
     },
     {
       label: t('stats.total_donors'),
-      value: String(totalDonors),
+      count: totalDonors,
+      countFormat: undefined as ((n: number) => string) | undefined,
       sub: t('stats.supporters'),
       icon: <Users className="h-5 w-5 text-orange-500" />,
+      accent: false,
+      showProgress: false,
     },
     {
       label: t('stats.avg_donation'),
-      value: formatCurrency(averageDonation),
+      count: averageDonation,
+      countFormat: (n: number) => formatCurrency(n),
       sub: t('stats.per_supporter'),
       icon: <IndianRupee className="h-5 w-5 text-orange-500" />,
+      accent: false,
+      showProgress: false,
     },
   ];
 
@@ -179,9 +190,9 @@ export const CampaignStats = () => {
                 {card.icon}
               </div>
               <div className={`text-3xl font-bold mb-1 ${card.accent ? 'text-orange-600' : 'text-gray-900'}`}>
-                {card.value}
+                <CountUp value={card.count} format={card.countFormat} />
               </div>
-              {card.progress && (
+              {card.showProgress && (
                 <div className="w-full bg-gray-100 rounded-full h-2 mt-2">
                   <div className="bg-gradient-to-r from-orange-600 to-orange-400 h-2 rounded-full transition-all" style={{ width: `${progress}%` }} />
                 </div>

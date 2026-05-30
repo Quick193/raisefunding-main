@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { motion } from 'framer-motion';
+import { CountUp } from '../components/CountUp';
 import {
   Sparkles,
   Shield,
@@ -192,22 +193,26 @@ export const AboutUs = () => {
           {[
             {
               icon: Target,
-              value: loading ? '—' : stats.campaignsCreated,
+              count: stats.campaignsCreated,
+              countFormat: undefined as ((n: number) => string) | undefined,
               label: t('about.stat_campaigns'),
             },
             {
               icon: Lightbulb,
-              value: loading ? '—' : `₹${(stats.totalRaised / 100000).toFixed(1)}L`,
+              count: stats.totalRaised / 100000,
+              countFormat: (n: number) => `₹${n.toFixed(1)}L`,
               label: t('about.stat_raised'),
             },
             {
               icon: TrendingUp,
-              value: loading ? '—' : `${stats.successRate}%`,
+              count: stats.successRate,
+              countFormat: (n: number) => `${n.toFixed(1)}%`,
               label: t('about.stat_success'),
             },
             {
               icon: Globe,
-              value: stats.statesSupported,
+              count: stats.statesSupported,
+              countFormat: undefined as ((n: number) => string) | undefined,
               label: t('about.stat_states'),
             },
           ].map((stat, idx) => (
@@ -220,14 +225,14 @@ export const AboutUs = () => {
               whileHover={{ y: -5, boxShadow: "0 10px 30px rgba(0, 0, 0, 0.15)" }}
               className="bg-white border border-gray-200 rounded-2xl p-8 text-center group transition-shadow"
             >
-              <motion.div 
+              <motion.div
                 whileHover={{ scale: 1.1 }}
                 className="mb-4 transition-transform"
               >
                 <stat.icon className="h-12 w-12 text-orange-500 mx-auto" />
               </motion.div>
               <div className="text-4xl font-black text-gray-900 mb-2">
-                {stat.value}
+                {loading ? '—' : <CountUp value={stat.count} format={stat.countFormat} />}
               </div>
               <p className="text-gray-600 font-medium">{stat.label}</p>
             </motion.div>
