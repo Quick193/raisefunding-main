@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { Campaign } from '../types';
 import { Users, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { CustomSelect } from '../components/CustomSelect';
+import ShinyText from '../components/ShinyText';
 import { motion } from 'framer-motion';
 import { formatCurrency } from '../utils/format';
 import { useTranslation } from 'react-i18next';
@@ -198,13 +199,19 @@ export const Campaigns = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setFeaturedOnly((v) => !v)}
-              className={`px-4 sm:px-6 py-2 rounded-full font-semibold transition-all flex items-center gap-1.5 ${
+              className={`px-4 sm:px-6 py-2 rounded-full font-semibold transition-all ${
                 featuredOnly
-                  ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow-lg'
-                  : 'bg-white/60 text-gray-700 border border-orange-200 hover:bg-orange-50'
+                  ? 'bg-gradient-to-r from-orange-600 to-orange-500 shadow-lg'
+                  : 'bg-white/60 border border-orange-200 hover:bg-orange-50'
               }`}
             >
-              ⭐ Featured
+              <ShinyText
+                text="Featured"
+                speed={2.5}
+                color={featuredOnly ? '#fdba74' : '#c2410c'}
+                shineColor={featuredOnly ? '#ffffff' : '#fbbf24'}
+                spread={100}
+              />
             </motion.button>
           </motion.div>
 
