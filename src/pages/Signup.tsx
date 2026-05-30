@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
-import { Eye, EyeOff, Wallet } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { RaiseLogo } from '../components/RaiseLogo';
 
 export const Signup = () => {
   const { t } = useTranslation();
@@ -93,9 +94,9 @@ export const Signup = () => {
           initial={{ scale: 0, rotate: -90 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ delay: 0.2, duration: 0.5, type: 'spring', stiffness: 150 }}
-          className="bg-gradient-to-r from-orange-500 to-orange-600 p-3 rounded-full mb-2"
+          className="mb-2"
         >
-          <Wallet className="h-8 w-8 text-white" />
+          <RaiseLogo iconSize={64} showText={false} />
         </motion.span>
 
         <motion.h2
