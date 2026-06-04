@@ -181,7 +181,7 @@ export const CreateCampaign = () => {
 
             {/* Title */}
             <div>
-              <label htmlFor="title" className="block text-sm font-semibold text-gray-700 mb-1.5">{t('create.title_label')}</label>
+              <label htmlFor="title" className="block text-sm font-semibold text-gray-700 mb-1.5">{t('create.title_label')} <span className="text-red-500">*</span></label>
               <input id="title" name="title" type="text" value={formData.title} onChange={handleChange} required
                 className="w-full px-4 py-3 border border-orange-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white transition-all"
                 placeholder={t('create.title_placeholder')} />
@@ -189,7 +189,7 @@ export const CreateCampaign = () => {
 
             {/* Description */}
             <div>
-              <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-1.5">{t('create.description_label')}</label>
+              <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-1.5">{t('create.description_label')} <span className="text-red-500">*</span></label>
               <textarea id="description" name="description" value={formData.description} onChange={handleChange} required rows={7}
                 className="w-full px-4 py-3 border border-orange-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white transition-all resize-none"
                 placeholder={t('create.description_placeholder')} />
@@ -199,7 +199,7 @@ export const CreateCampaign = () => {
             {/* Category + Location */}
             <div className="grid md:grid-cols-2 gap-5">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t('create.category_label')}</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t('create.category_label')} <span className="text-red-500">*</span></label>
                 <CustomSelect value={formData.category}
                   onChange={(val) => setFormData((p) => ({ ...p, category: val }))}
                   options={CATEGORY_OPTIONS} />
@@ -217,7 +217,7 @@ export const CreateCampaign = () => {
             {/* Goal + End Date */}
             <div className="grid md:grid-cols-2 gap-5">
               <div>
-                <label htmlFor="goalAmount" className="block text-sm font-semibold text-gray-700 mb-1.5">{t('create.goal_label')}</label>
+                <label htmlFor="goalAmount" className="block text-sm font-semibold text-gray-700 mb-1.5">{t('create.goal_label')} <span className="text-red-500">*</span></label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">₹</span>
                   <input id="goalAmount" name="goalAmount" type="number" value={formData.goalAmount} onChange={handleChange}

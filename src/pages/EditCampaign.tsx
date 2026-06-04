@@ -200,7 +200,7 @@ export const EditCampaign = () => {
 
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('edit.title_label')}
+                {t('edit.title_label')} <span className="text-red-500">*</span>
               </label>
               <input
                 id="title"
@@ -215,7 +215,7 @@ export const EditCampaign = () => {
 
             <div>
               <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('edit.description_label')}
+                {t('edit.description_label')} <span className="text-red-500">*</span>
               </label>
               <textarea
                 id="description"
@@ -230,7 +230,7 @@ export const EditCampaign = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t('edit.category_label')}
+                {t('edit.category_label')} <span className="text-red-500">*</span>
               </label>
               <CustomSelect
                 value={formData.category}
@@ -258,7 +258,7 @@ export const EditCampaign = () => {
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="goalAmount" className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('edit.goal_label')}
+                  {t('edit.goal_label')} <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
@@ -280,7 +280,7 @@ export const EditCampaign = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('edit.end_date_label')}
+                  {t('edit.end_date_label')} <span className="text-red-500">*</span>
                 </label>
                 <DatePicker
                   value={formData.endDate}
