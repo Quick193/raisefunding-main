@@ -38,7 +38,7 @@ export const CookieBanner = () => {
           transition={{ duration: 0.4, ease: 'easeOut' }}
           className="fixed bottom-0 left-0 right-0 z-50 p-4 sm:p-6"
         >
-          <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl border border-orange-100 p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="max-w-4xl mx-auto bg-white/50 backdrop-blur-2xl rounded-2xl shadow-2xl border border-white/50 p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="flex-shrink-0 w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
               <Cookie className="h-5 w-5 text-orange-600" />
             </div>
