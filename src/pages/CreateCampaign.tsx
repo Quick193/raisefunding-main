@@ -111,6 +111,7 @@ export const CreateCampaign = () => {
     const goal = parseFloat(formData.goalAmount);
     if (isNaN(goal) || goal < 100) return t('create.error_goal_min');
     if (goal > 100_000_000) return t('create.error_goal_max');
+    if (!formData.endDate) return 'Please select an end date for your campaign.';
     return null;
   };
 
@@ -143,7 +144,7 @@ export const CreateCampaign = () => {
           image_url: formData.imageUrl || null,
           video_url: formData.videoUrl.trim() || null,
           media: mediaItems,
-          end_date: formData.endDate || null,
+          end_date: formData.endDate,
           status: 'active',
         })
         .select()
@@ -227,7 +228,7 @@ export const CreateCampaign = () => {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                  {t('create.end_date_label')} <span className="text-gray-400 font-normal">{t('create.end_date_optional')}</span>
+                  {t('create.end_date_label')} <span className="text-red-500">*</span>
                 </label>
                 <DatePicker value={formData.endDate}
                   onChange={(val) => setFormData((p) => ({ ...p, endDate: val }))}
