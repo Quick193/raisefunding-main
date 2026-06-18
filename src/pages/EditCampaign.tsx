@@ -6,6 +6,7 @@ import { Campaign } from '../types';
 import { ImagePlus, Video } from 'lucide-react';
 import { CustomSelect } from '../components/CustomSelect';
 import { DatePicker } from '../components/DatePicker';
+import { Skeleton } from '../components/Skeleton';
 import { useTranslation } from 'react-i18next';
 
 const CATEGORY_OPTIONS = [
@@ -162,8 +163,26 @@ export const EditCampaign = () => {
 
   if (fetchLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 py-8">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Skeleton className="h-8 w-56 mb-8" />
+          <div className="bg-white rounded-2xl shadow-md p-6 sm:p-8 space-y-6">
+            <Skeleton className="h-48 w-full rounded-xl" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-11 w-full rounded-xl" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-28 w-full rounded-xl" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <Skeleton className="h-11 w-full rounded-xl" />
+              <Skeleton className="h-11 w-full rounded-xl" />
+            </div>
+            <Skeleton className="h-12 w-full rounded-xl" />
+          </div>
+        </div>
       </div>
     );
   }

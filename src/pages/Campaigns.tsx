@@ -9,6 +9,7 @@ import GlareHover from '../components/GlareHover';
 import { motion } from 'framer-motion';
 import { formatCurrency } from '../utils/format';
 import { useTranslation } from 'react-i18next';
+import { CampaignGridSkeleton } from '../components/Skeleton';
 
 const CAMPAIGNS_PER_PAGE = 28;
 
@@ -98,12 +99,13 @@ export const Campaigns = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full"
-        />
+      <div className="bg-white relative">
+        <div className="fixed inset-0 bg-gradient-to-br from-orange-50 via-white to-orange-50 z-0" />
+        <div className="relative z-10 pt-12 pb-10">
+          <div className="max-w-7xl mx-auto px-4">
+            <CampaignGridSkeleton count={CAMPAIGNS_PER_PAGE > 12 ? 12 : CAMPAIGNS_PER_PAGE} />
+          </div>
+        </div>
       </div>
     );
   }

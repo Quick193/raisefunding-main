@@ -6,6 +6,7 @@ import { Campaign, Donation } from '../types';
 import { formatCurrency, formatDate } from '../utils/format';
 import { CountUp } from '../components/CountUp';
 import { TrendingUp, Users, IndianRupee, Calendar, ArrowLeft } from 'lucide-react';
+import { Skeleton } from '../components/Skeleton';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -63,8 +64,17 @@ export const CampaignStats = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600" />
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Skeleton className="h-5 w-32 mb-6" />
+          <Skeleton className="h-8 w-72 mb-8" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-32 rounded-2xl" />
+            ))}
+          </div>
+          <Skeleton className="h-80 rounded-2xl" />
+        </div>
       </div>
     );
   }

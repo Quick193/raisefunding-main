@@ -19,6 +19,7 @@ import {
 import { Campaign } from '../types';
 import { formatCurrency } from '../utils/format';
 import { useTranslation } from 'react-i18next';
+import { Skeleton } from '../components/Skeleton';
 
 const getTipMessage = (category: string | null | undefined, title: string): string => {
   const cat = (category || '').toLowerCase();
@@ -233,12 +234,34 @@ export const CampaignDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full"
-        />
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
+        <div className="max-w-[1600px] mx-auto px-6 sm:px-8 lg:px-12 py-8">
+          <Skeleton className="h-5 w-28 mb-6" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              <Skeleton className="h-[420px] w-full rounded-2xl" />
+              <Skeleton className="h-8 w-3/4" />
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+                <Skeleton className="h-4 w-2/3" />
+              </div>
+            </div>
+            <div className="space-y-4">
+              <div className="bg-white rounded-2xl shadow-md p-6 space-y-4">
+                <Skeleton className="h-6 w-40" />
+                <Skeleton className="h-3 w-full rounded-full" />
+                <div className="flex justify-between">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-20" />
+                </div>
+                <Skeleton className="h-12 w-full rounded-xl" />
+                <Skeleton className="h-12 w-full rounded-xl" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

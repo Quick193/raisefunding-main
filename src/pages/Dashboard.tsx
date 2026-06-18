@@ -8,6 +8,7 @@ import { CountUp } from '../components/CountUp';
 import { Plus, TrendingUp, Pencil, Trash2 } from 'lucide-react';
 import { formatCurrency } from '../utils/format';
 import { useTranslation } from 'react-i18next';
+import { Skeleton, CampaignGridSkeleton } from '../components/Skeleton';
 
 export const Dashboard = () => {
   const { t } = useTranslation();
@@ -75,8 +76,22 @@ export const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-8 flex justify-between items-center">
+            <div>
+              <Skeleton className="h-8 w-56 mb-3" />
+              <Skeleton className="h-4 w-72" />
+            </div>
+            <Skeleton className="h-11 w-40 rounded-xl" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+            <Skeleton className="h-28 rounded-2xl" />
+            <Skeleton className="h-28 rounded-2xl" />
+            <Skeleton className="h-28 rounded-2xl" />
+          </div>
+          <CampaignGridSkeleton count={4} />
+        </div>
       </div>
     );
   }
