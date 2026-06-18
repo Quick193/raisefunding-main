@@ -36,6 +36,42 @@ export const CampaignGridSkeleton = ({ count = 8 }: { count?: number }) => (
   </div>
 );
 
+/** Placeholder that mirrors the 3-up featured carousel on the home page. */
+export const FeaturedCarouselSkeleton = () => (
+  <div className="relative">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div
+          key={i}
+          className="bg-white rounded-2xl overflow-hidden shadow-lg h-full flex flex-col"
+        >
+          <Skeleton className="h-56 w-full rounded-none" />
+          <div className="p-5 flex-1 flex flex-col gap-3">
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="h-5 w-3/4" />
+            <div className="mt-auto space-y-3">
+              <div className="flex justify-between">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+              <Skeleton className="h-2.5 w-full rounded-full" />
+              <div className="flex justify-between">
+                <Skeleton className="h-3 w-16" />
+                <Skeleton className="h-3 w-24" />
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+    <div className="flex gap-2 justify-center mt-6">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <Skeleton key={i} className="h-2 w-2 rounded-full" />
+      ))}
+    </div>
+  </div>
+);
+
 /** Generic full-page placeholder used while route-level data / auth resolves. */
 export const PageSkeleton = () => (
   <div className="min-h-screen bg-white py-12">

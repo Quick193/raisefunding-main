@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Campaign } from '../types';
 import { FeaturedCarousel } from '../components/FeaturedCarousel';
+import { FeaturedCarouselSkeleton } from '../components/Skeleton';
 import { TypingHeroTitle } from '../components/TypingHeroTitle';
 import { FAQAccordion } from '../components/FAQAccordion';
 import { CountUp } from '../components/CountUp';
@@ -206,7 +207,7 @@ export const Home = () => {
             </p>
           </div>
 
-          {!loading && <FeaturedCarousel campaigns={campaigns} />}
+          {loading ? <FeaturedCarouselSkeleton /> : <FeaturedCarousel campaigns={campaigns} />}
 
           {!loading && campaigns.length > 0 && (
             <div className="text-center mt-10">
