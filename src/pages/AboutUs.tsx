@@ -21,6 +21,7 @@ import {
   Wallet,
   Star,
 } from 'lucide-react';
+import { isCampaignEnded } from '../utils/format';
 
 export const AboutUs = () => {
   const { t } = useTranslation();
@@ -53,7 +54,7 @@ export const AboutUs = () => {
     try {
       const { data: campaigns } = await supabase
         .from('campaigns')
-        .select('current_amount, status, id');
+        .select('current_amount, status, id, end_date');
 
       if (campaigns) {
         const created = campaigns.length;
@@ -61,7 +62,7 @@ export const AboutUs = () => {
           (sum, c) => sum + (parseFloat(c.current_amount?.toString() || '0')),
           0
         );
-        const completed = campaigns.filter((c) => c.status === 'completed').length;
+        const completed = campaigns.filter((c) => isCampaignEnded(c)).length;
         const successRate = created > 0 ? ((completed / created) * 100).toFixed(1) : 0;
 
         setStats({

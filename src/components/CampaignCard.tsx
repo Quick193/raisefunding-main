@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Campaign } from '../types';
-import { formatCurrency, calculateProgress } from '../utils/format';
+import { formatCurrency, calculateProgress, isCampaignEnded } from '../utils/format';
 import { Calendar, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -37,12 +37,12 @@ export const CampaignCard = ({ campaign }: CampaignCardProps) => {
         <div className="flex items-center justify-between mb-2">
           <span
             className={`px-2 py-1 rounded-full text-xs font-semibold ${
-              campaign.status === 'active'
+              !isCampaignEnded(campaign)
                 ? 'bg-green-100 text-green-800'
                 : 'bg-gray-100 text-gray-800'
             }`}
           >
-            {campaign.status === 'active' ? t('common.active') : t('common.completed')}
+            {!isCampaignEnded(campaign) ? t('common.active') : t('common.completed')}
           </span>
           {campaign.profiles && (
             <div className="flex items-center text-sm text-gray-600">

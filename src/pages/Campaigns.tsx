@@ -7,7 +7,7 @@ import { CustomSelect } from '../components/CustomSelect';
 import ShinyText from '../components/ShinyText';
 import GlareHover from '../components/GlareHover';
 import { motion } from 'framer-motion';
-import { formatCurrency } from '../utils/format';
+import { formatCurrency, isCampaignEnded } from '../utils/format';
 import { useTranslation } from 'react-i18next';
 import { CampaignGridSkeleton } from '../components/Skeleton';
 
@@ -64,7 +64,8 @@ export const Campaigns = () => {
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
         campaign.description.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesFilter = filter === 'all' || campaign.status === filter;
+      const effectiveStatus = isCampaignEnded(campaign) ? 'completed' : 'active';
+      const matchesFilter = filter === 'all' || effectiveStatus === filter;
       const matchesCategory = selectedCategory === 'All' || campaign.category === selectedCategory;
       const matchesFeatured = !featuredOnly || (
         campaign.is_featured && campaign.featured_until && campaign.featured_until > nowIso
@@ -72,8 +73,8 @@ export const Campaigns = () => {
       return matchesSearch && matchesFilter && matchesCategory && matchesFeatured;
     })
     .sort((a, b) => {
-      const aFeatured = !!(a.is_featured && a.featured_until && a.featured_until > nowIso && a.status === 'active');
-      const bFeatured = !!(b.is_featured && b.featured_until && b.featured_until > nowIso && b.status === 'active');
+      const aFeatured = !!(a.is_featured && a.featured_until && a.featured_until > nowIso && !isCampaignEnded(a));
+      const bFeatured = !!(b.is_featured && b.featured_until && b.featured_until > nowIso && !isCampaignEnded(b));
       if (aFeatured && !bFeatured) return -1;
       if (!aFeatured && bFeatured) return 1;
       return 0;
@@ -287,7 +288,7 @@ export const Campaigns = () => {
 
                     {/* Status badge */}
                     <div className="absolute top-3 right-3 bg-orange-600 text-white px-3 py-1 rounded-full text-xs font-bold">
-                      {campaign.status === 'active' ? t('common.active') : t('common.completed')}
+                      {!isCampaignEnded(campaign) ? t('common.active') : t('common.completed')}
                     </div>
 
                     {/* Content overlay */}

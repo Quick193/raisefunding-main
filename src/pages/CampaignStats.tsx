@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/useAuth';
 import { Campaign, Donation } from '../types';
-import { formatCurrency, formatDate } from '../utils/format';
+import { formatCurrency, formatDate, isCampaignEnded } from '../utils/format';
 import { CountUp } from '../components/CountUp';
 import { TrendingUp, Users, IndianRupee, Calendar, ArrowLeft } from 'lucide-react';
 import { Skeleton } from '../components/Skeleton';
@@ -245,9 +245,9 @@ export const CampaignStats = () => {
               <div>
                 <div className="text-gray-500 text-sm mb-1">{t('stats.info_status')}</div>
                 <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                  campaign.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                  !isCampaignEnded(campaign) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                 }`}>
-                  {campaign.status === 'active' ? t('stats.status_active') : t('stats.status_completed')}
+                  {!isCampaignEnded(campaign) ? t('stats.status_active') : t('stats.status_completed')}
                 </span>
               </div>
 

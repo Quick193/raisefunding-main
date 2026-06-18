@@ -36,3 +36,17 @@ export const calculateProgress = (current: number | string, goal: number | strin
   if (g === 0) return 0;
   return Math.min(Math.round((c / g) * 100), 100);
 };
+
+// A campaign is "ended" if it was explicitly completed, or its end_date has
+// passed. Campaigns run through 11:59 PM on their end_date, so we compare
+// against the end of that day. Keep this as the single source of truth for
+// derived status — the DB `status` column is only flipped lazily (on detail
+// view), so listings must not rely on it alone.
+export const isCampaignEnded = (
+  campaign: { status?: string | null; end_date?: string | null }
+): boolean => {
+  if (campaign.status === 'completed') return true;
+  if (!campaign.end_date) return false;
+  const endOfDay = new Date(campaign.end_date.split('T')[0] + 'T23:59:59').getTime();
+  return endOfDay <= Date.now();
+};

@@ -10,6 +10,7 @@ import { CountUp } from '../components/CountUp';
 import BlurText from '../components/BlurText';
 import ClickSpark from '../components/ClickSpark';
 import { Zap, Star } from 'lucide-react';
+import { isCampaignEnded } from '../utils/format';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 
@@ -85,7 +86,7 @@ export const Home = () => {
 
       const { data: allCampaigns } = await supabase
         .from('campaigns')
-        .select('current_amount, status, supporter_count');
+        .select('current_amount, status, supporter_count, end_date');
 
       if (allCampaigns) {
         const totalRaised = allCampaigns.reduce(
@@ -93,7 +94,7 @@ export const Home = () => {
           0
         );
         const activeCampaigns = allCampaigns.filter(
-          (c) => c.status === 'active'
+          (c) => !isCampaignEnded(c)
         ).length;
         const totalSupporters = allCampaigns.reduce(
           (sum, c) => sum + Number(c.supporter_count || 0),

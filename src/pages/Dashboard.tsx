@@ -6,7 +6,7 @@ import { Campaign } from '../types';
 import { CampaignCard } from '../components/CampaignCard';
 import { CountUp } from '../components/CountUp';
 import { Plus, TrendingUp, Pencil, Trash2 } from 'lucide-react';
-import { formatCurrency } from '../utils/format';
+import { formatCurrency, isCampaignEnded } from '../utils/format';
 import { useTranslation } from 'react-i18next';
 import { Skeleton, CampaignGridSkeleton } from '../components/Skeleton';
 
@@ -64,13 +64,14 @@ export const Dashboard = () => {
 
   const filteredCampaigns = campaigns.filter((campaign) => {
     if (filter === 'all') return true;
-    return campaign.status === filter;
+    const effectiveStatus = isCampaignEnded(campaign) ? 'completed' : 'active';
+    return effectiveStatus === filter;
   });
 
   const stats = {
     total: campaigns.length,
-    active: campaigns.filter((c) => c.status === 'active').length,
-    completed: campaigns.filter((c) => c.status === 'completed').length,
+    active: campaigns.filter((c) => !isCampaignEnded(c)).length,
+    completed: campaigns.filter((c) => isCampaignEnded(c)).length,
     totalRaised: campaigns.reduce((sum, c) => sum + Number(c.current_amount), 0),
   };
 
