@@ -34,10 +34,29 @@ serve(async (req) => {
     // Look up the campaign and its creator's linked account.
     const { data: campaign, error: campErr } = await admin
       .from('campaigns')
-      .select('id, profiles:creator_id(razorpay_account_id)')
+      .select('id, current_amount, goal_amount, status, end_date, profiles:creator_id(razorpay_account_id)')
       .eq('id', campaign_id)
       .single();
     if (campErr || !campaign) return json({ error: 'Campaign not found' }, 404);
+
+    // Refuse donations to campaigns that are closed or already funded, and cap
+    // a donation so it can't push the total past the goal.
+    const ended =
+      campaign.status === 'completed' ||
+      (campaign.end_date &&
+        new Date(String(campaign.end_date).split('T')[0] + 'T23:59:59').getTime() <= Date.now());
+    if (ended) return json({ error: 'This campaign is closed to new donations.' }, 400);
+
+    const remaining = Number(campaign.goal_amount) - Number(campaign.current_amount);
+    if (remaining <= 0) {
+      return json({ error: 'This campaign has already reached its goal.' }, 400);
+    }
+    if (Number(amount) > remaining) {
+      return json(
+        { error: `Only ₹${remaining.toLocaleString('en-IN')} left to reach the goal.`, remaining },
+        400
+      );
+    }
 
     const creatorAccount = (campaign.profiles as { razorpay_account_id?: string } | null)
       ?.razorpay_account_id;
