@@ -14,6 +14,7 @@ import { CreateCampaign } from './pages/CreateCampaign';
 import { EditCampaign } from './pages/EditCampaign';
 import { Dashboard } from './pages/Dashboard';
 import { CampaignStats } from './pages/CampaignStats';
+import { PayoutSetup } from './pages/PayoutSetup';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { ForgotPassword } from './pages/ForgotPassword';
@@ -68,6 +69,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <CampaignStats />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/payouts"
+                element={
+                  <ProtectedRoute>
+                    <PayoutSetup />
                   </ProtectedRoute>
                 }
               />

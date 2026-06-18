@@ -20,6 +20,7 @@ import { Campaign } from '../types';
 import { formatCurrency } from '../utils/format';
 import { useTranslation } from 'react-i18next';
 import { Skeleton } from '../components/Skeleton';
+import { loadRazorpay, RazorpayHandlerResponse } from '../lib/razorpay';
 
 const getTipMessage = (category: string | null | undefined, title: string): string => {
   const cat = (category || '').toLowerCase();
@@ -49,6 +50,7 @@ export const CampaignDetail = () => {
   const [donateStep, setDonateStep] = useState<'idle' | 'amount' | 'tip' | 'summary' | 'success'>('idle');
   const [donateAmountStr, setDonateAmountStr] = useState('500');
   const [donateName, setDonateName] = useState('');
+  const [donateEmail, setDonateEmail] = useState('');
   const [tipAmount, setTipAmount] = useState(0);
   const [showPersuasion, setShowPersuasion] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -191,6 +193,7 @@ export const CampaignDetail = () => {
     setDonateStep('idle');
     setDonateAmountStr('500');
     setDonateName('');
+    setDonateEmail('');
     setTipAmount(0);
     setShowPersuasion(false);
     setDonateError('');
@@ -201,33 +204,79 @@ export const CampaignDetail = () => {
     setIsProcessing(true);
     setDonateError('');
     const donateAmount = Math.max(1, parseInt(donateAmountStr) || 1);
-    const totalAmount = donateAmount + tipAmount;
     const donorNameFinal = donateName.trim() || 'Anonymous';
+    const donorEmailFinal = donateEmail.trim();
 
     try {
-      const { error } = await supabase.from('donations').insert({
-        campaign_id: campaign.id,
-        donor_name: donorNameFinal,
-        donor_email: 'donor@example.com',
-        amount: totalAmount,
-      });
-
-      if (error) {
-        setDonateError('Could not record donation. Please try again.');
+      const ready = await loadRazorpay();
+      if (!ready) {
+        setDonateError('Could not load the payment gateway. Please try again.');
         setIsProcessing(false);
         return;
       }
 
-      setLocalDonors((prev) => [
-        { donor_name: donorNameFinal, amount: totalAmount, created_at: new Date().toISOString() },
-        ...prev,
-      ]);
+      // 1. Create the order server-side (also computes the Route split).
+      const { data: order, error: orderError } = await supabase.functions.invoke('donation-order', {
+        body: {
+          campaign_id: campaign.id,
+          amount: donateAmount,
+          tip: tipAmount,
+          donor_name: donorNameFinal,
+          donor_email: donorEmailFinal,
+        },
+      });
+      if (orderError || !order?.id) {
+        setDonateError(order?.error || 'Could not start the payment. Please try again.');
+        setIsProcessing(false);
+        return;
+      }
 
-      await fetchCampaign(campaign.id);
-      setDonateStep('success');
+      // 2. Open Razorpay Checkout (UPI / cards / netbanking).
+      const rzp = new window.Razorpay({
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        order_id: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        name: 'Raise',
+        description: campaign.title,
+        image: `${window.location.origin}/favicon.png`,
+        prefill: { name: donorNameFinal, email: donorEmailFinal },
+        theme: { color: '#ea580c' },
+        modal: { ondismiss: () => setIsProcessing(false) },
+        handler: async (response: RazorpayHandlerResponse) => {
+          // 3. Verify the signature and record the donation server-side.
+          const { data: result, error: verifyError } = await supabase.functions.invoke('donation-verify', {
+            body: {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              campaign_id: campaign.id,
+              donor_name: donorNameFinal,
+              donor_email: donorEmailFinal,
+              amount: donateAmount,
+            },
+          });
+
+          if (verifyError || !result?.success) {
+            setDonateError(
+              'Payment received but we could not confirm it instantly — it will be reflected shortly.'
+            );
+            setIsProcessing(false);
+            return;
+          }
+
+          setLocalDonors((prev) => [
+            { donor_name: donorNameFinal, amount: donateAmount, created_at: new Date().toISOString() },
+            ...prev,
+          ]);
+          await fetchCampaign(campaign.id);
+          setIsProcessing(false);
+          setDonateStep('success');
+        },
+      });
+      rzp.open();
     } catch {
       setDonateError('Something went wrong. Please try again.');
-    } finally {
       setIsProcessing(false);
     }
   };
@@ -755,11 +804,25 @@ export const CampaignDetail = () => {
                           className="w-full rounded-lg border border-orange-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
                         />
                       </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Email (for your receipt)</label>
+                        <input
+                          type="email"
+                          value={donateEmail}
+                          onChange={(e) => setDonateEmail(e.target.value)}
+                          placeholder="you@example.com"
+                          className="w-full rounded-lg border border-orange-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                      </div>
                       <div className="flex gap-2">
                         <button
                           type="button"
                           onClick={() => { setShowPersuasion(false); setDonateStep('tip'); }}
-                          disabled={!donateAmountStr || (parseInt(donateAmountStr) || 0) < 1}
+                          disabled={
+                            !donateAmountStr ||
+                            (parseInt(donateAmountStr) || 0) < 1 ||
+                            !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(donateEmail.trim())
+                          }
                           className="flex-1 bg-gradient-to-r from-orange-600 to-orange-500 text-white font-bold py-3 rounded-xl hover:shadow-lg transition-all disabled:opacity-50"
                         >
                           Continue

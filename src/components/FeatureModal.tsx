@@ -3,11 +3,15 @@ import { supabase } from '../lib/supabase';
 import { Star, X, Check, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../context/useAuth';
+import { loadRazorpay, RazorpayHandlerResponse } from '../lib/razorpay';
 
+// Prices shown to the user. The charge itself is enforced server-side in the
+// razorpay-order function (FEATURE_FEES_PAISE) — this is display only.
 const PLANS = [
-  { days: 7, label: '7 Days' },
-  { days: 30, label: '30 Days', popular: true },
-  { days: 90, label: '90 Days' },
+  { days: 7, label: '7 Days', price: 500 },
+  { days: 30, label: '30 Days', price: 2000, popular: true },
+  { days: 90, label: '90 Days', price: 5000 },
 ];
 
 interface Props {
@@ -19,6 +23,7 @@ interface Props {
 
 export const FeatureModal = ({ campaignId, campaignTitle, onClose, onSuccess }: Props) => {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const perks = [
     t('feature_modal.perk_1'),
     t('feature_modal.perk_2'),
@@ -35,27 +40,60 @@ export const FeatureModal = ({ campaignId, campaignTitle, onClose, onSuccess }: 
     setError('');
 
     try {
-      const featuredUntil = new Date();
-      featuredUntil.setDate(featuredUntil.getDate() + plan.days);
+      const ready = await loadRazorpay();
+      if (!ready) {
+        setError('Could not load the payment gateway. Please try again.');
+        setLoading(false);
+        return;
+      }
 
-      const { error: updateError } = await supabase
-        .from('campaigns')
-        .update({
-          is_featured: true,
-          featured_until: featuredUntil.toISOString(),
-          featured_since: new Date().toISOString(),
-        })
-        .eq('id', campaignId)
-        .select('id')
-        .single();
+      // 1. Create the featuring order (server sets the price from the plan).
+      const { data: order, error: orderError } = await supabase.functions.invoke('razorpay-order', {
+        body: { campaign_id: campaignId, days: plan.days },
+      });
+      if (orderError || !order?.id) {
+        setError(order?.error || 'Could not start the payment. Please try again.');
+        setLoading(false);
+        return;
+      }
 
-      if (updateError) throw updateError;
+      // 2. Open Razorpay Checkout.
+      const rzp = new window.Razorpay({
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        order_id: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        name: 'Raise',
+        description: `Feature campaign — ${plan.label}`,
+        image: `${window.location.origin}/favicon.png`,
+        prefill: { email: user?.email || '' },
+        theme: { color: '#ea580c' },
+        modal: { ondismiss: () => setLoading(false) },
+        handler: async (response: RazorpayHandlerResponse) => {
+          // 3. Verify the payment; the server flips the campaign to featured.
+          const { data: result, error: verifyError } = await supabase.functions.invoke('razorpay-verify', {
+            body: {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              campaign_id: campaignId,
+            },
+          });
 
-      setSuccess(true);
-      setTimeout(onSuccess, 1500);
+          if (verifyError || !result?.success) {
+            setError('Payment received but featuring could not be confirmed — it will be applied shortly.');
+            setLoading(false);
+            return;
+          }
+
+          setLoading(false);
+          setSuccess(true);
+          setTimeout(onSuccess, 1500);
+        },
+      });
+      rzp.open();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong.');
-    } finally {
       setLoading(false);
     }
   };
@@ -131,7 +169,9 @@ export const FeatureModal = ({ campaignId, campaignTitle, onClose, onSuccess }: 
                       <div className={`text-lg font-bold ${plan.days === p.days ? 'text-orange-600' : 'text-gray-900'}`}>
                         {p.label}
                       </div>
-                      <div className="text-xs text-gray-500 mt-1">{t('feature_modal.test_mode')}</div>
+                      <div className={`text-sm font-bold mt-1 ${plan.days === p.days ? 'text-orange-600' : 'text-gray-700'}`}>
+                        ₹{p.price.toLocaleString('en-IN')}
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -153,7 +193,7 @@ export const FeatureModal = ({ campaignId, campaignTitle, onClose, onSuccess }: 
                   ) : (
                     <>
                       <Star className="h-5 w-5 fill-white" />
-                      {t('feature_modal.feature_btn', { duration: plan.label })}
+                      Pay ₹{plan.price.toLocaleString('en-IN')} &amp; Feature ({plan.label})
                     </>
                   )}
                 </button>

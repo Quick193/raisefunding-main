@@ -23,3 +23,6 @@ dist-ssr
 .env
 .bolt/
 .claude/settings.local.json
+
+# Supabase CLI machine-local state
+supabase/.temp/

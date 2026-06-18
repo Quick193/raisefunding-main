@@ -6,13 +6,21 @@ const CORS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Server-side price list for featuring a campaign, in paise. The client cannot
+// influence the amount — it only picks a plan (days), and the fee is looked up
+// here. This money goes to the platform (no Route transfer).
+const FEATURE_FEES_PAISE: Record<number, number> = {
+  7: 50000,   // ₹500
+  30: 200000, // ₹2000
+  90: 500000, // ₹5000
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
   try {
-    // Verify caller is authenticated
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+    if (!authHeader) return json({ error: 'Unauthorized' }, 401);
 
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
@@ -20,11 +28,12 @@ serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     );
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+    if (!user) return json({ error: 'Unauthorized' }, 401);
 
-    const { amount, campaign_id } = await req.json();
-    if (!amount || !campaign_id) {
-      return new Response(JSON.stringify({ error: 'Missing amount or campaign_id' }), { status: 400 });
+    const { campaign_id, days } = await req.json();
+    const amount = FEATURE_FEES_PAISE[Number(days)];
+    if (!campaign_id || !amount) {
+      return json({ error: 'Missing campaign_id or invalid plan' }, 400);
     }
 
     const KEY_ID = Deno.env.get('RAZORPAY_KEY_ID')!;
@@ -33,26 +42,31 @@ serve(async (req) => {
     const response = await fetch('https://api.razorpay.com/v1/orders', {
       method: 'POST',
       headers: {
-        'Authorization': `Basic ${btoa(`${KEY_ID}:${KEY_SECRET}`)}`,
+        Authorization: `Basic ${btoa(`${KEY_ID}:${KEY_SECRET}`)}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        amount,                 // in paise
+        amount, // in paise, server-determined
         currency: 'INR',
-        receipt: `feat_${campaign_id.slice(0, 8)}_${Date.now()}`,
+        receipt: `feat_${String(campaign_id).slice(0, 8)}_${Date.now()}`,
+        // The plan is recorded on the order so verify can trust it instead of
+        // the client (which could otherwise pay for 7 days and claim 90).
+        notes: { type: 'feature', campaign_id, days: String(days) },
       }),
     });
 
     const order = await response.json();
     if (!response.ok) throw new Error(order.error?.description || 'Razorpay order creation failed');
 
-    return new Response(JSON.stringify(order), {
-      headers: { ...CORS, 'Content-Type': 'application/json' },
-    });
+    return json(order);
   } catch (err) {
-    return new Response(JSON.stringify({ error: (err as Error).message }), {
-      status: 500,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
-    });
+    return json({ error: (err as Error).message }, 500);
   }
 });
+
+function json(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...CORS, 'Content-Type': 'application/json' },
+  });
+}

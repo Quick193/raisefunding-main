@@ -6,64 +6,92 @@ const CORS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const ALLOWED_DAYS = [7, 30, 90];
+
+// Verifies a featuring payment and flips the campaign to featured. The featured
+// duration is read from the ORDER's notes (set server-side in razorpay-order),
+// never from the client, so a paid-for plan can't be upgraded for free.
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
   try {
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+    if (!authHeader) return json({ error: 'Unauthorized' }, 401);
 
-    // Verify caller owns the campaign
     const anonClient = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_ANON_KEY')!,
       { global: { headers: { Authorization: authHeader } } }
     );
     const { data: { user } } = await anonClient.auth.getUser();
-    if (!user) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+    if (!user) return json({ error: 'Unauthorized' }, 401);
 
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, campaign_id, days } = await req.json();
-
-    // Verify Razorpay signature
-    const KEY_SECRET = Deno.env.get('RAZORPAY_KEY_SECRET')!;
-    const encoder = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-      'raw', encoder.encode(KEY_SECRET),
-      { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
-    );
-    const sig = await crypto.subtle.sign(
-      'HMAC', key, encoder.encode(`${razorpay_order_id}|${razorpay_payment_id}`)
-    );
-    const generated = [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, '0')).join('');
-
-    if (generated !== razorpay_signature) {
-      return new Response(JSON.stringify({ error: 'Payment signature mismatch' }), { status: 400 });
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, campaign_id } = await req.json();
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return json({ error: 'Missing payment fields' }, 400);
     }
 
-    // Use service role to bypass RLS and update the campaign
+    const KEY_ID = Deno.env.get('RAZORPAY_KEY_ID')!;
+    const KEY_SECRET = Deno.env.get('RAZORPAY_KEY_SECRET')!;
+
+    // 1. Verify the payment signature.
+    const expected = await hmacHex(KEY_SECRET, `${razorpay_order_id}|${razorpay_payment_id}`);
+    if (expected !== razorpay_signature) {
+      return json({ error: 'Payment signature mismatch' }, 400);
+    }
+
+    // 2. Fetch the order to read the authoritative plan (days) we stored on it.
+    const orderRes = await fetch(`https://api.razorpay.com/v1/orders/${razorpay_order_id}`, {
+      headers: { Authorization: `Basic ${btoa(`${KEY_ID}:${KEY_SECRET}`)}` },
+    });
+    const order = await orderRes.json();
+    if (!orderRes.ok) throw new Error(order.error?.description || 'Could not fetch order');
+
+    const days = Number(order.notes?.days);
+    if (!ALLOWED_DAYS.includes(days)) {
+      return json({ error: 'Invalid plan on order' }, 400);
+    }
+
+    // 3. Flip the campaign to featured (service role, with ownership check).
     const adminClient = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    const featuredUntil = new Date();
-    featuredUntil.setDate(featuredUntil.getDate() + Number(days));
+    const now = new Date();
+    const featuredUntil = new Date(now);
+    featuredUntil.setDate(featuredUntil.getDate() + days);
 
     const { error } = await adminClient
       .from('campaigns')
-      .update({ is_featured: true, featured_until: featuredUntil.toISOString() })
+      .update({
+        is_featured: true,
+        featured_until: featuredUntil.toISOString(),
+        featured_since: now.toISOString(),
+      })
       .eq('id', campaign_id)
-      .eq('creator_id', user.id);   // ownership check
-
+      .eq('creator_id', user.id); // ownership check
     if (error) throw error;
 
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { ...CORS, 'Content-Type': 'application/json' },
-    });
+    return json({ success: true });
   } catch (err) {
-    return new Response(JSON.stringify({ error: (err as Error).message }), {
-      status: 500,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
-    });
+    return json({ error: (err as Error).message }, 500);
   }
 });
+
+async function hmacHex(secret: string, message: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw', encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  );
+  const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(message));
+  return [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+function json(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...CORS, 'Content-Type': 'application/json' },
+  });
+}

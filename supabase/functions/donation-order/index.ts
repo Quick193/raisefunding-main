@@ -1,0 +1,105 @@
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+// Platform fee taken from the donation (not the tip), in basis points. 500 = 5%.
+const PLATFORM_FEE_BPS = 500;
+
+// Creates a Razorpay order for a donation. If the campaign's creator has a Route
+// linked account, the order is split: (donation - platform fee) transfers to the
+// creator; the platform fee and any tip stay in the platform account. Donations
+// are open to anonymous donors, so this endpoint does not require auth.
+serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
+
+  try {
+    const { campaign_id, amount, tip = 0, donor_name, donor_email } = await req.json();
+
+    if (!campaign_id || !amount || Number(amount) < 1) {
+      return json({ error: 'Missing campaign_id or invalid amount' }, 400);
+    }
+    if (!donor_email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(donor_email)) {
+      return json({ error: 'A valid donor email is required' }, 400);
+    }
+
+    const admin = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+
+    // Look up the campaign and its creator's linked account.
+    const { data: campaign, error: campErr } = await admin
+      .from('campaigns')
+      .select('id, profiles:creator_id(razorpay_account_id)')
+      .eq('id', campaign_id)
+      .single();
+    if (campErr || !campaign) return json({ error: 'Campaign not found' }, 404);
+
+    const creatorAccount = (campaign.profiles as { razorpay_account_id?: string } | null)
+      ?.razorpay_account_id;
+
+    const donationPaise = Math.round(Number(amount) * 100);
+    const tipPaise = Math.round(Number(tip) * 100);
+    const feePaise = Math.floor((donationPaise * PLATFORM_FEE_BPS) / 10000);
+
+    const KEY_ID = Deno.env.get('RAZORPAY_KEY_ID')!;
+    const KEY_SECRET = Deno.env.get('RAZORPAY_KEY_SECRET')!;
+
+    const orderBody: Record<string, unknown> = {
+      amount: donationPaise + tipPaise, // total charged to the donor, in paise
+      currency: 'INR',
+      receipt: `don_${String(campaign_id).slice(0, 8)}_${Date.now()}`,
+      // notes ride along on the payment so the webhook can record the donation
+      // even if the client never calls back.
+      notes: {
+        type: 'donation',
+        campaign_id,
+        donor_name: donor_name || 'Anonymous',
+        donor_email,
+        donation_amount: String(amount), // rupees that count toward the campaign
+      },
+    };
+
+    // Only split when the creator can actually receive funds.
+    if (creatorAccount) {
+      orderBody.transfers = [
+        {
+          account: creatorAccount,
+          amount: donationPaise - feePaise,
+          currency: 'INR',
+          on_hold: false,
+          notes: { campaign_id },
+        },
+      ];
+    }
+
+    const response = await fetch('https://api.razorpay.com/v1/orders', {
+      method: 'POST',
+      headers: {
+        Authorization: `Basic ${btoa(`${KEY_ID}:${KEY_SECRET}`)}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(orderBody),
+    });
+
+    const order = await response.json();
+    if (!response.ok) {
+      throw new Error(order.error?.description || 'Razorpay order creation failed');
+    }
+
+    return json(order);
+  } catch (err) {
+    return json({ error: (err as Error).message }, 500);
+  }
+});
+
+function json(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...CORS, 'Content-Type': 'application/json' },
+  });
+}

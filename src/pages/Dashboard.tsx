@@ -5,7 +5,7 @@ import { useAuth } from '../context/useAuth';
 import { Campaign } from '../types';
 import { CampaignCard } from '../components/CampaignCard';
 import { CountUp } from '../components/CountUp';
-import { Plus, TrendingUp, Pencil, Trash2 } from 'lucide-react';
+import { Plus, TrendingUp, Pencil, Trash2, Landmark } from 'lucide-react';
 import { formatCurrency, isCampaignEnded } from '../utils/format';
 import { useTranslation } from 'react-i18next';
 import { Skeleton, CampaignGridSkeleton } from '../components/Skeleton';
@@ -110,13 +110,22 @@ export const Dashboard = () => {
                 {t('dashboard.subtitle')}
               </p>
             </div>
-            <Link
-              to="/create"
-              className="flex items-center space-x-2 bg-orange-600 text-white px-6 py-3 rounded-md hover:bg-orange-700 font-medium"
-            >
-              <Plus className="h-5 w-5" />
-              <span>{t('dashboard.new_campaign')}</span>
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link
+                to="/payouts"
+                className="flex items-center space-x-2 bg-white text-orange-700 border border-orange-200 px-5 py-3 rounded-md hover:bg-orange-50 font-medium"
+              >
+                <Landmark className="h-5 w-5" />
+                <span>Payout setup</span>
+              </Link>
+              <Link
+                to="/create"
+                className="flex items-center space-x-2 bg-orange-600 text-white px-6 py-3 rounded-md hover:bg-orange-700 font-medium"
+              >
+                <Plus className="h-5 w-5" />
+                <span>{t('dashboard.new_campaign')}</span>
+              </Link>
+            </div>
           </div>
         </div>
 
