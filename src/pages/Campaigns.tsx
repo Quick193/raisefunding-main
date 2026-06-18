@@ -36,6 +36,18 @@ export const Campaigns = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [featuredOnly, setFeaturedOnly] = useState(() => searchParams.get('featured') === 'true');
   const [page, setPage] = useState(1);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Toggling the Featured filter is often a no-op visually (featured campaigns
+  // already sort to the top), so flash the grid skeleton briefly to make the
+  // action feel responsive.
+  const handleToggleFeatured = () => {
+    setFeaturedOnly((v) => !v);
+    setPage(1);
+    setRefreshing(true);
+    topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(() => setRefreshing(false), 450);
+  };
 
   useEffect(() => {
     fetchCampaigns();
@@ -202,7 +214,7 @@ export const Campaigns = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => setFeaturedOnly((v) => !v)}
+              onClick={handleToggleFeatured}
               className={`px-4 sm:px-6 py-2 rounded-full font-semibold transition-all ${
                 featuredOnly
                   ? 'bg-gradient-to-r from-orange-600 to-orange-500 shadow-lg'
@@ -220,6 +232,9 @@ export const Campaigns = () => {
           </motion.div>
 
           {/* Campaigns Grid */}
+          {refreshing ? (
+            <CampaignGridSkeleton count={8} />
+          ) : (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -345,6 +360,7 @@ export const Campaigns = () => {
               ))
             )}
           </motion.div>
+          )}
 
           {/* Pagination Controls */}
           {totalPages > 1 && (
