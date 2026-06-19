@@ -29,11 +29,11 @@ export const PayoutSetup = () => {
       if (!user) return;
       const { data } = await supabase
         .from('profiles')
-        .select('full_name, email, razorpay_account_id')
+        .select('full_name, email, razorpay_fund_account_id')
         .eq('id', user.id)
         .single();
       if (data) {
-        setLinkedAccountId(data.razorpay_account_id ?? null);
+        setLinkedAccountId(data.razorpay_fund_account_id ?? null);
         setForm((f) => ({
           ...f,
           name: data.full_name || '',
@@ -64,11 +64,11 @@ export const PayoutSetup = () => {
     });
     setSubmitting(false);
 
-    if (fnError || !data?.razorpay_account_id) {
+    if (fnError || !data?.razorpay_fund_account_id) {
       setError(data?.error || 'Could not set up payouts. Please check your details and try again.');
       return;
     }
-    setLinkedAccountId(data.razorpay_account_id);
+    setLinkedAccountId(data.razorpay_fund_account_id);
   };
 
   if (loading) {

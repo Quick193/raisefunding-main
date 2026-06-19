@@ -6,9 +6,9 @@ const CORS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Onboards a campaign creator as a Razorpay Route "linked account" so donations
-// can be split/transferred to them. Stores the resulting acc_... id on their
-// profile. Must be called by the authenticated creator (their own account).
+// Sets up a creator's payout destination for the escrow model: a RazorpayX
+// Contact + Fund Account (bank). The resulting fund_account_id is what the
+// withdraw function pays out to. Must be called by the authenticated creator.
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
@@ -24,58 +24,59 @@ serve(async (req) => {
     const { data: { user } } = await anonClient.auth.getUser();
     if (!user) return json({ error: 'Unauthorized' }, 401);
 
-    const {
-      name,
-      email,
-      account_number,
-      ifsc,
-      beneficiary_name,
-      business_type = 'individual',
-    } = await req.json();
-
+    const { name, email, contact, account_number, ifsc, beneficiary_name } = await req.json();
     if (!name || !email || !account_number || !ifsc || !beneficiary_name) {
       return json({ error: 'Missing required fields' }, 400);
     }
 
     const KEY_ID = Deno.env.get('RAZORPAY_KEY_ID')!;
     const KEY_SECRET = Deno.env.get('RAZORPAY_KEY_SECRET')!;
+    const auth = `Basic ${btoa(`${KEY_ID}:${KEY_SECRET}`)}`;
 
-    // NOTE: this targets the classic Route "Linked Accounts" API. Field names can
-    // differ across Razorpay account API versions — adjust if your account uses
-    // the newer v2 onboarding (/v2/accounts + stakeholders + product config).
-    const response = await fetch('https://api.razorpay.com/v1/accounts', {
+    // 1. Create (or reuse) a RazorpayX Contact for the creator.
+    const contactRes = await fetch('https://api.razorpay.com/v1/contacts', {
       method: 'POST',
-      headers: {
-        Authorization: `Basic ${btoa(`${KEY_ID}:${KEY_SECRET}`)}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { Authorization: auth, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email,
         name,
-        tnc_accepted: true,
-        account_details: { business_name: name, business_type },
-        bank_account: { ifsc_code: ifsc, beneficiary_name, account_number },
-        notes: { profile_id: user.id },
+        email,
+        contact: contact || undefined,
+        type: 'customer',
+        reference_id: user.id,
       }),
     });
-
-    const account = await response.json();
-    if (!response.ok) {
-      throw new Error(account.error?.description || 'Linked account creation failed');
+    const contactJson = await contactRes.json();
+    if (!contactRes.ok) {
+      throw new Error(contactJson.error?.description || 'Contact creation failed');
     }
 
-    // Persist the linked account id on the creator's profile (service role).
+    // 2. Create a bank Fund Account under that contact.
+    const faRes = await fetch('https://api.razorpay.com/v1/fund_accounts', {
+      method: 'POST',
+      headers: { Authorization: auth, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contact_id: contactJson.id,
+        account_type: 'bank_account',
+        bank_account: { name: beneficiary_name, ifsc, account_number },
+      }),
+    });
+    const faJson = await faRes.json();
+    if (!faRes.ok) {
+      throw new Error(faJson.error?.description || 'Fund account creation failed');
+    }
+
+    // 3. Persist both ids on the creator's profile (service role).
     const adminClient = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
     const { error } = await adminClient
       .from('profiles')
-      .update({ razorpay_account_id: account.id })
+      .update({ razorpay_contact_id: contactJson.id, razorpay_fund_account_id: faJson.id })
       .eq('id', user.id);
     if (error) throw error;
 
-    return json({ razorpay_account_id: account.id });
+    return json({ razorpay_fund_account_id: faJson.id });
   } catch (err) {
     return json({ error: (err as Error).message }, 500);
   }

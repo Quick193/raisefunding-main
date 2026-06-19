@@ -65,6 +65,30 @@ serve(async (req) => {
           );
         }
       }
+    } else if (event.event?.startsWith('payout.')) {
+      // Keep a withdrawal's status in sync with RazorpayX.
+      const payout = event.payload?.payout?.entity;
+      if (payout?.id) {
+        const admin = createClient(
+          Deno.env.get('SUPABASE_URL')!,
+          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+        );
+        const map: Record<string, string> = {
+          processed: 'processed',
+          reversed: 'reversed',
+          failed: 'failed',
+          cancelled: 'failed',
+          rejected: 'failed',
+        };
+        const status = map[payout.status] || 'processing';
+        await admin
+          .from('withdrawals')
+          .update({
+            status,
+            processed_at: status === 'processed' ? new Date().toISOString() : null,
+          })
+          .eq('razorpay_payout_id', payout.id);
+      }
     }
 
     // Always 200 on a valid signature so Razorpay stops retrying.

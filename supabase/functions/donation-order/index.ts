@@ -6,13 +6,9 @@ const CORS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Platform fee taken from the donation (not the tip), in basis points. 500 = 5%.
-const PLATFORM_FEE_BPS = 500;
-
-// Creates a Razorpay order for a donation. If the campaign's creator has a Route
-// linked account, the order is split: (donation - platform fee) transfers to the
-// creator; the platform fee and any tip stay in the platform account. Donations
-// are open to anonymous donors, so this endpoint does not require auth.
+// Creates a Razorpay order for a donation. Donations pool in the platform's
+// account (escrow) and are paid out to the creator on withdrawal. Open to
+// anonymous donors, so this endpoint does not require auth.
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
@@ -31,10 +27,11 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    // Look up the campaign and its creator's linked account.
+    // Look up the campaign. Donations pool in the platform account (escrow
+    // model) — they are paid out to the creator on withdrawal, not split here.
     const { data: campaign, error: campErr } = await admin
       .from('campaigns')
-      .select('id, current_amount, goal_amount, status, end_date, profiles:creator_id(razorpay_account_id)')
+      .select('id, current_amount, goal_amount, status, end_date')
       .eq('id', campaign_id)
       .single();
     if (campErr || !campaign) return json({ error: 'Campaign not found' }, 404);
@@ -58,12 +55,8 @@ serve(async (req) => {
       );
     }
 
-    const creatorAccount = (campaign.profiles as { razorpay_account_id?: string } | null)
-      ?.razorpay_account_id;
-
     const donationPaise = Math.round(Number(amount) * 100);
     const tipPaise = Math.round(Number(tip) * 100);
-    const feePaise = Math.floor((donationPaise * PLATFORM_FEE_BPS) / 10000);
 
     const KEY_ID = Deno.env.get('RAZORPAY_KEY_ID')!;
     const KEY_SECRET = Deno.env.get('RAZORPAY_KEY_SECRET')!;
@@ -82,19 +75,6 @@ serve(async (req) => {
         donation_amount: String(amount), // rupees that count toward the campaign
       },
     };
-
-    // Only split when the creator can actually receive funds.
-    if (creatorAccount) {
-      orderBody.transfers = [
-        {
-          account: creatorAccount,
-          amount: donationPaise - feePaise,
-          currency: 'INR',
-          on_hold: false,
-          notes: { campaign_id },
-        },
-      ];
-    }
 
     const response = await fetch('https://api.razorpay.com/v1/orders', {
       method: 'POST',

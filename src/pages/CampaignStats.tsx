@@ -35,6 +35,27 @@ export const CampaignStats = () => {
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [donations, setDonations] = useState<Donation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [withdrawing, setWithdrawing] = useState(false);
+  const [confirmWithdraw, setConfirmWithdraw] = useState(false);
+  const [withdrawError, setWithdrawError] = useState('');
+
+  const handleWithdraw = async () => {
+    if (!id) return;
+    setWithdrawing(true);
+    setWithdrawError('');
+    const { data, error } = await supabase.functions.invoke('withdraw', { body: { campaign_id: id } });
+    setWithdrawing(false);
+    if (error || !data?.success) {
+      if (data?.needs_payout_account) {
+        navigate('/payouts');
+        return;
+      }
+      setWithdrawError(data?.error || 'Withdrawal failed. Please try again.');
+      return;
+    }
+    setConfirmWithdraw(false);
+    fetchData();
+  };
 
   const fetchData = useCallback(async () => {
     if (!id) return;
@@ -190,6 +211,78 @@ export const CampaignStats = () => {
           <h1 className="text-3xl font-bold text-gray-900 mb-1">{t('stats.title')}</h1>
           <p className="text-gray-600">{campaign.title}</p>
         </div>
+
+        {/* Withdrawal */}
+        {campaign.status === 'withdrawn' ? (
+          <div className="mb-8 rounded-2xl border border-green-200 bg-green-50 p-5">
+            <p className="font-bold text-green-700">✅ Funds withdrawn</p>
+            <p className="text-sm text-green-600 mt-1">
+              The raised amount has been paid out to your bank account.
+            </p>
+          </div>
+        ) : campaign.status === 'refunded' ? (
+          <div className="mb-8 rounded-2xl border border-gray-200 bg-gray-50 p-5">
+            <p className="font-bold text-gray-700">↩️ Refunded to donors</p>
+            <p className="text-sm text-gray-600 mt-1">
+              This campaign wasn't withdrawn within the claim window, so donations were refunded.
+            </p>
+          </div>
+        ) : (
+          <div className="mb-8 rounded-2xl border border-orange-200 bg-white p-5 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <p className="text-sm text-gray-500">Available to withdraw</p>
+                <p className="text-2xl font-black text-gray-900">
+                  {formatCurrency(Number(campaign.current_amount))}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  All-or-nothing — withdrawing pays out the full amount and closes the campaign.
+                </p>
+                {campaign.status === 'completed' && campaign.claim_deadline && (
+                  <p className="text-xs font-semibold text-amber-700 mt-2">
+                    Funding closed. Withdraw by {formatDate(campaign.claim_deadline)} (30-day claim
+                    window) — after that, donations are refunded to donors.
+                  </p>
+                )}
+              </div>
+              <div className="shrink-0">
+                {!confirmWithdraw ? (
+                  <button
+                    onClick={() => setConfirmWithdraw(true)}
+                    disabled={Number(campaign.current_amount) < 500}
+                    className="bg-gradient-to-r from-orange-600 to-orange-500 text-white font-bold px-6 py-3 rounded-xl hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Withdraw funds
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleWithdraw}
+                      disabled={withdrawing}
+                      className="bg-gradient-to-r from-orange-600 to-orange-500 text-white font-bold px-5 py-3 rounded-xl hover:shadow-lg transition-all disabled:opacity-60"
+                    >
+                      {withdrawing ? 'Processing…' : 'Confirm withdrawal'}
+                    </button>
+                    <button
+                      onClick={() => setConfirmWithdraw(false)}
+                      className="rounded-xl bg-gray-100 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-200"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+            {Number(campaign.current_amount) < 500 && (
+              <p className="mt-3 text-xs text-gray-500">Minimum withdrawal is ₹500.</p>
+            )}
+            {withdrawError && (
+              <p className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+                {withdrawError}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Stat Cards */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

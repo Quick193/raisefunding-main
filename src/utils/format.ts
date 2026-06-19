@@ -45,7 +45,7 @@ export const calculateProgress = (current: number | string, goal: number | strin
 export const isCampaignEnded = (
   campaign: { status?: string | null; end_date?: string | null }
 ): boolean => {
-  if (campaign.status === 'completed') return true;
+  if (campaign.status && ['completed', 'withdrawn', 'refunded'].includes(campaign.status)) return true;
   if (!campaign.end_date) return false;
   const endOfDay = new Date(campaign.end_date.split('T')[0] + 'T23:59:59').getTime();
   return endOfDay <= Date.now();
