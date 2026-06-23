@@ -120,6 +120,7 @@ export const Home = () => {
     { question: t('home.faq_q3'), answer: t('home.faq_a3') },
     { question: t('home.faq_q4'), answer: t('home.faq_a4') },
     { question: t('home.faq_q5'), answer: t('home.faq_a5') },
+    { question: t('home.faq_q6'), answer: t('home.faq_a6') },
   ];
 
   return (

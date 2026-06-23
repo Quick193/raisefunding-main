@@ -376,7 +376,7 @@ export const AboutUs = () => {
             },
             {
               title: t('about.pricing_premium_title'),
-              value: '1%',
+              value: 'From ₹500',
               icon: Star,
               color: 'bg-green-50',
               description: t('about.pricing_premium_desc'),
