@@ -366,6 +366,7 @@ export const AboutUs = () => {
               icon: PiggyBank,
               color: 'bg-green-50',
               description: t('about.pricing_platform_desc'),
+              tiers: undefined as { price: string; days: string }[] | undefined,
             },
             {
               title: t('about.pricing_payment_title'),
@@ -373,6 +374,7 @@ export const AboutUs = () => {
               icon: CreditCard,
               color: 'bg-blue-50',
               description: t('about.pricing_payment_desc'),
+              tiers: undefined as { price: string; days: string }[] | undefined,
             },
             {
               title: t('about.pricing_premium_title'),
@@ -380,6 +382,11 @@ export const AboutUs = () => {
               icon: Star,
               color: 'bg-green-50',
               description: t('about.pricing_premium_desc'),
+              tiers: [
+                { price: '₹500', days: '7d' },
+                { price: '₹2,000', days: '30d' },
+                { price: '₹5,000', days: '90d' },
+              ] as { price: string; days: string }[] | undefined,
             },
           ].map((pricing, idx) => (
             <motion.div
@@ -404,6 +411,19 @@ export const AboutUs = () => {
                 {pricing.value}
               </div>
               <p className="text-gray-700">{pricing.description}</p>
+              {pricing.tiers && (
+                <div className="mt-4 grid grid-cols-3 gap-2">
+                  {pricing.tiers.map((tier) => (
+                    <div
+                      key={tier.days}
+                      className="rounded-lg bg-white/70 border border-gray-200 py-2 px-1"
+                    >
+                      <div className="text-sm sm:text-base font-black text-gray-900">{tier.price}</div>
+                      <div className="text-[11px] text-gray-500">{tier.days}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </motion.div>
           ))}
         </div>
