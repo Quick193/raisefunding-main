@@ -37,6 +37,17 @@ export const calculateProgress = (current: number | string, goal: number | strin
   return Math.min(Math.round((c / g) * 100), 100);
 };
 
+// Compact money for summary stats, on the Indian lakh/crore scale:
+// ₹1,234 / ₹1.5L (1,00,000) / ₹2.3Cr (1,00,00,000). For exact amounts that
+// must show every digit, use formatCurrency instead.
+export const formatCompactINR = (amount: number | string | null | undefined): string => {
+  const n = Math.round(Number(amount) || 0);
+  const fmt = (v: number) => v.toFixed(2).replace(/\.?0+$/, '');
+  if (n >= 10000000) return `₹${fmt(n / 10000000)}Cr`;
+  if (n >= 100000) return `₹${fmt(n / 100000)}L`;
+  return `₹${n.toLocaleString('en-IN')}`;
+};
+
 // A campaign is "ended" if it was explicitly completed, or its end_date has
 // passed. Campaigns run through 11:59 PM on their end_date, so we compare
 // against the end of that day. Keep this as the single source of truth for

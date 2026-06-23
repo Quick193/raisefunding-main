@@ -792,7 +792,7 @@ export const CampaignDetail = () => {
                                 : 'bg-white text-gray-700 border-gray-200 hover:border-orange-300'
                             }`}
                           >
-                            ₹{amt.toLocaleString()}
+                            ₹{amt.toLocaleString('en-IN')}
                           </button>
                         ))}
                       </div>
@@ -914,18 +914,18 @@ export const CampaignDetail = () => {
                       <div className="space-y-2 bg-orange-50 rounded-xl p-4">
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-600">Donation to campaign</span>
-                          <span className="font-semibold">₹{(parseInt(donateAmountStr) || 0).toLocaleString()}</span>
+                          <span className="font-semibold">₹{(parseInt(donateAmountStr) || 0).toLocaleString('en-IN')}</span>
                         </div>
                         {tipAmount > 0 && (
                           <div className="flex justify-between text-sm">
                             <span className="text-gray-600">Tip to Raise</span>
-                            <span className="font-semibold">₹{tipAmount.toLocaleString()}</span>
+                            <span className="font-semibold">₹{tipAmount.toLocaleString('en-IN')}</span>
                           </div>
                         )}
                         <div className="border-t border-orange-200 pt-2 flex justify-between font-bold text-base">
                           <span>Total</span>
                           <span className="text-orange-600">
-                            ₹{((parseInt(donateAmountStr) || 0) + tipAmount).toLocaleString()}
+                            ₹{((parseInt(donateAmountStr) || 0) + tipAmount).toLocaleString('en-IN')}
                           </span>
                         </div>
                       </div>
@@ -962,7 +962,7 @@ export const CampaignDetail = () => {
                       <p className="text-sm text-green-700 mb-1">
                         Your contribution of{' '}
                         <span className="font-bold">
-                          ₹{((parseInt(donateAmountStr) || 0) + tipAmount).toLocaleString()}
+                          ₹{((parseInt(donateAmountStr) || 0) + tipAmount).toLocaleString('en-IN')}
                         </span>{' '}
                         has been recorded.
                       </p>
@@ -994,7 +994,7 @@ export const CampaignDetail = () => {
                           <span className="text-sm font-medium text-gray-800 truncate max-w-[120px]">{donor.donor_name}</span>
                         </div>
                         <span className="text-xs font-bold text-orange-600 flex-shrink-0">
-                          ₹{donor.amount.toLocaleString()}
+                          ₹{donor.amount.toLocaleString('en-IN')}
                         </span>
                       </div>
                     ))}

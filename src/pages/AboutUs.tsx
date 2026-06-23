@@ -21,7 +21,7 @@ import {
   Wallet,
   Star,
 } from 'lucide-react';
-import { isCampaignEnded } from '../utils/format';
+import { isCampaignEnded, formatCompactINR } from '../utils/format';
 
 export const AboutUs = () => {
   const { t } = useTranslation();
@@ -200,8 +200,8 @@ export const AboutUs = () => {
             },
             {
               icon: Lightbulb,
-              count: stats.totalRaised / 100000,
-              countFormat: (n: number) => `₹${n.toFixed(1)}L`,
+              count: stats.totalRaised,
+              countFormat: formatCompactINR,
               label: t('about.stat_raised'),
             },
             {
@@ -571,7 +571,7 @@ export const AboutUs = () => {
                     onClick={() => setGoalStr(String(amount))}
                     className="bg-white bg-opacity-20 hover:bg-opacity-30 border border-white border-opacity-30 rounded-lg px-4 py-3 font-bold transition-all"
                   >
-                    ₹{amount.toLocaleString()}
+                    ₹{amount.toLocaleString('en-IN')}
                   </motion.button>
                 ))}
               </div>

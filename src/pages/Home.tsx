@@ -10,7 +10,7 @@ import { CountUp } from '../components/CountUp';
 import BlurText from '../components/BlurText';
 import ClickSpark from '../components/ClickSpark';
 import { Zap, Star } from 'lucide-react';
-import { isCampaignEnded } from '../utils/format';
+import { isCampaignEnded, formatCompactINR } from '../utils/format';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 
@@ -152,8 +152,8 @@ export const Home = () => {
           {[
             {
               label: t('home.total_raised'),
-              count: stats.totalRaised / 1000000,
-              countFormat: (n: number) => `$${n.toFixed(1)}M`,
+              count: stats.totalRaised,
+              countFormat: formatCompactINR,
               subtext: t('home.funds_mobilized'),
             },
             {
