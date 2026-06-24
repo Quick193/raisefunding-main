@@ -224,28 +224,28 @@ export const Dashboard = () => {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredCampaigns.map((campaign) => (
-                <div key={campaign.id} className="relative flex flex-col">
+                <div key={campaign.id} className="relative flex flex-col min-w-0">
                   <CampaignCard campaign={campaign} />
                   <div className="flex gap-2 mt-2">
                     <Link
                       to={`/dashboard/campaign/${campaign.id}`}
-                      className="flex-1 text-center bg-orange-50 border border-orange-200 px-3 py-2 rounded-xl text-sm font-semibold text-orange-600 hover:bg-orange-100 transition-colors"
+                      className="flex-1 min-w-0 text-center bg-orange-50 border border-orange-200 px-2 py-2 rounded-xl text-sm font-semibold text-orange-600 hover:bg-orange-100 transition-colors"
                     >
                       {t('dashboard.view_stats')}
                     </Link>
                     <button
                       onClick={() => navigate(`/campaign/${campaign.id}/edit`)}
-                      className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-100 transition-colors"
+                      className="flex flex-1 min-w-0 items-center justify-center gap-1.5 bg-gray-50 border border-gray-200 px-2 py-2 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-100 transition-colors"
                     >
-                      <Pencil className="h-3.5 w-3.5" />
+                      <Pencil className="h-3.5 w-3.5 flex-shrink-0" />
                       {t('dashboard.edit')}
                     </button>
                     <button
                       onClick={() => handleDelete(campaign.id, campaign.title)}
                       disabled={deletingId === campaign.id}
-                      className="flex items-center gap-1.5 bg-red-50 border border-red-200 px-3 py-2 rounded-xl text-sm font-semibold text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50"
+                      className="flex flex-1 min-w-0 items-center justify-center gap-1.5 bg-red-50 border border-red-200 px-2 py-2 rounded-xl text-sm font-semibold text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50"
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Trash2 className="h-3.5 w-3.5 flex-shrink-0" />
                       {deletingId === campaign.id ? '…' : t('dashboard.delete')}
                     </button>
                   </div>
