@@ -101,7 +101,7 @@ export const Dashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
                 {t('dashboard.title')}
@@ -110,17 +110,17 @@ export const Dashboard = () => {
                 {t('dashboard.subtitle')}
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <Link
                 to="/payouts"
-                className="flex items-center space-x-2 bg-white text-orange-700 border border-orange-200 px-5 py-3 rounded-md hover:bg-orange-50 font-medium"
+                className="flex items-center justify-center space-x-2 bg-white text-orange-700 border border-orange-200 px-5 py-3 rounded-md hover:bg-orange-50 font-medium"
               >
                 <Landmark className="h-5 w-5" />
                 <span>Payout setup</span>
               </Link>
               <Link
                 to="/create"
-                className="flex items-center space-x-2 bg-orange-600 text-white px-6 py-3 rounded-md hover:bg-orange-700 font-medium"
+                className="flex items-center justify-center space-x-2 bg-orange-600 text-white px-6 py-3 rounded-md hover:bg-orange-700 font-medium"
               >
                 <Plus className="h-5 w-5" />
                 <span>{t('dashboard.new_campaign')}</span>
