@@ -57,7 +57,7 @@ export const Campaigns = () => {
     try {
       const { data, error } = await supabase
         .from('campaigns')
-        .select('*, profiles(full_name, email)')
+        .select('*, profiles(full_name)')
         .order('created_at', { ascending: false });
       if (error) throw error;
       setCampaigns(data || []);

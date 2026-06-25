@@ -29,7 +29,7 @@ export const PayoutSetup = () => {
       if (!user) return;
       const { data } = await supabase
         .from('profiles')
-        .select('full_name, email, razorpay_fund_account_id')
+        .select('full_name, razorpay_fund_account_id')
         .eq('id', user.id)
         .single();
       if (data) {
@@ -37,7 +37,7 @@ export const PayoutSetup = () => {
         setForm((f) => ({
           ...f,
           name: data.full_name || '',
-          email: data.email || '',
+          email: user.email || '',
           beneficiary_name: data.full_name || '',
         }));
       }

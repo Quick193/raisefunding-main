@@ -41,7 +41,7 @@ export const Home = () => {
       // Falls back to simple query if featured_since column not yet migrated.
       const { data: protectedData, error: protectedError } = await supabase
         .from('campaigns')
-        .select('*, profiles(full_name, email)')
+        .select('*, profiles(full_name)')
         .eq('status', 'active')
         .eq('is_featured', true)
         .gt('featured_until', now)
@@ -53,7 +53,7 @@ export const Home = () => {
       if (protectedError) {
         const { data: fallbackData } = await supabase
           .from('campaigns')
-          .select('*, profiles(full_name, email)')
+          .select('*, profiles(full_name)')
           .eq('status', 'active')
           .eq('is_featured', true)
           .gt('featured_until', now)
@@ -69,7 +69,7 @@ export const Home = () => {
         if (remainingSlots > 0) {
           const { data: eligibleData } = await supabase
             .from('campaigns')
-            .select('*, profiles(full_name, email)')
+            .select('*, profiles(full_name)')
             .eq('status', 'active')
             .eq('is_featured', true)
             .gt('featured_until', now)

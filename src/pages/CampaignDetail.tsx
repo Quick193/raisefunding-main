@@ -75,8 +75,7 @@ export const CampaignDetail = () => {
         .select(`
           *,
           profiles (
-            full_name,
-            email
+            full_name
           )
         `)
         .eq('id', campaignId)
@@ -85,21 +84,11 @@ export const CampaignDetail = () => {
       if (error) throw error;
 
       if (data) {
-        let campaignData = data;
-
-        // Auto-complete expired campaigns (campaigns end at 11:59 PM on their end_date)
-        if (data.end_date && data.status === 'active') {
-          const dateStr = data.end_date.split('T')[0] + 'T23:59:59';
-          const daysRemaining = Math.ceil(
-            (new Date(dateStr).getTime() - Date.now()) / 86400000
-          );
-          if (daysRemaining <= 0) {
-            await supabase.from('campaigns').update({ status: 'completed' }).eq('id', campaignId);
-            campaignData = { ...data, status: 'completed' };
-          }
-        }
-
-        setCampaign(campaignData as typeof data);
+        // Display uses isCampaignEnded (date-aware), and the daily job flips
+        // expired campaigns to 'completed' with a claim window. We no longer
+        // write status from the client here — doing so set no claim_deadline
+        // (escaping refunds) and tripped RLS for non-owner viewers.
+        setCampaign(data as typeof data);
 
         // Pre-load supporters for campaign creator
         if (data.creator_id) fetchSupporters(campaignId);
@@ -111,9 +100,8 @@ export const CampaignDetail = () => {
             .select(`
               *,
               profiles (
-                full_name,
-                email
-              )
+            full_name
+          )
             `)
             .eq('category', data.category)
             .neq('id', campaignId)

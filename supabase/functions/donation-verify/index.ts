@@ -13,24 +13,34 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
   try {
-    const {
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature,
-      campaign_id,
-      donor_name,
-      donor_email,
-      amount,
-    } = await req.json();
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = await req.json();
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return json({ error: 'Missing payment fields' }, 400);
     }
 
+    const KEY_ID = Deno.env.get('RAZORPAY_KEY_ID')!;
     const KEY_SECRET = Deno.env.get('RAZORPAY_KEY_SECRET')!;
+
+    // 1. Verify the payment signature.
     const expected = await hmacHex(KEY_SECRET, `${razorpay_order_id}|${razorpay_payment_id}`);
     if (expected !== razorpay_signature) {
       return json({ error: 'Payment signature mismatch' }, 400);
+    }
+
+    // 2. Fetch the order and read the AUTHORITATIVE donation details from the
+    // notes we set server-side in donation-order. Never trust client-supplied
+    // amount/campaign — otherwise a real ₹1 payment could record any amount.
+    const orderRes = await fetch(`https://api.razorpay.com/v1/orders/${razorpay_order_id}`, {
+      headers: { Authorization: `Basic ${btoa(`${KEY_ID}:${KEY_SECRET}`)}` },
+    });
+    const order = await orderRes.json();
+    if (!orderRes.ok) throw new Error(order.error?.description || 'Could not fetch order');
+
+    const notes = order.notes || {};
+    const amount = Number(notes.donation_amount);
+    if (notes.type !== 'donation' || !notes.campaign_id || !(amount >= 1)) {
+      return json({ error: 'Invalid order' }, 400);
     }
 
     const admin = createClient(
@@ -40,10 +50,10 @@ serve(async (req) => {
 
     const { error } = await admin.from('donations').upsert(
       {
-        campaign_id,
-        donor_name: donor_name || 'Anonymous',
-        donor_email,
-        amount: Number(amount),
+        campaign_id: notes.campaign_id,
+        donor_name: notes.donor_name || 'Anonymous',
+        donor_email: notes.donor_email,
+        amount,
         razorpay_order_id,
         razorpay_payment_id,
         status: 'captured',

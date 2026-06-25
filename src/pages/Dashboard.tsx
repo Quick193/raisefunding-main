@@ -28,8 +28,7 @@ export const Dashboard = () => {
         .select(`
           *,
           profiles (
-            full_name,
-            email
+            full_name
           )
         `)
         .eq('creator_id', user.id)

@@ -56,7 +56,9 @@ serve(async (req) => {
     }
 
     const donationPaise = Math.round(Number(amount) * 100);
-    const tipPaise = Math.round(Number(tip) * 100);
+    // Clamp tip to >= 0 so it can't be used to charge less than the donation
+    // amount credited to the campaign.
+    const tipPaise = Math.max(0, Math.round(Number(tip) * 100));
 
     const KEY_ID = Deno.env.get('RAZORPAY_KEY_ID')!;
     const KEY_SECRET = Deno.env.get('RAZORPAY_KEY_SECRET')!;
