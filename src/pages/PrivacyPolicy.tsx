@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
-const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <div className="mb-10">
+const Section = ({ title, children, id }: { title: string; children: React.ReactNode; id?: string }) => (
+  <div id={id} className="mb-10 scroll-mt-24">
     <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b border-orange-100">{title}</h2>
     <div className="text-gray-700 leading-relaxed space-y-3">{children}</div>
   </div>

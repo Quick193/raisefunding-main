@@ -65,7 +65,7 @@ export const FeaturedCarousel = ({ campaigns }: FeaturedCarouselProps) => {
         transition={{ duration: 0.35, ease: 'easeInOut' }}
         className="grid grid-cols-1 md:grid-cols-3 gap-6"
       >
-        {visibleItems.map((campaign, idx) => {
+        {visibleItems.map((campaign) => {
           const progress = calculateProgress(campaign.current_amount, campaign.goal_amount);
           const daysLeft = campaign.end_date
             ? Math.ceil(
