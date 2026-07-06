@@ -84,11 +84,10 @@ export const Dashboard = () => {
       Number(c.current_amount) > 0
   );
 
-  // Prompt the creator to claim, at most once per browser session.
+  // Prompt the creator to claim every time the dashboard loads (new session,
+  // reload, or navigation back here) while any campaign has unclaimed funds.
   useEffect(() => {
-    if (claimable.length > 0 && !sessionStorage.getItem('claim_prompt_dismissed')) {
-      setShowClaim(true);
-    }
+    if (claimable.length > 0) setShowClaim(true);
   }, [claimable.length]);
 
   if (loading) {
@@ -118,10 +117,7 @@ export const Dashboard = () => {
       {showClaim && claimable.length > 0 && (
         <ClaimFundsModal
           campaigns={claimable}
-          onClose={() => {
-            setShowClaim(false);
-            sessionStorage.setItem('claim_prompt_dismissed', '1');
-          }}
+          onClose={() => setShowClaim(false)}
         />
       )}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
