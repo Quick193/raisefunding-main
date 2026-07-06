@@ -66,28 +66,43 @@ serve(async (req) => {
         }
       }
     } else if (event.event?.startsWith('payout.')) {
-      // Keep a withdrawal's status in sync with RazorpayX.
       const payout = event.payload?.payout?.entity;
       if (payout?.id) {
         const admin = createClient(
           Deno.env.get('SUPABASE_URL')!,
           Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
         );
-        const map: Record<string, string> = {
-          processed: 'processed',
-          reversed: 'reversed',
-          failed: 'failed',
-          cancelled: 'failed',
-          rejected: 'failed',
-        };
-        const status = map[payout.status] || 'processing';
-        await admin
+        const { data: wd } = await admin
           .from('withdrawals')
-          .update({
-            status,
-            processed_at: status === 'processed' ? new Date().toISOString() : null,
-          })
-          .eq('razorpay_payout_id', payout.id);
+          .select('campaign_id')
+          .eq('razorpay_payout_id', payout.id)
+          .maybeSingle();
+
+        if (payout.status === 'processed') {
+          // Payout confirmed — the creator has their money, so the campaign is
+          // fully settled. Delete it (cascades donations + the withdrawal row).
+          if (wd?.campaign_id) {
+            await admin.from('campaigns').delete().eq('id', wd.campaign_id);
+          }
+        } else if (['failed', 'reversed', 'cancelled', 'rejected'].includes(payout.status)) {
+          // Payout didn't go through — reopen the campaign so it can be claimed
+          // again, and mark the withdrawal failed.
+          await admin
+            .from('withdrawals')
+            .update({ status: 'failed' })
+            .eq('razorpay_payout_id', payout.id);
+          if (wd?.campaign_id) {
+            await admin
+              .from('campaigns')
+              .update({ status: 'completed', withdrawn_at: null })
+              .eq('id', wd.campaign_id);
+          }
+        } else {
+          await admin
+            .from('withdrawals')
+            .update({ status: 'processing' })
+            .eq('razorpay_payout_id', payout.id);
+        }
       }
     }
 
