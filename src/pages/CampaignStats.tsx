@@ -249,7 +249,7 @@ export const CampaignStats = () => {
                 {!confirmWithdraw ? (
                   <button
                     onClick={() => setConfirmWithdraw(true)}
-                    disabled={Number(campaign.current_amount) < 500}
+                    disabled={Number(campaign.current_amount) <= 0}
                     className="bg-gradient-to-r from-orange-600 to-orange-500 text-white font-bold px-6 py-3 rounded-xl hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Withdraw funds
@@ -273,9 +273,6 @@ export const CampaignStats = () => {
                 )}
               </div>
             </div>
-            {Number(campaign.current_amount) < 500 && (
-              <p className="mt-3 text-xs text-gray-500">Minimum withdrawal is ₹500.</p>
-            )}
             {withdrawError && (
               <p className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
                 {withdrawError}

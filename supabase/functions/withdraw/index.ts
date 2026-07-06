@@ -7,7 +7,6 @@ const CORS = {
 };
 
 // Minimum a creator can withdraw, in rupees.
-const MIN_WITHDRAWAL = 500;
 // Fee passed on to the creator, in basis points. 0 = Raise charges nothing and
 // absorbs Razorpay's processing cost from platform revenue (tips + featuring).
 // Set > 0 to pass the processing cost through to the creator instead.
@@ -52,8 +51,8 @@ serve(async (req) => {
     }
 
     const gross = Number(campaign.current_amount);
-    if (gross < MIN_WITHDRAWAL) {
-      return json({ error: `You can withdraw once you've raised at least ₹${MIN_WITHDRAWAL}.` }, 400);
+    if (gross <= 0) {
+      return json({ error: 'This campaign has no funds to withdraw.' }, 400);
     }
 
     const { data: profile } = await admin
