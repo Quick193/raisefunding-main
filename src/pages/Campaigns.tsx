@@ -77,7 +77,10 @@ export const Campaigns = () => {
         .includes(searchTerm.toLowerCase()) ||
         campaign.description.toLowerCase().includes(searchTerm.toLowerCase());
       const effectiveStatus = isCampaignEnded(campaign) ? 'completed' : 'active';
-      const matchesFilter = filter === 'all' || effectiveStatus === filter;
+      // Completed campaigns only appear under the "Completed" filter — "All"
+      // and "Active" both show active (non-ended) campaigns only.
+      const matchesFilter =
+        filter === 'completed' ? effectiveStatus === 'completed' : effectiveStatus === 'active';
       const matchesCategory = selectedCategory === 'All' || campaign.category === selectedCategory;
       const matchesFeatured = !featuredOnly || (
         campaign.is_featured && campaign.featured_until && campaign.featured_until > nowIso

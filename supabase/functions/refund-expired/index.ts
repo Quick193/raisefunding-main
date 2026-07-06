@@ -34,6 +34,15 @@ serve(async (req) => {
     .not('end_date', 'is', null)
     .lt('end_date', nowIso.split('T')[0]);
 
+  // Backfill a claim window for any 'completed' campaign missing one (e.g.
+  // legacy campaigns completed before the escrow model), so they get their
+  // 30 days and then flow into the refund + purge pipeline.
+  await admin
+    .from('campaigns')
+    .update({ claim_deadline: claimDeadline })
+    .eq('status', 'completed')
+    .is('claim_deadline', null);
+
   // Step 2: refund campaigns that closed and were never withdrawn within the
   // claim window. Batch to avoid timeouts.
   const { data: campaigns, error } = await admin

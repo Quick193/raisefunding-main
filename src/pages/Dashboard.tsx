@@ -9,6 +9,7 @@ import { Plus, TrendingUp, Pencil, Trash2, Landmark } from 'lucide-react';
 import { formatCurrency, isCampaignEnded } from '../utils/format';
 import { useTranslation } from 'react-i18next';
 import { Skeleton, CampaignGridSkeleton } from '../components/Skeleton';
+import { ClaimFundsModal } from '../components/ClaimFundsModal';
 
 export const Dashboard = () => {
   const { t } = useTranslation();
@@ -18,6 +19,7 @@ export const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [showClaim, setShowClaim] = useState(false);
 
   const fetchCampaigns = useCallback(async () => {
     if (!user) return;
@@ -74,6 +76,21 @@ export const Dashboard = () => {
     totalRaised: campaigns.reduce((sum, c) => sum + Number(c.current_amount), 0),
   };
 
+  // Ended campaigns that still hold funds the creator hasn't withdrawn.
+  const claimable = campaigns.filter(
+    (c) =>
+      isCampaignEnded(c) &&
+      !['withdrawn', 'refunded'].includes(c.status || '') &&
+      Number(c.current_amount) > 0
+  );
+
+  // Prompt the creator to claim, at most once per browser session.
+  useEffect(() => {
+    if (claimable.length > 0 && !sessionStorage.getItem('claim_prompt_dismissed')) {
+      setShowClaim(true);
+    }
+  }, [claimable.length]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 py-8">
@@ -98,6 +115,15 @@ export const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 py-8">
+      {showClaim && claimable.length > 0 && (
+        <ClaimFundsModal
+          campaigns={claimable}
+          onClose={() => {
+            setShowClaim(false);
+            sessionStorage.setItem('claim_prompt_dismissed', '1');
+          }}
+        />
+      )}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
