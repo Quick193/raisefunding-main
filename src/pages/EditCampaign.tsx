@@ -130,7 +130,6 @@ export const EditCampaign = () => {
           image_url: getTrustedCampaignMediaUrl(formData.imageUrl) || null,
           video_url: formData.videoUrl.trim() || null,
           end_date: formData.endDate || null,
-          status: formData.status,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id);
@@ -152,15 +151,12 @@ export const EditCampaign = () => {
     }
 
     try {
-      const { error: updateError } = await supabase
-        .from('campaigns')
-        .update({
-          status: 'completed',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', id);
-
-      if (updateError) throw updateError;
+      const { data, error: fnError } = await supabase.functions.invoke('end-campaign', {
+        body: { campaign_id: id },
+      });
+      if (fnError || !data?.success) {
+        throw new Error(data?.error || 'Failed to end campaign');
+      }
 
       navigate(`/campaign/${id}`);
     } catch (err) {
@@ -347,18 +343,6 @@ export const EditCampaign = () => {
                   placeholder={t('edit.video_url_placeholder')}
                 />
               </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t('edit.status_label')}
-              </label>
-              <CustomSelect
-                value={formData.status === 'active' ? 'Active' : 'Completed'}
-                onChange={(val) => setFormData((p) => ({ ...p, status: val === 'Active' ? 'active' : 'completed' }))}
-                options={['Active', 'Completed']}
-                buttonClassName="py-2"
-              />
             </div>
 
             <div className="flex gap-4 pt-4">

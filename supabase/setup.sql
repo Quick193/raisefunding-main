@@ -503,5 +503,7 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW
   EXECUTE FUNCTION handle_new_user();
 
-REVOKE SELECT (email, phone_number, razorpay_account_id, razorpay_contact_id, razorpay_fund_account_id)
+-- razorpay_fund_account_id stays readable: the owner's payout page reads it,
+-- and it's an opaque token that cannot move money without RazorpayX credentials.
+REVOKE SELECT (email, phone_number, razorpay_account_id, razorpay_contact_id)
   ON public.profiles FROM anon, authenticated;

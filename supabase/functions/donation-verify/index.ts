@@ -56,7 +56,30 @@ serve(async (req) => {
       p_razorpay_order_id: razorpay_order_id,
       p_razorpay_payment_id: razorpay_payment_id,
     });
-    if (error) throw error;
+    if (error) {
+      // The payment was captured, but the donation can't be credited — e.g. the
+      // goal filled or the campaign closed between checkout and confirmation.
+      // Refund the donor in full instead of keeping money we can't record.
+      const businessRejection =
+        /exceeds the remaining campaign goal|closed to new donations|campaign not found/i.test(
+          error.message || ''
+        );
+      if (businessRejection) {
+        await fetch(`https://api.razorpay.com/v1/payments/${razorpay_payment_id}/refund`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Basic ${btoa(`${KEY_ID}:${KEY_SECRET}`)}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ speed: 'optimum', notes: { reason: 'campaign_unavailable' } }),
+        });
+        return json(
+          { error: "This campaign can no longer accept your donation — you'll be refunded.", refunded: true },
+          409
+        );
+      }
+      throw error;
+    }
 
     return json({ success: true });
   } catch (err) {
