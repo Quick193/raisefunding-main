@@ -40,7 +40,7 @@ serve(async (req) => {
     // Load the campaign (ownership-checked) and the creator's payout account.
     const { data: campaign } = await admin
       .from('campaigns')
-      .select('id, creator_id, current_amount, status')
+      .select('id, creator_id, status')
       .eq('id', campaign_id)
       .eq('creator_id', user.id)
       .single();
@@ -49,19 +49,44 @@ serve(async (req) => {
     if (campaign.status === 'withdrawn' || campaign.status === 'refunded') {
       return json({ error: 'This campaign has already been settled.' }, 400);
     }
+    if (campaign.status === 'withdrawal_pending') {
+      return json({ error: 'A withdrawal for this campaign is already in progress.' }, 400);
+    }
+    if (campaign.status !== 'completed') {
+      return json({ error: 'This campaign is not ready to withdraw yet.' }, 400);
+    }
 
-    const gross = Number(campaign.current_amount);
+    const { data: verifiedDonations, error: donationError } = await admin
+      .from('donations')
+      .select('amount')
+      .eq('campaign_id', campaign_id)
+      .eq('status', 'captured')
+      .not('razorpay_payment_id', 'is', null);
+    if (donationError) throw donationError;
+
+    const gross = (verifiedDonations ?? []).reduce((sum, donation) => (
+      sum + Number(donation.amount || 0)
+    ), 0);
     if (gross <= 0) {
       return json({ error: 'This campaign has no funds to withdraw.' }, 400);
     }
 
     const { data: profile } = await admin
       .from('profiles')
-      .select('razorpay_fund_account_id')
+      .select('razorpay_fund_account_id, payout_account_ready_at')
       .eq('id', user.id)
       .single();
     if (!profile?.razorpay_fund_account_id) {
       return json({ error: 'Set up your payout account first.', needs_payout_account: true }, 400);
+    }
+    if (
+      profile.payout_account_ready_at &&
+      new Date(profile.payout_account_ready_at).getTime() > Date.now()
+    ) {
+      return json({
+        error: 'This payout account is still in the security cooling-off period.',
+        payout_account_ready_at: profile.payout_account_ready_at,
+      }, 400);
     }
 
     // Don't re-pay a campaign with an in-flight or completed withdrawal.
@@ -106,7 +131,11 @@ serve(async (req) => {
       throw new Error(payout.error?.description || 'Payout failed');
     }
 
-    // Record the withdrawal and close the campaign.
+    // Record the withdrawal. Only close the campaign after RazorpayX confirms a
+    // processed payout; queued/processing payouts remain visibly pending.
+    const withdrawalStatus = payout.status === 'processed' ? 'processed' : 'processing';
+    const campaignStatus = payout.status === 'processed' ? 'withdrawn' : 'withdrawal_pending';
+    const withdrawnAt = payout.status === 'processed' ? new Date().toISOString() : null;
     await admin.from('withdrawals').upsert(
       {
         campaign_id,
@@ -115,17 +144,25 @@ serve(async (req) => {
         fee_amount: fee,
         net_amount: net,
         razorpay_payout_id: payout.id,
-        status: payout.status === 'processed' ? 'processed' : 'processing',
+        status: withdrawalStatus,
+        processed_at: withdrawnAt,
       },
       { onConflict: 'campaign_id' }
     );
     await admin
       .from('campaigns')
-      .update({ status: 'withdrawn', withdrawn_at: new Date().toISOString() })
+      .update({ status: campaignStatus, withdrawn_at: withdrawnAt })
       .eq('id', campaign_id)
       .eq('creator_id', user.id);
 
-    return json({ success: true, net_amount: net, fee_amount: fee, payout_id: payout.id });
+    return json({
+      success: true,
+      net_amount: net,
+      fee_amount: fee,
+      payout_id: payout.id,
+      payout_status: payout.status,
+      campaign_status: campaignStatus,
+    });
   } catch (err) {
     return json({ error: (err as Error).message }, 500);
   }

@@ -24,3 +24,27 @@ DROP INDEX IF EXISTS idx_campaigns_featured;
 CREATE INDEX IF NOT EXISTS idx_campaigns_featured
   ON campaigns (is_featured, featured_until DESC, featured_since DESC)
   WHERE is_featured = true;
+
+CREATE OR REPLACE FUNCTION protect_featured_columns()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF current_user IN ('anon', 'authenticated') THEN
+    IF TG_OP = 'INSERT' THEN
+      NEW.is_featured := false;
+      NEW.featured_until := NULL;
+      NEW.featured_since := NULL;
+    ELSE
+      NEW.is_featured := OLD.is_featured;
+      NEW.featured_until := OLD.featured_until;
+      NEW.featured_since := OLD.featured_since;
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SET search_path = public;
+
+DROP TRIGGER IF EXISTS protect_featured ON campaigns;
+CREATE TRIGGER protect_featured
+  BEFORE INSERT OR UPDATE ON campaigns
+  FOR EACH ROW
+  EXECUTE FUNCTION protect_featured_columns();

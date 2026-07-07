@@ -36,6 +36,21 @@ serve(async (req) => {
       return json({ error: 'Missing campaign_id or invalid plan' }, 400);
     }
 
+    const admin = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+
+    const { data: campaign, error: campaignError } = await admin
+      .from('campaigns')
+      .select('id, creator_id')
+      .eq('id', campaign_id)
+      .eq('creator_id', user.id)
+      .single();
+    if (campaignError || !campaign) {
+      return json({ error: 'Campaign not found' }, 404);
+    }
+
     const KEY_ID = Deno.env.get('RAZORPAY_KEY_ID')!;
     const KEY_SECRET = Deno.env.get('RAZORPAY_KEY_SECRET')!;
 
@@ -51,7 +66,7 @@ serve(async (req) => {
         receipt: `feat_${String(campaign_id).slice(0, 8)}_${Date.now()}`,
         // The plan is recorded on the order so verify can trust it instead of
         // the client (which could otherwise pay for 7 days and claim 90).
-        notes: { type: 'feature', campaign_id, days: String(days) },
+        notes: { type: 'feature', campaign_id: campaign.id, creator_id: user.id, days: String(days) },
       }),
     });
 

@@ -24,7 +24,12 @@ ALTER TABLE campaign_reports ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Anyone can create campaign reports"
   ON campaign_reports FOR INSERT
   TO anon, authenticated
-  WITH CHECK (true);
+  WITH CHECK (
+    status = 'open'
+    AND reviewed_at IS NULL
+    AND created_at >= now() - interval '5 minutes'
+    AND created_at <= now() + interval '5 minutes'
+  );
 
 CREATE INDEX IF NOT EXISTS idx_campaign_reports_campaign_id ON campaign_reports(campaign_id);
 CREATE INDEX IF NOT EXISTS idx_campaign_reports_status ON campaign_reports(status);

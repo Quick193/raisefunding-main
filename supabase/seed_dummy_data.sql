@@ -2,26 +2,21 @@
 -- seed_dummy_data.sql
 -- Run this in Supabase → SQL Editor
 -- Creates 50 regular + 33 featured dummy campaigns
--- Also adds a public SELECT policy on donations
+-- Keeps donation privacy policies unchanged
+-- Requires: SET app.allow_test_seed = 'true';
 -- =============================================================
 
--- 1. ADD PUBLIC SELECT POLICY ON DONATIONS (allows donor list to be public)
-DO $policy$
+DO $guard$
 BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies
-    WHERE schemaname = 'public'
-      AND tablename  = 'donations'
-      AND policyname = 'Donations are publicly viewable'
-  ) THEN
-    EXECUTE 'CREATE POLICY "Donations are publicly viewable" ON public.donations FOR SELECT USING (true)';
+  IF current_setting('app.allow_test_seed', true) <> 'true' THEN
+    RAISE EXCEPTION 'Refusing to run test seed. Set app.allow_test_seed=true in a local/dev database only.';
   END IF;
-END $policy$;
+END $guard$;
 
--- 2. CLEAR ALL EXISTING CAMPAIGNS (cascades to donations, reports, etc.)
+-- 1. CLEAR ALL EXISTING CAMPAIGNS (cascades to donations, reports, etc.)
 TRUNCATE public.campaigns CASCADE;
 
--- 3. INSERT DUMMY CAMPAIGNS
+-- 2. INSERT DUMMY CAMPAIGNS
 DO $seed$
 DECLARE
   pid text;

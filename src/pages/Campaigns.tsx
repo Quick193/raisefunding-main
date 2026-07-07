@@ -10,6 +10,7 @@ import { motion } from 'framer-motion';
 import { formatCurrency, isCampaignEnded } from '../utils/format';
 import { useTranslation } from 'react-i18next';
 import { CampaignGridSkeleton } from '../components/Skeleton';
+import { getTrustedCampaignMediaUrl } from '../utils/media';
 
 const CAMPAIGNS_PER_PAGE = 28;
 
@@ -287,11 +288,12 @@ export const Campaigns = () => {
                   className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 cursor-pointer"
                 >
                   <div className="relative h-56">
-                    {campaign.image_url ? (
+                    {getTrustedCampaignMediaUrl(campaign.image_url) ? (
                       <img
-                        src={campaign.image_url}
+                        src={getTrustedCampaignMediaUrl(campaign.image_url)!}
                         alt={campaign.title}
                         className="w-full h-full object-cover"
+                        referrerPolicy="no-referrer"
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">

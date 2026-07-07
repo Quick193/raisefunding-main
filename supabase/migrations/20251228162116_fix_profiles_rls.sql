@@ -14,12 +14,15 @@ BEGIN
   -- Recreate policies with proper security context
   CREATE POLICY "System can create profiles"
     ON profiles FOR INSERT
-    WITH CHECK (true);
+    TO authenticated
+    WITH CHECK (auth.uid() = id);
 
   CREATE POLICY "Users can view all profiles"
     ON profiles FOR SELECT
     TO authenticated, anon
     USING (true);
+
+  REVOKE SELECT (email) ON profiles FROM anon, authenticated;
 
   CREATE POLICY "Users can update own profile"
     ON profiles FOR UPDATE

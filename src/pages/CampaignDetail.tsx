@@ -21,6 +21,7 @@ import { formatCurrency } from '../utils/format';
 import { useTranslation } from 'react-i18next';
 import { Skeleton } from '../components/Skeleton';
 import { loadRazorpay, RazorpayHandlerResponse } from '../lib/razorpay';
+import { getTrustedCampaignMediaUrl } from '../utils/media';
 
 const getTipMessage = (category: string | null | undefined, title: string): string => {
   const cat = (category || '').toLowerCase();
@@ -137,13 +138,16 @@ export const CampaignDetail = () => {
     setReportError('');
 
     try {
-      const { error } = await supabase.from('campaign_reports').insert({
-        campaign_id: campaign.id,
-        reporter_email: reporterEmail.trim() || null,
-        reason: reportReason.trim(),
+      const { data, error } = await supabase.functions.invoke('campaign-report', {
+        body: {
+          campaign_id: campaign.id,
+          reporter_email: reporterEmail.trim() || null,
+          reason: reportReason.trim(),
+        },
       });
 
       if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Failed to submit report. Please try again.');
       setReportStatus('success');
       setReporterEmail('');
       setReportReason('');
@@ -167,12 +171,14 @@ export const CampaignDetail = () => {
     } else if (platform === 'twitter') {
       window.open(
         `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`,
-        '_blank'
+        '_blank',
+        'noopener,noreferrer'
       );
     } else if (platform === 'facebook') {
       window.open(
         `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
-        '_blank'
+        '_blank',
+        'noopener,noreferrer'
       );
     }
   };
@@ -378,11 +384,12 @@ export const CampaignDetail = () => {
             >
               {/* Campaign Image */}
               <div className="relative h-96 overflow-hidden">
-                {campaign.image_url ? (
+                {getTrustedCampaignMediaUrl(campaign.image_url) ? (
                   <img
-                    src={campaign.image_url}
+                    src={getTrustedCampaignMediaUrl(campaign.image_url)!}
                     alt={campaign.title}
                     className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
                   />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
@@ -533,9 +540,9 @@ export const CampaignDetail = () => {
                   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.95 }} className="mt-8">
                     <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('campaign.gallery_title')}</h2>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                      {campaign.media.filter((m) => m.type === 'image').map((item, i) => (
+                      {campaign.media.filter((m) => m.type === 'image' && getTrustedCampaignMediaUrl(m.url)).map((item, i) => (
                         <div key={i} className="rounded-xl overflow-hidden aspect-square border border-orange-100">
-                          <img src={item.url} alt={item.name || `Photo ${i + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                          <img src={getTrustedCampaignMediaUrl(item.url)!} alt={item.name || `Photo ${i + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" referrerPolicy="no-referrer" />
                         </div>
                       ))}
                     </div>
@@ -559,18 +566,19 @@ export const CampaignDetail = () => {
                         {allVideos.map((v, i) => {
                           const ytMatch = v.url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/);
                           const viMatch = v.url.match(/vimeo\.com\/(\d+)/);
-                          const isDirect = /\.(mp4|webm|ogg|mov)(\?|$)/i.test(v.url) || v.url.includes('/storage/v1/object/public/');
+                          const trustedDirectUrl = getTrustedCampaignMediaUrl(v.url);
+                          const isDirect = trustedDirectUrl && /\.(mp4|webm|ogg|mov)(\?|$)/i.test(trustedDirectUrl);
                           if (ytMatch || viMatch) {
                             const src = ytMatch ? `https://www.youtube.com/embed/${ytMatch[1]}` : `https://player.vimeo.com/video/${viMatch![1]}`;
                             return (
                               <div key={i} className="relative w-full rounded-xl overflow-hidden" style={{ paddingTop: '56.25%' }}>
-                                <iframe src={src} className="absolute inset-0 w-full h-full"
+                                <iframe src={src} title={v.name || `Campaign video ${i + 1}`} className="absolute inset-0 w-full h-full" referrerPolicy="no-referrer"
                                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
                               </div>
                             );
                           }
                           if (isDirect) {
-                            return <video key={i} controls className="w-full rounded-xl border border-orange-200" src={v.url} />;
+                            return <video key={i} controls className="w-full rounded-xl border border-orange-200" src={trustedDirectUrl} />;
                           }
                           return null;
                         })}
@@ -628,11 +636,12 @@ export const CampaignDetail = () => {
                       className="bg-white rounded-xl overflow-hidden border border-orange-200/50 cursor-pointer hover:shadow-xl transition-all"
                     >
                       <div className="relative h-40">
-                        {related.image_url ? (
+                        {getTrustedCampaignMediaUrl(related.image_url) ? (
                           <img
-                            src={related.image_url}
+                            src={getTrustedCampaignMediaUrl(related.image_url)!}
                             alt={related.title}
                             className="w-full h-full object-cover"
+                            referrerPolicy="no-referrer"
                           />
                         ) : (
                           <div className="w-full h-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">

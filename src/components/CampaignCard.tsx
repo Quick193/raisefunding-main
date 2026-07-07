@@ -3,6 +3,7 @@ import { Campaign } from '../types';
 import { formatCurrency, calculateProgress, isCampaignEnded } from '../utils/format';
 import { Calendar, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { getTrustedCampaignMediaUrl } from '../utils/media';
 
 interface CampaignCardProps {
   campaign: Campaign;
@@ -11,6 +12,7 @@ interface CampaignCardProps {
 export const CampaignCard = ({ campaign }: CampaignCardProps) => {
   const { t } = useTranslation();
   const progress = calculateProgress(campaign.current_amount, campaign.goal_amount);
+  const imageUrl = getTrustedCampaignMediaUrl(campaign.image_url);
 
   return (
     <Link
@@ -18,11 +20,12 @@ export const CampaignCard = ({ campaign }: CampaignCardProps) => {
       className="block bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-shadow border border-orange-100"
     >
       <div className="h-48 bg-gray-200 overflow-hidden">
-        {campaign.image_url ? (
+        {imageUrl ? (
           <img
-            src={campaign.image_url}
+            src={imageUrl}
             alt={campaign.title}
             className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-400 to-orange-600">

@@ -8,6 +8,12 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 // Configure in Razorpay Dashboard → Settings → Webhooks, pointing at this
 // function's URL, subscribed to `payment.captured`, with a secret stored as
 // RAZORPAY_WEBHOOK_SECRET.
+const FEATURE_FEES_PAISE: Record<number, number> = {
+  7: 50000,
+  30: 200000,
+  90: 500000,
+};
+
 serve(async (req) => {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
 
@@ -32,37 +38,70 @@ serve(async (req) => {
         );
 
         if (notes.type === 'feature') {
-          // Feature payment — mark the campaign featured (backstop for the
-          // client-side razorpay-verify call). Setting the same values twice
-          // is harmless, so no idempotency key is needed.
+          // Feature payment backstop. The payment id is consumed once in
+          // feature_payments so a captured payment cannot be replayed.
           const days = Number(notes.days);
-          if (days > 0) {
-            const now = new Date();
-            const featuredUntil = new Date(now);
-            featuredUntil.setDate(featuredUntil.getDate() + days);
-            await admin
+          const expectedAmount = FEATURE_FEES_PAISE[days];
+          if (expectedAmount && Number(payment.amount) === expectedAmount) {
+            const { data: campaign } = await admin
               .from('campaigns')
-              .update({
-                is_featured: true,
-                featured_until: featuredUntil.toISOString(),
-                featured_since: now.toISOString(),
-              })
-              .eq('id', notes.campaign_id);
+              .select('id, creator_id')
+              .eq('id', notes.campaign_id)
+              .single();
+
+            if (campaign && notes.creator_id && notes.creator_id !== campaign.creator_id) {
+              throw new Error('Feature payment creator mismatch');
+            }
+
+            const { data: existingPayment } = await admin
+              .from('feature_payments')
+              .select('campaign_id')
+              .eq('razorpay_payment_id', payment.id)
+              .maybeSingle();
+
+            let shouldApplyFeature = false;
+            if (campaign && !existingPayment) {
+              const { error: featurePaymentError } = await admin.from('feature_payments').insert({
+                campaign_id: campaign.id,
+                creator_id: campaign.creator_id,
+                razorpay_order_id: payment.order_id,
+                razorpay_payment_id: payment.id,
+                amount_paise: expectedAmount,
+                days,
+              });
+              if (featurePaymentError && featurePaymentError.code !== '23505') {
+                throw featurePaymentError;
+              }
+              shouldApplyFeature = !featurePaymentError;
+            }
+
+            if (shouldApplyFeature) {
+              const now = new Date();
+              const featuredUntil = new Date(now);
+              featuredUntil.setDate(featuredUntil.getDate() + days);
+              await admin
+                .from('campaigns')
+                .update({
+                  is_featured: true,
+                  featured_until: featuredUntil.toISOString(),
+                  featured_since: now.toISOString(),
+                })
+                .eq('id', notes.campaign_id);
+            }
           }
         } else {
           // Donation (notes.type === 'donation', or legacy with no type).
-          await admin.from('donations').upsert(
-            {
-              campaign_id: notes.campaign_id,
-              donor_name: notes.donor_name || 'Anonymous',
-              donor_email: notes.donor_email || payment.email,
-              amount: Number(notes.donation_amount),
-              razorpay_order_id: payment.order_id,
-              razorpay_payment_id: payment.id,
-              status: 'captured',
-            },
-            { onConflict: 'razorpay_payment_id', ignoreDuplicates: true }
-          );
+          const { error: donationError } = await admin.rpc('record_verified_donation', {
+            p_campaign_id: notes.campaign_id,
+            p_donor_name: notes.donor_name || 'Anonymous',
+            p_donor_email: notes.donor_email || payment.email,
+            p_amount: Number(notes.donation_amount),
+            p_razorpay_order_id: payment.order_id,
+            p_razorpay_payment_id: payment.id,
+          });
+          if (donationError) {
+            console.error('Donation recording failed:', donationError.message);
+          }
         }
       }
     } else if (event.event?.startsWith('payout.')) {
@@ -79,10 +118,16 @@ serve(async (req) => {
           .maybeSingle();
 
         if (payout.status === 'processed') {
-          // Payout confirmed — the creator has their money, so the campaign is
-          // fully settled. Delete it (cascades donations + the withdrawal row).
+          // Payout confirmed — keep the financial audit trail and mark settlement.
+          await admin
+            .from('withdrawals')
+            .update({ status: 'processed', processed_at: new Date().toISOString() })
+            .eq('razorpay_payout_id', payout.id);
           if (wd?.campaign_id) {
-            await admin.from('campaigns').delete().eq('id', wd.campaign_id);
+            await admin
+              .from('campaigns')
+              .update({ status: 'withdrawn', withdrawn_at: new Date().toISOString() })
+              .eq('id', wd.campaign_id);
           }
         } else if (['failed', 'reversed', 'cancelled', 'rejected'].includes(payout.status)) {
           // Payout didn't go through — reopen the campaign so it can be claimed
@@ -102,6 +147,13 @@ serve(async (req) => {
             .from('withdrawals')
             .update({ status: 'processing' })
             .eq('razorpay_payout_id', payout.id);
+          if (wd?.campaign_id) {
+            await admin
+              .from('campaigns')
+              .update({ status: 'withdrawal_pending', withdrawn_at: null })
+              .eq('id', wd.campaign_id)
+              .neq('status', 'withdrawn');
+          }
         }
       }
     }

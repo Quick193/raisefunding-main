@@ -27,6 +27,22 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
+    const rateLimitKey = [
+      clientIp(req),
+      String(campaign_id),
+      String(donor_email).trim().toLowerCase(),
+    ].join(':');
+    const { data: allowed, error: rateLimitError } = await admin.rpc('check_rate_limit', {
+      p_scope: 'donation_order',
+      p_key: rateLimitKey,
+      p_max_requests: 10,
+      p_window_seconds: 600,
+    });
+    if (rateLimitError) throw rateLimitError;
+    if (!allowed) {
+      return json({ error: 'Too many donation attempts. Please try again later.' }, 429);
+    }
+
     // Look up the campaign. Donations pool in the platform account (escrow
     // model) — they are paid out to the creator on withdrawal, not split here.
     const { data: campaign, error: campErr } = await admin
@@ -103,4 +119,13 @@ function json(body: unknown, status = 200) {
     status,
     headers: { ...CORS, 'Content-Type': 'application/json' },
   });
+}
+
+function clientIp(req: Request) {
+  return (
+    req.headers.get('cf-connecting-ip') ||
+    req.headers.get('x-real-ip') ||
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    'unknown'
+  );
 }

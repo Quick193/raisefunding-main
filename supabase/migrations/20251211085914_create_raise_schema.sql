@@ -50,6 +50,8 @@ CREATE POLICY "Users can view all profiles"
   TO authenticated
   USING (true);
 
+REVOKE SELECT (email) ON profiles FROM anon, authenticated;
+
 CREATE POLICY "Users can insert own profile"
   ON profiles FOR INSERT
   TO authenticated
@@ -112,16 +114,6 @@ CREATE TABLE IF NOT EXISTS donations (
 
 ALTER TABLE donations ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Anyone can view donations"
-  ON donations FOR SELECT
-  TO anon, authenticated
-  USING (true);
-
-CREATE POLICY "Anyone can create donations"
-  ON donations FOR INSERT
-  TO anon, authenticated
-  WITH CHECK (true);
-
 CREATE POLICY "Campaign creators can view donations for their campaigns"
   ON donations FOR SELECT
   TO authenticated
@@ -143,7 +135,7 @@ BEGIN
   WHERE id = NEW.campaign_id;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Create trigger for donations
 DROP TRIGGER IF EXISTS donation_created ON donations;

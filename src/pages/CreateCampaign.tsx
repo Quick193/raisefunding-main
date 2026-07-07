@@ -9,6 +9,7 @@ import { DatePicker } from '../components/DatePicker';
 import { FeatureModal } from '../components/FeatureModal';
 import { MediaItem } from '../types';
 import { useTranslation } from 'react-i18next';
+import { getTrustedCampaignMediaUrl, isAllowedCampaignVideoUrl } from '../utils/media';
 
 const CATEGORY_OPTIONS = [
   'Medical', 'Education', 'Social Impact', 'Emergency',
@@ -50,8 +51,9 @@ export const CreateCampaign = () => {
   };
 
   const uploadFile = async (file: File, folder: string) => {
+    if (!user) throw new Error('You must be signed in to upload media.');
     const ext = file.name.split('.').pop();
-    const path = `campaigns/${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const path = `campaigns/${user.id}/${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     const { error: upErr } = await supabase.storage
       .from('campaign-media')
       .upload(path, file, { upsert: true });
@@ -112,6 +114,12 @@ export const CreateCampaign = () => {
     if (isNaN(goal) || goal < 100) return t('create.error_goal_min');
     if (goal > 100_000_000) return t('create.error_goal_max');
     if (!formData.endDate) return 'Please select an end date for your campaign.';
+    if (formData.imageUrl && !getTrustedCampaignMediaUrl(formData.imageUrl)) {
+      return 'Use an uploaded campaign image or a trusted campaign media URL.';
+    }
+    if (formData.videoUrl && !isAllowedCampaignVideoUrl(formData.videoUrl)) {
+      return 'Use an uploaded campaign video, YouTube, or Vimeo URL.';
+    }
     return null;
   };
 
@@ -141,7 +149,7 @@ export const CreateCampaign = () => {
           goal_amount: parseFloat(formData.goalAmount),
           category: formData.category,
           location: formData.location.trim() || null,
-          image_url: formData.imageUrl || null,
+          image_url: getTrustedCampaignMediaUrl(formData.imageUrl) || null,
           video_url: formData.videoUrl.trim() || null,
           media: mediaItems,
           end_date: formData.endDate,
@@ -242,9 +250,9 @@ export const CreateCampaign = () => {
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
                 {t('create.cover_label')} <span className="text-gray-400 font-normal">{t('create.cover_optional')}</span>
               </label>
-              {(imagePreview || formData.imageUrl) && (
+              {(imagePreview || getTrustedCampaignMediaUrl(formData.imageUrl)) && (
                 <div className="relative mb-3 rounded-xl overflow-hidden h-48 border border-orange-200">
-                  <img src={imagePreview || formData.imageUrl} alt="Cover preview" className="w-full h-full object-cover"
+                  <img src={imagePreview || getTrustedCampaignMediaUrl(formData.imageUrl)!} alt="Cover preview" className="w-full h-full object-cover" referrerPolicy="no-referrer"
                     onError={() => setImagePreview('')} />
                   <button type="button"
                     onClick={() => { setFormData((p) => ({ ...p, imageUrl: '' })); setImagePreview(''); }}

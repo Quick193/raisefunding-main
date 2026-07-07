@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Campaign } from '../types';
 import { formatCurrency, calculateProgress } from '../utils/format';
 import { Users, Zap } from 'lucide-react';
+import { getTrustedCampaignMediaUrl } from '../utils/media';
 
 interface CampaignCardGridProps {
   campaign: Campaign;
@@ -10,6 +11,7 @@ interface CampaignCardGridProps {
 
 export const CampaignCardGrid = ({ campaign, index }: CampaignCardGridProps) => {
   const progress = calculateProgress(campaign.current_amount, campaign.goal_amount);
+  const imageUrl = getTrustedCampaignMediaUrl(campaign.image_url);
   const daysLeft = campaign.end_date
     ? Math.ceil(
         (new Date(campaign.end_date + 'T00:00:00').getTime() - new Date().getTime()) /
@@ -25,11 +27,12 @@ export const CampaignCardGrid = ({ campaign, index }: CampaignCardGridProps) => 
     >
       <div className="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 h-full flex flex-col group-hover:bg-opacity-15 group-hover:border-opacity-40">
         <div className="relative h-48 bg-gradient-to-br from-gray-800 to-gray-900 overflow-hidden">
-          {campaign.image_url ? (
+          {imageUrl ? (
             <img
-              src={campaign.image_url}
+              src={imageUrl}
               alt={campaign.title}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              referrerPolicy="no-referrer"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-600 to-orange-400">

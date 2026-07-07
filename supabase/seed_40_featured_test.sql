@@ -1,6 +1,7 @@
 /*
   40 featured test campaigns to verify carousel fairness logic.
   Run AFTER migration_add_featured_since.sql.
+  Requires: SET app.allow_test_seed = 'true';
 
   Split:
   - 20 campaigns with featured_since = NOW() - 2 hours  → PROTECTED (< 24h, always shown)
@@ -11,6 +12,13 @@
   - 10 eligible shown (most recent eligible fill remaining slots)
   - 11 NOT shown (the 11 oldest eligible, including the 1 backfilled existing campaign)
 */
+
+DO $guard$
+BEGIN
+  IF current_setting('app.allow_test_seed', true) <> 'true' THEN
+    RAISE EXCEPTION 'Refusing to run test seed. Set app.allow_test_seed=true in a local/dev database only.';
+  END IF;
+END $guard$;
 
 DO $$
 DECLARE

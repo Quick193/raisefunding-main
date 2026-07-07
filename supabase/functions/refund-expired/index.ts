@@ -63,8 +63,23 @@ serve(async (req) => {
       .eq('campaign_id', campaign.id)
       .not('razorpay_payment_id', 'is', null);
 
+    let campaignHadFailure = false;
+
     for (const d of donations ?? []) {
       if (d.refund_status === 'processed' || d.refund_status === 'processing') continue;
+
+      const { data: claim, error: claimError } = await admin
+        .from('donations')
+        .update({ refund_status: 'processing' })
+        .eq('id', d.id)
+        .or('refund_status.is.null,refund_status.eq.failed')
+        .select('id')
+        .maybeSingle();
+      if (claimError) {
+        campaignHadFailure = true;
+        continue;
+      }
+      if (!claim) continue;
 
       const res = await fetch(
         `https://api.razorpay.com/v1/payments/${d.razorpay_payment_id}/refund`,
@@ -80,18 +95,21 @@ serve(async (req) => {
           .from('donations')
           .update({
             refund_id: refund.id,
-            refund_status: refund.status || 'processing',
+            refund_status: refund.status || 'processed',
             refunded_at: nowIso,
           })
           .eq('id', d.id);
         refundedDonations++;
       } else {
+        campaignHadFailure = true;
         await admin.from('donations').update({ refund_status: 'failed' }).eq('id', d.id);
       }
     }
 
-    await admin.from('campaigns').update({ status: 'refunded' }).eq('id', campaign.id);
-    refundedCampaigns++;
+    if (!campaignHadFailure) {
+      await admin.from('campaigns').update({ status: 'refunded' }).eq('id', campaign.id);
+      refundedCampaigns++;
+    }
   }
 
   return json({ refundedCampaigns, refundedDonations });

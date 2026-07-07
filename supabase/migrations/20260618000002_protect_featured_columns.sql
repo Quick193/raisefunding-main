@@ -18,9 +18,15 @@ BEGIN
   -- Only the client-facing roles are restricted. service_role / postgres
   -- (edge functions, migrations, SQL editor) may set these freely.
   IF current_user IN ('anon', 'authenticated') THEN
-    NEW.is_featured   := OLD.is_featured;
-    NEW.featured_until := OLD.featured_until;
-    NEW.featured_since := OLD.featured_since;
+    IF TG_OP = 'INSERT' THEN
+      NEW.is_featured := false;
+      NEW.featured_until := NULL;
+      NEW.featured_since := NULL;
+    ELSE
+      NEW.is_featured   := OLD.is_featured;
+      NEW.featured_until := OLD.featured_until;
+      NEW.featured_since := OLD.featured_since;
+    END IF;
   END IF;
   RETURN NEW;
 END;
@@ -28,6 +34,6 @@ $$ LANGUAGE plpgsql;
 
 DROP TRIGGER IF EXISTS protect_featured ON campaigns;
 CREATE TRIGGER protect_featured
-  BEFORE UPDATE ON campaigns
+  BEFORE INSERT OR UPDATE ON campaigns
   FOR EACH ROW
   EXECUTE FUNCTION protect_featured_columns();

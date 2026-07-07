@@ -48,18 +48,14 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    const { error } = await admin.from('donations').upsert(
-      {
-        campaign_id: notes.campaign_id,
-        donor_name: notes.donor_name || 'Anonymous',
-        donor_email: notes.donor_email,
-        amount,
-        razorpay_order_id,
-        razorpay_payment_id,
-        status: 'captured',
-      },
-      { onConflict: 'razorpay_payment_id', ignoreDuplicates: true }
-    );
+    const { error } = await admin.rpc('record_verified_donation', {
+      p_campaign_id: notes.campaign_id,
+      p_donor_name: notes.donor_name || 'Anonymous',
+      p_donor_email: notes.donor_email,
+      p_amount: amount,
+      p_razorpay_order_id: razorpay_order_id,
+      p_razorpay_payment_id: razorpay_payment_id,
+    });
     if (error) throw error;
 
     return json({ success: true });

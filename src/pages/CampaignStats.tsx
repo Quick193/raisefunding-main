@@ -227,6 +227,13 @@ export const CampaignStats = () => {
               This campaign wasn't withdrawn within the claim window, so donations were refunded.
             </p>
           </div>
+        ) : campaign.status !== 'completed' ? (
+          <div className="mb-8 rounded-2xl border border-blue-200 bg-blue-50 p-5">
+            <p className="font-bold text-blue-700">Funding is still active</p>
+            <p className="text-sm text-blue-600 mt-1">
+              Funds become withdrawable after the campaign reaches its goal or the funding period ends.
+            </p>
+          </div>
         ) : (
           <div className="mb-8 rounded-2xl border border-orange-200 bg-white p-5 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

@@ -8,6 +8,7 @@ import { CustomSelect } from '../components/CustomSelect';
 import { DatePicker } from '../components/DatePicker';
 import { Skeleton } from '../components/Skeleton';
 import { useTranslation } from 'react-i18next';
+import { getTrustedCampaignMediaUrl, isAllowedCampaignVideoUrl } from '../utils/media';
 
 const CATEGORY_OPTIONS = [
   'Medical',
@@ -96,6 +97,12 @@ export const EditCampaign = () => {
     const goal = parseFloat(formData.goalAmount);
     if (isNaN(goal) || goal < 100) return t('edit.error_goal_min');
     if (goal > 100_000_000) return t('edit.error_goal_max');
+    if (formData.imageUrl && !getTrustedCampaignMediaUrl(formData.imageUrl)) {
+      return 'Use an uploaded campaign image or a trusted campaign media URL.';
+    }
+    if (formData.videoUrl && !isAllowedCampaignVideoUrl(formData.videoUrl)) {
+      return 'Use an uploaded campaign video, YouTube, or Vimeo URL.';
+    }
     return null;
   };
 
@@ -120,7 +127,7 @@ export const EditCampaign = () => {
           goal_amount: parseFloat(formData.goalAmount),
           category: formData.category,
           location: formData.location.trim() || null,
-          image_url: formData.imageUrl || null,
+          image_url: getTrustedCampaignMediaUrl(formData.imageUrl) || null,
           video_url: formData.videoUrl.trim() || null,
           end_date: formData.endDate || null,
           status: formData.status,

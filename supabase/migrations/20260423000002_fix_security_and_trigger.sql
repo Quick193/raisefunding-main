@@ -8,7 +8,7 @@
      insert (so anonymous donors work).
 
   2. Profiles RLS — tighten the overly permissive INSERT policy
-     "System can create profiles" used WITH CHECK (true), meaning any request
+     "System can create profiles" allowed arbitrary inserted rows, meaning any request
      could insert any profile row. The auth trigger is SECURITY DEFINER so it
      bypasses RLS anyway; the frontend upsert runs as the authenticated user so
      it only needs CHECK (auth.uid() = id).

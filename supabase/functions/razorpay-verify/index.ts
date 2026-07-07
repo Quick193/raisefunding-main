@@ -6,7 +6,11 @@ const CORS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const ALLOWED_DAYS = [7, 30, 90];
+const FEATURE_FEES_PAISE: Record<number, number> = {
+  7: 50000,
+  30: 200000,
+  90: 500000,
+};
 
 // Verifies a featuring payment and flips the campaign to featured. The featured
 // duration is read from the ORDER's notes (set server-side in razorpay-order),
@@ -47,9 +51,19 @@ serve(async (req) => {
     const order = await orderRes.json();
     if (!orderRes.ok) throw new Error(order.error?.description || 'Could not fetch order');
 
-    const days = Number(order.notes?.days);
-    if (!ALLOWED_DAYS.includes(days)) {
+    const notes = order.notes || {};
+    const days = Number(notes.days);
+    const orderCampaignId = notes.campaign_id;
+    const expectedAmount = FEATURE_FEES_PAISE[days];
+
+    if (notes.type !== 'feature' || !orderCampaignId || !expectedAmount) {
       return json({ error: 'Invalid plan on order' }, 400);
+    }
+    if (campaign_id && campaign_id !== orderCampaignId) {
+      return json({ error: 'Payment does not belong to this campaign' }, 400);
+    }
+    if (Number(order.amount) !== expectedAmount) {
+      return json({ error: 'Payment amount does not match selected plan' }, 400);
     }
 
     // 3. Flip the campaign to featured (service role, with ownership check).
@@ -57,6 +71,43 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
+
+    const { data: campaign, error: campaignError } = await adminClient
+      .from('campaigns')
+      .select('id, creator_id')
+      .eq('id', orderCampaignId)
+      .eq('creator_id', user.id)
+      .single();
+    if (campaignError || !campaign) {
+      return json({ error: 'Campaign not found' }, 404);
+    }
+
+    const { data: existingPayment } = await adminClient
+      .from('feature_payments')
+      .select('campaign_id')
+      .eq('razorpay_payment_id', razorpay_payment_id)
+      .maybeSingle();
+    if (existingPayment) {
+      if (existingPayment.campaign_id !== orderCampaignId) {
+        return json({ error: 'Payment has already been used' }, 400);
+      }
+      return json({ success: true, already_applied: true });
+    }
+
+    const { error: paymentError } = await adminClient.from('feature_payments').insert({
+      campaign_id: orderCampaignId,
+      creator_id: user.id,
+      razorpay_order_id,
+      razorpay_payment_id,
+      amount_paise: expectedAmount,
+      days,
+    });
+    if (paymentError) {
+      if (paymentError.code === '23505') {
+        return json({ error: 'Payment has already been used' }, 400);
+      }
+      throw paymentError;
+    }
 
     const now = new Date();
     const featuredUntil = new Date(now);
@@ -69,7 +120,7 @@ serve(async (req) => {
         featured_until: featuredUntil.toISOString(),
         featured_since: now.toISOString(),
       })
-      .eq('id', campaign_id)
+      .eq('id', orderCampaignId)
       .eq('creator_id', user.id); // ownership check
     if (error) throw error;
 

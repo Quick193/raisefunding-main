@@ -5,6 +5,7 @@ import { formatCurrency, calculateProgress } from '../utils/format';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getTrustedCampaignMediaUrl } from '../utils/media';
 
 interface FeaturedCarouselProps {
   campaigns: Campaign[];
@@ -82,11 +83,12 @@ export const FeaturedCarousel = ({ campaigns }: FeaturedCarouselProps) => {
             >
               <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
                 <div className="relative h-56 bg-gray-200 overflow-hidden">
-                  {campaign.image_url ? (
+                  {getTrustedCampaignMediaUrl(campaign.image_url) ? (
                     <img
-                      src={campaign.image_url}
+                      src={getTrustedCampaignMediaUrl(campaign.image_url)!}
                       alt={campaign.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      referrerPolicy="no-referrer"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-400 to-orange-600">
