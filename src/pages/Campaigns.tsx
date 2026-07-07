@@ -59,6 +59,7 @@ export const Campaigns = () => {
       const { data, error } = await supabase
         .from('campaigns')
         .select('*, profiles(full_name)')
+        .is('archived_at', null)
         .order('created_at', { ascending: false });
       if (error) throw error;
       setCampaigns(data || []);

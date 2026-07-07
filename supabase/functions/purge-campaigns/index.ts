@@ -1,9 +1,11 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-// Scheduled housekeeping placeholder. Settled campaigns are intentionally
-// retained because donations, withdrawals, and refunds are financial audit
-// records. Public listing queries already hide non-active campaigns.
+// Scheduled housekeeping (intended to run ~monthly). Campaigns are never deleted
+// — donations, withdrawals, and refunds are financial audit records. Instead,
+// the oldest ended campaigns are ARCHIVED: kept in the database but hidden from
+// the public browse listing. Direct links and the creator's dashboard still
+// show them.
 //
 // Protected by a shared secret so only the scheduler can invoke it.
 serve(async (req) => {
@@ -17,16 +19,26 @@ serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   );
 
+  // Oldest ended, not-yet-archived campaigns first.
   const { data: rows, error: selErr } = await admin
     .from('campaigns')
     .select('id')
-    .in('status', ['withdrawn', 'refunded'])
+    .neq('status', 'active')
+    .is('archived_at', null)
     .order('created_at', { ascending: true })
     .limit(30);
   if (selErr) return json({ error: selErr.message }, 500);
 
   const ids = (rows ?? []).map((r) => r.id);
-  return json({ retained: ids.length, purged: 0 });
+  if (ids.length === 0) return json({ archived: 0 });
+
+  const { error: updErr } = await admin
+    .from('campaigns')
+    .update({ archived_at: new Date().toISOString() })
+    .in('id', ids);
+  if (updErr) return json({ error: updErr.message }, 500);
+
+  return json({ archived: ids.length });
 });
 
 function json(body: unknown, status = 200) {

@@ -14,10 +14,11 @@ export interface Campaign {
   image_url: string | null;
   video_url?: string | null;
   media?: MediaItem[];
-  status: 'active' | 'completed' | 'withdrawn' | 'refunded';
+  status: 'active' | 'completed' | 'withdrawal_pending' | 'withdrawn' | 'refunded';
   end_date: string | null;
   claim_deadline?: string | null;
   withdrawn_at?: string | null;
+  archived_at?: string | null;
   created_at: string;
   updated_at: string;
   category?: string;

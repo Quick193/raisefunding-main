@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS campaigns (
   end_date        timestamptz,
   claim_deadline  timestamptz,
   withdrawn_at    timestamptz,
+  archived_at     timestamptz,
   is_featured     boolean NOT NULL DEFAULT false,
   featured_until  timestamptz,
   featured_since  timestamptz,
@@ -440,6 +441,7 @@ BEGIN
       NEW.is_featured := false;
       NEW.featured_until := NULL;
       NEW.featured_since := NULL;
+      NEW.archived_at := NULL;
     ELSE
       NEW.current_amount := OLD.current_amount;
       NEW.supporter_count := OLD.supporter_count;
@@ -449,6 +451,7 @@ BEGIN
       NEW.is_featured := OLD.is_featured;
       NEW.featured_until := OLD.featured_until;
       NEW.featured_since := OLD.featured_since;
+      NEW.archived_at := OLD.archived_at;
     END IF;
   END IF;
   RETURN NEW;
