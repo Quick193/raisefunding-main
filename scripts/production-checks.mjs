@@ -50,6 +50,14 @@ const checks = [
     pass: () => !read('src/pages/CampaignDetail.tsx').includes(".from('donations').insert"),
   },
   {
+    name: 'Fresh setup does not recreate the disabled donation trigger',
+    pass: () => {
+      const setup = read('supabase/setup.sql');
+      return setup.includes('DROP TRIGGER IF EXISTS donation_created ON donations') &&
+        !setup.includes('CREATE TRIGGER donation_created');
+    },
+  },
+  {
     name: 'Campaign reporting schema is present',
     pass: () => read('supabase/migrations/20260501000001_create_campaign_reports.sql').includes('CREATE TABLE IF NOT EXISTS campaign_reports'),
   },

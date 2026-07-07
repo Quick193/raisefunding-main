@@ -183,10 +183,6 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 DROP TRIGGER IF EXISTS donation_created ON donations;
-CREATE TRIGGER donation_created
-  AFTER INSERT ON donations
-  FOR EACH ROW
-  EXECUTE FUNCTION update_campaign_amount();
 
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
