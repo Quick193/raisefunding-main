@@ -26,3 +26,4 @@ dist-ssr
 
 # Supabase CLI machine-local state
 supabase/.temp/
+.vercel
