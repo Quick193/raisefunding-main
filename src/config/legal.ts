@@ -8,8 +8,10 @@ export const LEGAL = {
   operatorName: 'Pallavi Mundadi',
   operatorType: 'sole proprietor',
   brand: 'Raise',
-  domain: 'raise.org.in',
-  url: 'https://raise.org.in',
+  // Live deployment URL submitted for verification. Switch both of these to
+  // 'raise.org.in' / 'https://raise.org.in' once the custom domain is live.
+  domain: 'raisefunding.vercel.app',
+  url: 'https://raisefunding.vercel.app',
   email: 'raise.org.in@gmail.com',
   phoneDisplay: '+91 99012 49601',
   phoneHref: '+919901249601',
