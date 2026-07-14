@@ -27,7 +27,9 @@ Contact identity used across the site (edit in one place: `src/config/legal.ts`)
 - [x] No false "Pvt Ltd" / "Inc" / company claims (site says *individual / sole proprietor*).
 - [x] Same email + phone appear on the site **and** in your Razorpay dashboard.
 - [ ] **YOU:** the bank account + PAN in Razorpay are under **Pallavi Mundadi**. ⚠️ verify.
-- [ ] **YOU:** domain `raise.org.in` is registered and the site is **live** on it (reviewers visit the real URL). ⚠️ pending.
+- [x] Site is **live over HTTPS** at raisefunding.vercel.app and the legal pages state that
+      same address. (Switch `src/config/legal.ts` to raise.org.in when the custom domain goes live,
+      then update the URL in the Razorpay dashboard.)
 
 ## C. Contactability & trust
 
@@ -55,7 +57,10 @@ Contact identity used across the site (edit in one place: `src/config/legal.ts`)
 
 ## F. Technical hygiene (auditors and gateways check these)
 
-- [ ] **YOU:** Site served over **HTTPS** with a valid SSL certificate on the live domain.
+- [x] Site served over **HTTPS** with valid SSL + HSTS (verified live 15 July 2026).
+- [x] Dummy/seeded campaigns removed from the production database (verified live: 0 campaigns).
+- [x] Full rendered-browser audit of every page on the live site: correct contact info on all
+      legal pages, zero console errors, no dead links, no horizontal scroll on mobile.
 - [x] `Last updated` dates are current (14 July 2026).
 - [x] Pages load with no console errors (verified).
 - [x] Legal pages linked from the footer of every page (crawlable/discoverable).
@@ -74,10 +79,11 @@ Contact identity used across the site (edit in one place: `src/config/legal.ts`)
 
 ## Still on YOU before submitting (not code)
 
-1. Register/point **raise.org.in** and deploy the site live over HTTPS.
-2. Ensure Razorpay KYC (PAN + bank) is under **Pallavi Mundadi** — must match the site.
-3. Confirm **raise.org.in@gmail.com** is monitored and the phone is reachable.
-4. In the Razorpay dashboard, set the business type to **Individual / Proprietorship**
-   and the same contact details.
-5. (Optional but strengthens approval) add a business address in the Razorpay
+1. Ensure Razorpay KYC (PAN + bank) is under **Pallavi Mundadi** — must match the site.
+2. Confirm **raise.org.in@gmail.com** is monitored and the phone is reachable.
+3. In the Razorpay dashboard, set the business type to **Individual / Proprietorship**,
+   the website to **https://raisefunding.vercel.app**, and the same contact details.
+4. (Optional but strengthens approval) add a business address in the Razorpay
    dashboard KYC even though it isn't published on the site.
+5. Later, when you buy **raise.org.in**: update `src/config/legal.ts` (domain + url),
+   redeploy, and change the website URL in the Razorpay dashboard.
