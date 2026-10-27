@@ -5,6 +5,7 @@ import { Campaign } from '../types';
 import { FeaturedCarousel } from '../components/FeaturedCarousel';
 import { FeaturedCarouselSkeleton } from '../components/Skeleton';
 import { TypingHeroTitle } from '../components/TypingHeroTitle';
+import { TypingText } from '../components/TypingText';
 import { FAQAccordion } from '../components/FAQAccordion';
 import { CountUp } from '../components/CountUp';
 import BlurText from '../components/BlurText';
@@ -134,13 +135,13 @@ export const Home = () => {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 mb-6 sm:mb-8 px-4 py-1.5 rounded-full bg-orange-100/80 border border-orange-200 text-orange-700 text-xs sm:text-sm font-semibold backdrop-blur-sm shadow-sm"
+              className="inline-flex items-center gap-2.5 mb-6 sm:mb-8 px-5 py-2 rounded-full bg-orange-100/80 border border-orange-200 text-orange-700 backdrop-blur-sm shadow-sm"
             >
-              <span className="relative flex h-2 w-2">
+              <span className="relative flex h-2.5 w-2.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-500 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-orange-500" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-orange-500" />
               </span>
-              Coming soon
+              <TypingText text="Coming soon" className="text-base sm:text-xl font-bold tracking-wide" />
             </motion.div>
 
             <TypingHeroTitle
