@@ -130,6 +130,19 @@ export const Home = () => {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-24 lg:py-32">
           <div className="text-center">
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 mb-6 sm:mb-8 px-4 py-1.5 rounded-full bg-orange-100/80 border border-orange-200 text-orange-700 text-xs sm:text-sm font-semibold backdrop-blur-sm shadow-sm"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-500 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-orange-500" />
+              </span>
+              Coming soon
+            </motion.div>
+
             <TypingHeroTitle
               className="text-4xl sm:text-6xl lg:text-8xl font-black text-gray-900 mb-6 sm:mb-8 leading-snug break-words"
               onComplete={() => setTitleDone(true)}
